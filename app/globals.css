@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Colori */
+  --color-bg-elevated: #ffffff;
+  --color-bg-primary: #f6f6f6;
+  --color-fg-primary: #171717;
+  --color-accent-primary: #d0ff00;
+  --color-accent-secondary: #5e00ff;
+  --color-accent-tertiary: #e3e3e3;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* Famiglie font */
+  --font-sans: var(--font-space-grotesk);
+  --font-heading: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Scala tipografica */
+  --text-hero: 90px;          --text-hero--line-height: 80px;
+  --text-h1: 70px;            --text-h1--line-height: 60px;
+  --text-display-caps: 30px;  --text-display-caps--line-height: 60px;
+  --text-display: 30px;
+  --text-lead: 20px;
+  --text-body: 15px;
+  --text-metadata: 11px;
+
+  /* Spacing & layout */
+  --spacing-gutter: 96px;
+  --spacing-section: 120px;
+  --container-page: 1248px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-fg-primary);
+  font-family: var(--font-sans);
 }
