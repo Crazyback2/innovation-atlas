@@ -34,3 +34,8 @@ body {
   color: var(--color-fg-primary);
   font-family: var(--font-sans);
 }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}

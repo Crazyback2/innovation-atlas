@@ -2,6 +2,8 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import LinearTheory from "./components/LinearTheory";
 import Matrix from "./components/Matrix";
+import AtlasPreview from "./components/AtlasPreview";
+import AtlasCta from "./components/AtlasCta";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -12,6 +14,8 @@ export default function Home() {
         <Hero />
         <LinearTheory />
         <Matrix />
+        <AtlasPreview />
+        <AtlasCta />
       </main>
       <Footer />
     </div>
