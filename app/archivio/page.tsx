@@ -1,6 +1,7 @@
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import MatrixChart from "@/app/components/MatrixChart";
+import CardGrid from "@/app/components/CardGrid";
 import { concepts } from "@/src/data/concepts";
 
 const totalConcepts = concepts.length;
@@ -125,6 +126,7 @@ export default function ArchivioPage() {
             I filtri futuri passeranno qui la lista già filtrata.
             ══════════════════════════════════════════ */}
         <MatrixChart concepts={concepts} />
+        <CardGrid concepts={concepts} />
       </main>
 
       <Footer />
