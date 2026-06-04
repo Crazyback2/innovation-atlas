@@ -106,8 +106,8 @@ export default function AtlasPreview() {
 
         {/* Area eyebrow: altezza 83 px = distanza top-sezione → bordo-top marquee in Figma.
             L'eyebrow è absolute al suo interno; bg-bg-primary copre la riga tratteggiata. */}
-        <div className="relative mx-auto w-[1440px]" style={{ height: 83 }}>
-          <p className="absolute left-[96px] top-[64px] font-mono text-metadata text-fg-primary leading-normal bg-bg-primary pr-[4px]">
+        <div className="relative mx-auto w-[1440px]" style={{ height: 113 }}>
+          <p className="absolute left-[96px] top-[94px] font-mono text-metadata text-fg-primary leading-normal bg-bg-primary pr-[4px]">
             03 // ATLAS
           </p>
         </div>
