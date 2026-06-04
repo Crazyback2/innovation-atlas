@@ -222,28 +222,24 @@ export default function Matrix() {
           2 · BUBBLE CHART  (CFML × SP)
       ═══════════════════════════════════════════════════════════ */}
 
-      {/* ── Y-axis info icon ──
-          Moved to left=227 (+22 px) so its right edge lands ≈246 px from the
-          chart left (x=278), matching the 32 px gap on the CFML side. */}
-      <div className="absolute left-[227px] top-[467px] w-[18px] h-[18px] rounded-full border border-accent-secondary flex items-center justify-center">
-        <span className="font-mono text-[11px] text-accent-secondary leading-none">i</span>
-      </div>
-
-      {/* ── Y-axis rotated label ──
-          Moved to left=236 (+22 px): right edge in page-space = 236+10 = 246.
-          Gap from 246 to chart left (278) = 32 px = CFML-to-chart gap. */}
-      <p
-        className="absolute font-sans text-fg-primary uppercase whitespace-nowrap"
-        style={{
-          left: 236,
-          top: 623,
-          fontSize: 20,
-          lineHeight: 1,
-          transform: "translate(-50%, -50%) rotate(-90deg)",
-        }}
+      {/* ── SP group — 20 px from chart left (x=278); icon 8 px above label top ── */}
+      <div
+        className="absolute z-10 flex items-center justify-end pointer-events-none"
+        style={{ left: 258, top: 380, height: 482, transform: "translateX(-100%)" }}
       >
-        <strong>SP</strong>: PERCEZIONE SIMBOLICA
-      </p>
+        <div
+          className="flex items-center gap-[8px] whitespace-nowrap bg-bg-primary px-[2px]"
+          style={{ transform: "rotate(-90deg)", transformOrigin: "center center" }}
+        >
+          <p
+            className="font-sans text-fg-primary uppercase"
+            style={{ fontSize: 20, lineHeight: 1 }}
+          >
+            <strong>SP</strong>: PERCEZIONE SIMBOLICA
+          </p>
+          <InfoIcon />
+        </div>
+      </div>
 
       {/* ── Y-axis tick labels ──
           bg-bg-primary gives each label a solid background.
