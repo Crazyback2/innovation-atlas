@@ -67,24 +67,26 @@ export default function Hero() {
 
       {/* Left pair with 8px gap */}
       <div className="absolute left-[96px] top-[741px] flex gap-2">
+        {/* debole: bianco → viola */}
         <Link
           href="/archivio"
-          className="flex h-[30px] items-center justify-center gap-[6px] px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+          className="flex h-[30px] items-center justify-center gap-[6px] px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-accent-secondary hover:text-bg-elevated focus-visible:bg-accent-secondary focus-visible:text-bg-elevated focus-visible:outline-none"
         >
           Esplora archivio ↗
         </Link>
+        {/* debole: bianco → viola */}
         <Link
           href="/analizza"
-          className="flex h-[30px] items-center justify-center gap-[6px] px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+          className="flex h-[30px] items-center justify-center gap-[6px] px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-accent-secondary hover:text-bg-elevated focus-visible:bg-accent-secondary focus-visible:text-bg-elevated focus-visible:outline-none"
         >
           Analizza concept ↗
         </Link>
       </div>
 
-      {/* Scorri in basso — left=657 so right edge=657+145=802px = boxes right edge */}
+      {/* Scorri in basso — bianco → viola */}
       <button
         type="button"
-        className="absolute left-[657px] top-[741px] flex h-[30px] w-[145px] items-center justify-center gap-2 px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+        className="absolute left-[657px] top-[741px] flex h-[30px] w-[145px] items-center justify-center gap-2 px-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-accent-secondary hover:text-bg-elevated focus-visible:bg-accent-secondary focus-visible:text-bg-elevated focus-visible:outline-none"
       >
         Scorri in basso ↓
       </button>

@@ -59,17 +59,18 @@ export default function LinearTheory() {
       {/* ── CTA: Scorri in basso ── */}
       {/* top=635: box bottom 461+166=627 + 8px gap = 635 */}
       {/* bottom=635+29=664: section 760 − 664 = 96px ✓ */}
+      {/* bianco → viola */}
       <button
         type="button"
-        className="absolute left-[96px] top-[635px] w-[156px] h-[29px] flex items-center justify-center gap-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+        className="absolute left-[96px] top-[635px] w-[156px] h-[29px] flex items-center justify-center gap-2 bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-accent-secondary hover:text-bg-elevated focus-visible:bg-accent-secondary focus-visible:text-bg-elevated focus-visible:outline-none"
       >
         ↓ Scorri in basso
       </button>
 
-      {/* ── CTA: Scopri perchè ── */}
+      {/* ── CTA: Scopri perchè — lime → nero */}
       <button
         type="button"
-        className="absolute right-[96px] top-[635px] w-[155px] h-[29px] flex items-center justify-center gap-2 bg-accent-primary border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+        className="absolute right-[96px] top-[635px] w-[155px] h-[29px] flex items-center justify-center gap-2 bg-accent-primary border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-fg-primary hover:text-bg-elevated focus-visible:bg-fg-primary focus-visible:text-bg-elevated focus-visible:outline-none"
       >
         Scopri perchè →
       </button>

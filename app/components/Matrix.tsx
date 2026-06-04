@@ -445,10 +445,19 @@ export default function Matrix() {
         </p>
       </div>
 
-      {/* ── CTA pill ── abs left=1114, top=1389 */}
+      {/* ── CTA: Analizza concept — debole, bordo sinistro del grid (left=219), 8px sotto il grid ── */}
       <button
         type="button"
-        className="absolute h-[30px] px-[8px] flex items-center justify-center gap-[8px] bg-accent-primary border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none"
+        className="absolute h-[30px] px-[8px] flex items-center justify-center gap-[6px] bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-accent-secondary hover:text-bg-elevated focus-visible:bg-accent-secondary focus-visible:text-bg-elevated focus-visible:outline-none"
+        style={{ left: 219, top: 1389 }}
+      >
+        Analizza concept ↗
+      </button>
+
+      {/* ── CTA: Diagnosi — lime → nero, abs left=1114, top=1389 ── */}
+      <button
+        type="button"
+        className="absolute h-[30px] px-[8px] flex items-center justify-center gap-[8px] bg-accent-primary border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-fg-primary hover:text-bg-elevated focus-visible:bg-fg-primary focus-visible:text-bg-elevated focus-visible:outline-none"
         style={{ left: 1114, top: 1389 }}
       >
         Diagnosi? ↓

@@ -45,11 +45,15 @@ export default function AtlasCta() {
 
         {/* Bottone — 8 px sotto il box CTA */}
         <div className="mt-[8px]">
+          {/* forte: viola → bianco */}
           <button
             type="button"
             className="h-[30px] px-[12px] flex items-center gap-[6px]
                        bg-accent-secondary border border-fg-primary
-                       font-sans text-body text-bg-elevated whitespace-nowrap leading-none"
+                       font-sans text-body text-bg-elevated whitespace-nowrap leading-none
+                       cursor-pointer transition-colors duration-150 ease-out
+                       hover:bg-fg-primary hover:text-bg-elevated
+                       focus-visible:bg-fg-primary focus-visible:text-bg-elevated focus-visible:outline-none"
           >
             Analizza concept ↗
           </button>
