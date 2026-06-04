@@ -31,9 +31,8 @@ function tierRadius(resp: number): number {
   return TIER_R[0];
 }
 
-// Axis titles from outer 1 px matrix border — CFML below, SP group to the left
-const CHART_TO_AXIS_LABEL = 32;
-const SP_AXIS_GAP = 20;
+// px between outer 1 px matrix border and axis label groups (SP left, CFML below)
+const AXIS_LABEL_GAP = 32;
 const MATRIX_BORDER_W = 1;
 const TICK_CHART_GAP = 6;
 
@@ -158,17 +157,21 @@ export default function MatrixChart({ concepts }: Props) {
                 className="relative size-full overflow-visible bg-bg-primary border border-fg-primary"
                 style={{ borderWidth: MATRIX_BORDER_W }}
               >
-              {/* SP group — 20 px from matrix left; icon 8 px above label top (after −90° rotation) */}
+              {/* SP group — AXIS_LABEL_GAP from matrix left; writing-mode = real bbox */}
               <div
-                className="absolute top-0 z-10 flex items-center justify-end pointer-events-none"
+                className="absolute top-0 z-10 flex items-center pointer-events-none"
                 style={{
-                  right: `calc(100% + ${SP_AXIS_GAP}px)`,
+                  left: -AXIS_LABEL_GAP,
                   height: CHART_H,
+                  transform: "translateX(-100%)",
                 }}
               >
                 <div
-                  className="flex items-center gap-[8px] whitespace-nowrap bg-bg-primary px-[2px]"
-                  style={{ transform: "rotate(-90deg)", transformOrigin: "center center" }}
+                  className="flex items-center gap-[8px] bg-bg-primary px-[2px]"
+                  style={{
+                    writingMode: "vertical-rl",
+                    transform: "rotate(180deg)",
+                  }}
                 >
                   <p
                     className="font-sans text-fg-primary uppercase"
@@ -330,23 +333,23 @@ export default function MatrixChart({ concepts }: Props) {
           ═══════════════════════════════════════════════════════════ */}
           <div
             className="relative"
-            style={{ marginLeft: Y_COL, width: CHART_W, paddingTop: TICK_CHART_GAP }}
+            style={{ marginLeft: Y_COL, width: CHART_W }}
           >
             {/* Tick labels */}
             {X_TICKS.map((cfml) => (
               <p
                 key={`xt-${cfml}`}
                 className="absolute font-mono text-metadata text-fg-primary leading-normal"
-                style={{ left: toX(cfml), top: 0, transform: "translateX(-50%)" }}
+                style={{ left: toX(cfml), top: TICK_CHART_GAP, transform: "translateX(-50%)" }}
               >
                 {cfml === 0 ? "00" : String(cfml)}
               </p>
             ))}
 
-            {/* X-axis label + info icon — centred at CFML=50 */}
+            {/* CFML group — AXIS_LABEL_GAP from matrix bottom outer border */}
             <div
               className="absolute flex items-center gap-[6px] bg-bg-primary px-[4px]"
-              style={{ left: toX(50), top: CHART_TO_AXIS_LABEL, transform: "translateX(-50%)" }}
+              style={{ left: toX(50), top: AXIS_LABEL_GAP, transform: "translateX(-50%)" }}
             >
               <p
                 className="font-sans text-fg-primary uppercase whitespace-nowrap"
