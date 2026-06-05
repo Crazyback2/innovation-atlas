@@ -1,7 +1,6 @@
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import MatrixChart from "@/app/components/MatrixChart";
-import CardGrid from "@/app/components/CardGrid";
+import ArchivioClient from "@/app/components/ArchivioClient";
 import { concepts } from "@/src/data/concepts";
 
 const totalConcepts = concepts.length;
@@ -120,13 +119,7 @@ export default function ArchivioPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════
-            FASCIA 3: bubble chart CFML × SP
-            Il componente riceve concepts come prop.
-            I filtri futuri passeranno qui la lista già filtrata.
-            ══════════════════════════════════════════ */}
-        <MatrixChart concepts={concepts} />
-        <CardGrid concepts={concepts} />
+        <ArchivioClient concepts={concepts} />
       </main>
 
       <Footer />

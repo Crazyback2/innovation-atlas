@@ -71,9 +71,10 @@ function ArchiveConceptCard({ concept }: { concept: Concept }) {
 
 interface Props {
   concepts: Concept[];
+  filterKey?: string;
 }
 
-export default function CardGrid({ concepts }: Props) {
+export default function CardGrid({ concepts, filterKey }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +85,7 @@ export default function CardGrid({ concepts }: Props) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [concepts.length]);
+  }, [filterKey]);
 
   useEffect(() => {
     if (currentPage > totalPages) {

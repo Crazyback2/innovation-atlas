@@ -171,22 +171,6 @@ export const concepts: Concept[] = [
     author: { name: "Andrea Lombardi", handle: "@andrealombardi" },
     createdAt: "2025-07-30",
   },
-  {
-    id: "nuvol",
-    number: "NR. 0543",
-    title: "NUVOL",
-    tagline: "Portable air quality personal monitor",
-    description:
-      "Nuvol è un dispositivo tascabile delle dimensioni di un accendino che misura in tempo reale PM2.5, CO₂, VOC e umidità dell'aria circostante. Il display e-ink mostra un indice di qualità aggregato su scala cromatica. I dati contribuiscono anonimamente a una mappa crowdsourced della qualità dell'aria urbana accessibile a tutti. L'autonomia è di tre giorni con una singola carica. La scocca è in alluminio riciclato con finitura sabbiata disponibile in otto colori.",
-    image: "/concepts/placeholder.jpg",
-    sector: "Ambiente e sostenibilità",
-    tags: ["health", "air-quality", "iot", "urban", "crowdsourcing", "portable"],
-    cfml: 66,
-    sp: 49,
-    spResponses: 42,
-    author: { name: "Martina Fontana", handle: "@martinafontana" },
-    createdAt: "2026-01-07",
-  },
 
   // ── Q2 (cfml<50, sp≥50) ────────────────────────────────────────────────
   {
@@ -332,7 +316,7 @@ export const concepts: Concept[] = [
     cfml: 68,
     sp: 37,
     spResponses: 18,
-    author: { name: "Simone Ferrari", handle: "@simonefebrari" },
+    author: { name: "Simone Ferrari", handle: "@simoneferrari" },
     createdAt: "2025-11-25",
   },
   {
@@ -414,6 +398,22 @@ export const concepts: Concept[] = [
     spResponses: 17,
     author: { name: "Filippo Riva", handle: "@filipporiva" },
     createdAt: "2025-07-14",
+  },
+  {
+    id: "nuvol",
+    number: "NR. 0543",
+    title: "NUVOL",
+    tagline: "Portable air quality personal monitor",
+    description:
+      "Nuvol è un dispositivo tascabile delle dimensioni di un accendino che misura in tempo reale PM2.5, CO₂, VOC e umidità dell'aria circostante. Il display e-ink mostra un indice di qualità aggregato su scala cromatica. I dati contribuiscono anonimamente a una mappa crowdsourced della qualità dell'aria urbana accessibile a tutti. L'autonomia è di tre giorni con una singola carica. La scocca è in alluminio riciclato con finitura sabbiata disponibile in otto colori.",
+    image: "/concepts/placeholder.jpg",
+    sector: "Ambiente e sostenibilità",
+    tags: ["health", "air-quality", "iot", "urban", "crowdsourcing", "portable"],
+    cfml: 66,
+    sp: 49,
+    spResponses: 42,
+    author: { name: "Martina Fontana", handle: "@martinafontana" },
+    createdAt: "2026-01-07",
   },
 
   // ── Q4 (cfml<50, sp<50) ────────────────────────────────────────────────
