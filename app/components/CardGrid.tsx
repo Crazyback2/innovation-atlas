@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Concept } from "@/src/data/concepts";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 const GRID_W = 4 * 248 + 3 * 24; // 1064
 
 function ConceptCardImage({ src, alt }: { src: string; alt: string }) {

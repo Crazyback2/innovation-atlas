@@ -52,22 +52,49 @@ function ChevronDown() {
   );
 }
 
-function PillDivider() {
+const PILL_BUTTON_BASE =
+  "flex h-[29px] w-full items-center gap-[10px] border border-fg-primary px-[10px] pb-[7px] pt-[8px] transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-fg-primary";
+
+function pillButtonClass(active: boolean): string {
+  return active
+    ? `${PILL_BUTTON_BASE} bg-fg-primary text-bg-elevated`
+    : `${PILL_BUTTON_BASE} bg-bg-elevated text-fg-primary`;
+}
+
+function PillDivider({ active }: { active: boolean }) {
   return (
     <span
-      className="h-[13px] w-px shrink-0 bg-fg-primary group-hover:bg-bg-elevated"
+      className={`h-[13px] w-px shrink-0 ${active ? "bg-bg-elevated" : "bg-fg-primary"}`}
       aria-hidden="true"
     />
   );
 }
 
-const PILL_BUTTON =
-  "group flex h-[29px] w-full items-center gap-[10px] border border-fg-primary bg-bg-elevated px-[10px] pb-[7px] pt-[8px] text-fg-primary transition-colors hover:bg-fg-primary hover:text-bg-elevated";
+function usePillDropdown() {
+  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-function pillButtonClass(open: boolean): string {
-  return open
-    ? `${PILL_BUTTON} bg-fg-primary text-bg-elevated`
-    : PILL_BUTTON;
+  const active = open || hovered;
+
+  function close() {
+    setOpen(false);
+    buttonRef.current?.blur();
+  }
+
+  function toggle() {
+    setOpen((v) => !v);
+  }
+
+  return {
+    open,
+    active,
+    buttonRef,
+    close,
+    toggle,
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
+  };
 }
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () => void) {
@@ -127,23 +154,32 @@ function SectorDropdown({
   value: Filters["sector"];
   onChange: (sector: Filters["sector"]) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const { open, active, buttonRef, close, toggle, onMouseEnter, onMouseLeave } =
+    usePillDropdown();
   const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(ref, () => setOpen(false));
+  useClickOutside(ref, close);
 
   const display = value === "all" ? "TUTTI" : value;
+
+  function select(sector: Filters["sector"]) {
+    onChange(sector);
+    close();
+  }
 
   return (
     <div ref={ref} className="relative w-[143px] shrink-0">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={pillButtonClass(open)}
+        onClick={toggle}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={pillButtonClass(active)}
       >
         <span className="shrink-0 font-mono text-metadata uppercase leading-normal">
           SETTORE
         </span>
-        <PillDivider />
+        <PillDivider active={active} />
         <span className="min-w-0 flex-1 truncate font-mono text-metadata uppercase leading-normal text-left">
           {display}
         </span>
@@ -154,20 +190,14 @@ function SectorDropdown({
           <DropdownOption
             label="Tutti"
             selected={value === "all"}
-            onSelect={() => {
-              onChange("all");
-              setOpen(false);
-            }}
+            onSelect={() => select("all")}
           />
           {SECTORS.map((sector) => (
             <DropdownOption
               key={sector}
               label={sector}
               selected={value === sector}
-              onSelect={() => {
-                onChange(sector);
-                setOpen(false);
-              }}
+              onSelect={() => select(sector)}
             />
           ))}
         </DropdownPanel>
@@ -183,23 +213,32 @@ function QuadrantDropdown({
   value: Filters["quadrant"];
   onChange: (quadrant: Filters["quadrant"]) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const { open, active, buttonRef, close, toggle, onMouseEnter, onMouseLeave } =
+    usePillDropdown();
   const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(ref, () => setOpen(false));
+  useClickOutside(ref, close);
 
   const display = value === "all" ? "TUTTI" : getQuadrantLabel(value).toUpperCase();
+
+  function select(quadrant: Filters["quadrant"]) {
+    onChange(quadrant);
+    close();
+  }
 
   return (
     <div ref={ref} className="relative w-[156px] shrink-0">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={pillButtonClass(open)}
+        onClick={toggle}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={pillButtonClass(active)}
       >
         <span className="shrink-0 font-mono text-metadata uppercase leading-normal">
           QUADRANTE
         </span>
-        <PillDivider />
+        <PillDivider active={active} />
         <span className="min-w-0 flex-1 truncate font-mono text-metadata uppercase leading-normal text-left">
           {display}
         </span>
@@ -212,10 +251,7 @@ function QuadrantDropdown({
               key={option.value}
               label={option.label}
               selected={value === option.value}
-              onSelect={() => {
-                onChange(option.value);
-                setOpen(false);
-              }}
+              onSelect={() => select(option.value)}
             />
           ))}
         </DropdownPanel>
@@ -235,9 +271,10 @@ function RangePopover({
   width: number;
   onChange: (range: [number, number]) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const { open, active, buttonRef, close, toggle, onMouseEnter, onMouseLeave } =
+    usePillDropdown();
   const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(ref, () => setOpen(false));
+  useClickOutside(ref, close);
 
   const display = `${range[0]} - ${range[1]}`;
 
@@ -258,14 +295,17 @@ function RangePopover({
   return (
     <div ref={ref} className="relative shrink-0" style={{ width }}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={pillButtonClass(open)}
+        onClick={toggle}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={pillButtonClass(active)}
       >
         <span className="shrink-0 font-mono text-metadata uppercase leading-normal">
           {label}
         </span>
-        <PillDivider />
+        <PillDivider active={active} />
         <span className="min-w-0 flex-1 truncate font-mono text-metadata leading-normal text-left">
           {display}
         </span>
@@ -316,16 +356,25 @@ function SortDropdown({
   value: Filters["sort"];
   onChange: (sort: Filters["sort"]) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const { open, active, buttonRef, close, toggle, onMouseEnter, onMouseLeave } =
+    usePillDropdown();
   const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(ref, () => setOpen(false));
+  useClickOutside(ref, close);
+
+  function select(sort: Filters["sort"]) {
+    onChange(sort);
+    close();
+  }
 
   return (
     <div ref={ref} className="relative w-[115px] shrink-0">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={pillButtonClass(open)}
+        onClick={toggle}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={pillButtonClass(active)}
       >
         <span className="min-w-0 flex-1 truncate font-mono text-metadata leading-normal text-left">
           {getSortLabel(value)}
@@ -339,10 +388,7 @@ function SortDropdown({
               key={option.value}
               label={option.label}
               selected={value === option.value}
-              onSelect={() => {
-                onChange(option.value);
-                setOpen(false);
-              }}
+              onSelect={() => select(option.value)}
             />
           ))}
         </DropdownPanel>
