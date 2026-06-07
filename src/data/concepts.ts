@@ -4,7 +4,7 @@ export type Concept = {
   title: string;
   tagline: string;
   description: string;
-  image: string;
+  images: string[];
   sector: string;
   tags: string[];
   cfml: number;
@@ -50,7 +50,7 @@ export const concepts: Concept[] = [
     tagline: "Modular desk space system",
     description:
       "Cubit è una piattaforma di scrivania modulare composta da unità magnetiche intercambiabili da 10 cm per lato. Ogni modulo integra funzioni diverse — caricatore wireless, portapenne, illuminazione LED, hub USB — e si aggancia senza attrezzi a qualsiasi configurazione. Il sistema è progettato per adattarsi ai ritmi del lavoro ibrido: si smonta in trenta secondi e si riconfigura altrettanto rapidamente in un nuovo spazio. I materiali sono alluminio riciclato e biopolimeri stampati a iniezione.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Lavoro e produttività",
     tags: ["workspace", "modular", "desk", "productivity", "industrial-design"],
     cfml: 74,
@@ -66,7 +66,7 @@ export const concepts: Concept[] = [
     tagline: "Circadian light companion",
     description:
       "Lunare è una lampada da comodino che sincronizza la propria temperatura di colore e intensità con il ciclo circadiano dell'utente. Attraverso un algoritmo di apprendimento adattivo, il dispositivo impara le abitudini di sonno in due settimane e anticipa il risveglio con una sequenza di alba artificiale. La scocca è in ceramica porosa che diffonde aromi rilassanti in fase serale. Una singola carica a induzione dura novanta giorni.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Casa e abitare",
     tags: ["home", "sleep", "light", "wellness", "circadian", "ceramic"],
     cfml: 72,
@@ -82,7 +82,7 @@ export const concepts: Concept[] = [
     tagline: "Continuous hydration monitor",
     description:
       "Puls è una patch sottocutanea non invasiva che misura il livello di idratazione tramite bioimpedenza a bassa frequenza. I dati vengono trasmessi via Bluetooth a uno smartwatch o smartphone con aggiornamenti ogni cinque minuti. Il form factor è simile a un cerotto e dura sette giorni prima di richiedere sostituzione. Lo strato adesivo è sviluppato per pelli sensibili e non lascia residui. L'app visualizza trend giornalieri e invia notifiche personalizzate prima che la disidratazione si manifesti.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Salute e benessere",
     tags: ["health", "wearable", "hydration", "biometric", "patch", "iot"],
     cfml: 58,
@@ -98,7 +98,7 @@ export const concepts: Concept[] = [
     tagline: "Smart posture training band",
     description:
       "Arco è una fascia elastica da tronco che monitora la postura durante le ore lavorative tramite una rete di sensori IMU distribuiti lungo la spina dorsale. Il sistema vibra dolcemente quando rileva uno scostamento prolungato dalla postura neutrale, allenando progressivamente la muscolatura posturale. Un pannello di resoconto settimanale mostra l'evoluzione del comportamento posturale nel tempo. Il tessuto tecnico è lavabile in lavatrice e il modulo elettronico si sfila in un secondo.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cura della persona",
     tags: ["health", "posture", "wearable", "workplace", "imu", "textile"],
     cfml: 61,
@@ -114,7 +114,7 @@ export const concepts: Concept[] = [
     tagline: "Urban vertical garden kit",
     description:
       "Flowr è un kit di giardinaggio verticale per ambienti domestici urbani, composto da pannelli idroponici modulari con sistema di irrigazione automatica. I pannelli si installano su qualsiasi parete attraverso un sistema a binario invisibile e supportano erbe aromatiche, insalate e piccoli ortaggi. Il serbatoio integrato autonomo ha una capacità di tre litri, sufficiente per due settimane senza intervento manuale. Un sensore di umidità e luce segnala all'app quando intervenire.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cibo e cucina",
     tags: ["food", "garden", "urban", "hydroponics", "home", "sustainability"],
     cfml: 67,
@@ -130,7 +130,7 @@ export const concepts: Concept[] = [
     tagline: "Children emotion reading toy",
     description:
       "Kero è un peluche interattivo per bambini da 3 a 8 anni dotato di sensori di pressione e microfoni che interpretano il tono emotivo del bambino. Risponde con espressioni facciali LED e suoni calibrati per confortare o stimolare il gioco. Il personaggio ha una narrativa propria che evolve nel tempo attraverso aggiornamenti via NFC dallo smartphone del genitore. Tutti i dati vengono processati localmente, senza connessione cloud, per tutelare la privacy dei più piccoli.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cura della persona",
     tags: ["kids", "emotion", "toy", "interactive", "privacy", "nfc"],
     cfml: 53,
@@ -146,7 +146,7 @@ export const concepts: Concept[] = [
     tagline: "Smart pantry inventory system",
     description:
       "Silo è un sistema di contenitori intelligenti per dispensa che traccia automaticamente le quantità di cibo attraverso celle di peso integrate nella base. Un hub centrale aggrega i dati di tutti i contenitori e genera liste della spesa in tempo reale sull'app abbinata. Il design è pensato per impilabilità e uniformità estetica: tutti i moduli sono cilindrici in vetro borosilicato con tappo in alluminio. Le ricette suggerite sono calibrate sugli ingredienti presenti in dispensa in quel momento.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cibo e cucina",
     tags: ["food", "smart-home", "iot", "kitchen", "inventory", "sustainability"],
     cfml: 55,
@@ -162,7 +162,7 @@ export const concepts: Concept[] = [
     tagline: "Lightweight trail navigation pod",
     description:
       "Treko è un piccolo dispositivo da clip che si aggancia alla spallina dello zaino e proietta una freccia direzionale laser sul terreno davanti all'escursionista. Funziona offline tramite mappe topografiche precaricate e un modulo GPS a basso consumo. L'autonomia è di quarantotto ore con due batterie AA standard. La scocca in policarbonato con guarnizioni IP67 resiste a pioggia, sabbia e urti. È pensato per chi vuole navigare in montagna senza guardare lo schermo del telefono.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Sport e tempo libero",
     tags: ["sport", "outdoor", "navigation", "gps", "hiking", "laser"],
     cfml: 70,
@@ -180,7 +180,7 @@ export const concepts: Concept[] = [
     tagline: "Ambient sound masking device",
     description:
       "Sglør è un diffusore acustico da parete che genera campi di mascheramento sonoro adattivi per garantire la privacy delle conversazioni negli open space. Il sistema analizza in tempo reale i livelli di rumore ambientale e calibra la frequenza e il volume del rumore di fondo prodotto. Il form factor piatto lo rende installabile come un quadro, e la scocca è disponibile in versione fonoassorbente rivestita di feltro. Non richiede app né connessione: è completamente plug-and-play.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Casa e abitare",
     tags: ["workspace", "acoustic", "privacy", "open-space", "sound", "office"],
     cfml: 44,
@@ -196,7 +196,7 @@ export const concepts: Concept[] = [
     tagline: "Fermented food starter kit",
     description:
       "Grogolix è un kit domestico per la fermentazione di alimenti che include un vaso di fermentazione in ceramica smaltata, una bilancia di precisione integrata nel coperchio e un termometro wireless. L'app companion guida l'utente passo a passo nella preparazione di kefir, kombucha, kimchi e altri fermentati attraverso ricette con tempistiche adattive. I sensori monitorano pH e temperatura e inviano avvisi quando è il momento di intervenire. Il design è volutamente analogico nell'estetica, artigianale e caldo.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cibo e cucina",
     tags: ["food", "fermentation", "health", "kitchen", "iot", "ceramic", "diy"],
     cfml: 34,
@@ -212,7 +212,7 @@ export const concepts: Concept[] = [
     tagline: "E-bike torque booster module",
     description:
       "Velox è un modulo retrofit che si installa in trenta minuti su qualsiasi bicicletta da strada per trasformarla in una e-bike leggera. Il sistema è centrato su un motore mid-drive da 250 W integrato nel movimento centrale, abbinato a una batteria da 300 Wh nascosta nel tubo del sellino. Il peso aggiuntivo totale è di 2,4 kg. Un display minimal sul manubrio mostra autonomia residua e modalità di assistenza. L'aggiornamento firmware avviene via OTA dallo smartphone.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Mobilità e trasporti",
     tags: ["mobility", "ebike", "cycling", "retrofit", "urban", "motor"],
     cfml: 42,
@@ -228,7 +228,7 @@ export const concepts: Concept[] = [
     tagline: "Blind spot cycling mirror",
     description:
       "Mira è uno specchietto retrovisore per bicicletta con display AR integrato che sovrappone avvisi visivi ai riflessi reali. Un sensore radar da 24 GHz rileva i veicoli in avvicinamento fino a 70 metri e colora lo specchio di rosso in funzione dell'urgenza. Il montaggio è compatibile con qualsiasi manubrio standard e non richiede utensili. La batteria ricaricabile dura sei settimane con uso quotidiano. Il peso è inferiore a 80 grammi.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Sicurezza e protezione",
     tags: ["mobility", "cycling", "safety", "radar", "ar", "urban"],
     cfml: 47,
@@ -244,7 +244,7 @@ export const concepts: Concept[] = [
     tagline: "Heat therapy wrist sleeve",
     description:
       "Thera è un manicotto da polso a terapia termica programmabile per chi soffre di sindrome del tunnel carpale o artrite. Il tessuto tecnico integra resistenze in grafene che si attivano tramite un'app con tre protocolli preimpostati: riscaldamento lento, impulsi termici e cicli caldo-freddo. Il design è slim, indossabile sotto i vestiti durante il lavoro. Il ricaricamento avviene via USB-C e dura due ore per sessione. È CE-certificato come dispositivo medico di classe I.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Salute e benessere",
     tags: ["health", "therapy", "wearable", "thermal", "textile", "medical"],
     cfml: 38,
@@ -260,7 +260,7 @@ export const concepts: Concept[] = [
     tagline: "AI meal planning assistant",
     description:
       "Nomi è un dispositivo fisico da cucina a forma di tablet verticale che funge da assistente alla pianificazione pasti. Integra una telecamera che legge le etichette nutrizionali e gli ingredienti freschi, e un modello linguistico locale che genera piani settimanali personalizzati per obiettivi calorici e preferenze alimentari. Non richiede connessione internet per l'uso base. Lo schermo è touch e mostra le ricette passo a passo con timer integrati. Il dispositivo si integra opzionalmente con i sistemi di consegna della spesa.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cibo e cucina",
     tags: ["food", "ai", "nutrition", "kitchen", "privacy", "meal-planning"],
     cfml: 46,
@@ -276,7 +276,7 @@ export const concepts: Concept[] = [
     tagline: "Fog collection water harvester",
     description:
       "Bruma è un collettore d'acqua atmosferica per aree ad alta umidità o nebbia, pensato per installazioni rurali e periurbane. La mesh polimerica tridimensionale brevettata cattura le goccioline di nebbia e le convoglia verso un serbatoio da 20 litri. Il dispositivo non richiede energia elettrica ed è costruito interamente in materiali riciclabili. Una versione domestica da balcone può raccogliere fino a 2 litri al giorno in condizioni di nebbia moderata. Il progetto ha una forte vocazione di accessibilità economica.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Inclusione e accessibilità",
     tags: ["energy", "water", "sustainability", "off-grid", "rural", "climate"],
     cfml: 41,
@@ -294,7 +294,7 @@ export const concepts: Concept[] = [
     tagline: "Haptic safety system",
     description:
       "Hapto è un sistema indossabile da polso che traduce i pericoli stradali in segnali tattili di intensità variabile. Pensato per ciclisti urbani e runner, elimina la necessità di distogliere lo sguardo dal percorso. Il modulo sensoriale analizza il traffico circostante tramite sensori di prossimità a ultrasuoni e restituisce pattern vibrotattili codificati. L'app companion permette di personalizzare le soglie di allerta e di registrare i percorsi più sicuri.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Sicurezza e protezione",
     tags: ["mobility", "safety", "wearable", "haptic", "urban", "cycling"],
     cfml: 64,
@@ -310,7 +310,7 @@ export const concepts: Concept[] = [
     tagline: "Kinetic energy floor tile",
     description:
       "Volta è una piastrella piezoelettrica per pavimenti di aree ad alto traffico pedonale che converte i passi in energia elettrica. Ogni piastrella da 30×30 cm genera fino a 5 W di picco sotto il peso di un adulto. L'energia viene immagazzinata in un supercondensatore integrato o ceduta alla rete locale tramite microinverter. Il rivestimento superiore è in gomma riciclata ad alta durabilità, disponibile in dieci colori. Il sistema è pensato per stazioni metro, aeroporti e centri commerciali.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Servizi e pubblica utilità",
     tags: ["energy", "piezoelectric", "floor", "harvesting", "urban", "infrastructure"],
     cfml: 68,
@@ -326,7 +326,7 @@ export const concepts: Concept[] = [
     tagline: "Customizable modular fashion accessory",
     description:
       "Deko è una linea di accessori moda modulari in resina stampata a SLA che consente all'utente di assemblare borse, cinture e bigiotteria da componenti intercambiabili. I ganci di connessione brevettati permettono di aggiungere o rimuovere elementi in pochi secondi, trasformando una clutch in tracolla o una collana in bracciale. Il catalogo conta oltre duecento moduli disponibili in sei finiture. Ogni componente è numerato e tracciabile con chip NFC per certificare l'origine e la composizione del materiale.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Abbigliamento e accessori",
     tags: ["fashion", "modular", "accessories", "3d-print", "nfc", "customization"],
     cfml: 57,
@@ -342,7 +342,7 @@ export const concepts: Concept[] = [
     tagline: "AR learning microscope for schools",
     description:
       "Scope è un microscopio ottico per uso scolastico dotato di fotocamera ad alta risoluzione e modulo AR che sovrappone annotazioni didattiche al vetrino osservato in tempo reale sul tablet abbinato. Il software di riconoscimento automatico identifica cellule, batteri e microorganismi e li etichetta con schede informative interattive. Il corpo è in ABS rinforzato pensato per resistere all'uso quotidiano in classe. La batteria ricaricabile lo rende completamente wireless. Il curriculum integrato copre il programma scientifico dalle medie alle superiori.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Educazione e apprendimento",
     tags: ["education", "ar", "science", "school", "microscope", "interactive"],
     cfml: 63,
@@ -358,7 +358,7 @@ export const concepts: Concept[] = [
     tagline: "Pet activity and health tracker",
     description:
       "Pluto è un collare smart per cani e gatti che monitora attività fisica, sonno, temperatura corporea e frequenza cardiaca. Il modulo è impermeabile IPX8, pesa 18 grammi e si aggancia a qualsiasi collare esistente. Il rilevamento GPS con geofencing avvisa il proprietario se l'animale esce da un'area definita. L'autonomia è di quindici giorni. I dati si sincronizzano automaticamente con l'app che offre un diario di salute condivisibile con il veterinario.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cura della persona",
     tags: ["leisure", "pet", "wearable", "gps", "health", "iot"],
     cfml: 71,
@@ -374,7 +374,7 @@ export const concepts: Concept[] = [
     tagline: "Biofeedback sport performance glove",
     description:
       "Forma è un guanto da allenamento che misura la forza di presa, la sudorazione e la temperatura cutanea durante sessioni di arrampicata, ginnastica e sport da combat. I sensori flessibili sono integrati nel palmo senza compromettere la sensibilità tattile. Un algoritmo di fatica muscolare suggerisce pause e variazioni del carico di allenamento in tempo reale tramite earpiece Bluetooth. Il guanto è lavabile fino a cinquanta cicli senza perdita di precisione dei sensori.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Sport e tempo libero",
     tags: ["sport", "biofeedback", "glove", "performance", "climbing", "textile"],
     cfml: 59,
@@ -390,7 +390,7 @@ export const concepts: Concept[] = [
     tagline: "Risograph inspired home printer",
     description:
       "Riso è una stampante domestica compatta ispirata alla Risograph che riproduce l'estetica della stampa a stencil con inchiostri a base soia intercambiabili. Ogni cartuccia monocolore costa un quinto rispetto all'equivalente inkjet e produce cinquecento fogli. Il design è volutamente meccanico e visibile: il meccanismo di stampa è esposto sotto una campana in vetro temperato. Il software companion genera automaticamente separazioni di colore ottimizzate per lo stile risografico. Supporta formati da A6 a A4.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Cultura e intrattenimento",
     tags: ["workspace", "print", "design", "risograph", "sustainable", "creative"],
     cfml: 52,
@@ -406,7 +406,7 @@ export const concepts: Concept[] = [
     tagline: "Portable air quality personal monitor",
     description:
       "Nuvol è un dispositivo tascabile delle dimensioni di un accendino che misura in tempo reale PM2.5, CO₂, VOC e umidità dell'aria circostante. Il display e-ink mostra un indice di qualità aggregato su scala cromatica. I dati contribuiscono anonimamente a una mappa crowdsourced della qualità dell'aria urbana accessibile a tutti. L'autonomia è di tre giorni con una singola carica. La scocca è in alluminio riciclato con finitura sabbiata disponibile in otto colori.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Ambiente e sostenibilità",
     tags: ["health", "air-quality", "iot", "urban", "crowdsourcing", "portable"],
     cfml: 66,
@@ -424,7 +424,7 @@ export const concepts: Concept[] = [
     tagline: "Wireless mesh speaker network",
     description:
       "Nodo è un sistema di speaker sferici da 8 cm che si connettono automaticamente in una rete mesh multi-room senza bisogno di un hub centrale. Ogni nodo riconosce la propria posizione nell'ambiente tramite time-of-flight ultrasonico e calibra il mix audio per una diffusione omogenea. Il rivestimento è in silicone antimacchia disponibile in sei colori neutri. La ricarica avviene tramite base magnetica. Tre nodi sono sufficienti per coprire un appartamento di 60 mq.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Comunicazione e media",
     tags: ["home", "audio", "mesh", "wireless", "speaker", "iot"],
     cfml: 48,
@@ -440,7 +440,7 @@ export const concepts: Concept[] = [
     tagline: "Programmable textile display patch",
     description:
       "Pixel è una patch tessile flessibile da 10×10 cm con matrice LED a bassa potenza programmabile via smartphone. Si applica su qualsiasi indumento tramite velcro termoadesivo e consente di visualizzare testi, icone animate o messaggi personalizzati in movimento. Il display è visibile anche alla luce diretta del sole. La batteria sottile dura otto ore ed è ricaricabile in sessanta minuti. È pensata per uso sportivo, eventi, e per chi vuole esprimere identità visiva attraverso l'abbigliamento.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Abbigliamento e accessori",
     tags: ["fashion", "led", "wearable", "textile", "display", "customization"],
     cfml: 36,
@@ -456,7 +456,7 @@ export const concepts: Concept[] = [
     tagline: "Last mile cargo drone dock",
     description:
       "Dropo è una stazione di atterraggio compatta per droni di consegna last-mile, progettata per installazione su balconi e terrazze condominiali. Il dock include un sistema di ancoraggio automatico, ricarica rapida in venti minuti e un vano sicuro per i pacchi. Un'app di gestione consente di autorizzare le consegne e monitorare lo stato del drone in volo. Il sistema è compatibile con i principali operatori di logistica aerea civile. Il design è compatto e discreto per minimizzare l'impatto estetico.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Servizi e pubblica utilità",
     tags: ["mobility", "drone", "logistics", "last-mile", "urban", "infrastructure"],
     cfml: 29,
@@ -472,7 +472,7 @@ export const concepts: Concept[] = [
     tagline: "Anxiety relief breath trainer",
     description:
       "Calmo è un piccolo dispositivo palmare che guida la respirazione diaframmatica attraverso resistenza fisica variabile all'inspirazione. Una luce LED perimetrale pulsa al ritmo ottimale calcolato sull'HRV dell'utente, rilevata tramite un sensore PPG nella zona di contatto. Sessioni di cinque minuti al giorno sono sufficienti per abbassare i livelli di cortisolo. Il materiale è silicone medicale morbido, pensato per essere tenuto in mano anche in ambienti di lavoro senza attirare attenzione. Nessuna app richiesta per l'uso base.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Salute e benessere",
     tags: ["health", "mental-health", "breathing", "anxiety", "wearable", "hrv"],
     cfml: 43,
@@ -488,7 +488,7 @@ export const concepts: Concept[] = [
     tagline: "Focus time physical scheduler",
     description:
       "Krono è un orologio da tavolo fisico con corona rotante che imposta blocchi di tempo per sessioni di focus, pause e riunioni. Una corona analogica seleziona la durata, un LED colorato comunica lo stato attuale a colleghi e familiari senza parole. Al termine di ogni blocco, una vibrazione gentile segnala il cambio. Il dispositivo si sincronizza con Google Calendar e Notion via Wi-Fi per aggiornare automaticamente la propria visualizzazione. Il case è in noce massello tornito.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Lavoro e produttività",
     tags: ["workspace", "focus", "time-management", "analog", "iot", "wood"],
     cfml: 47,
@@ -504,7 +504,7 @@ export const concepts: Concept[] = [
     tagline: "Floating garden island module",
     description:
       "Molo è un modulo galleggiante in polietilene espanso riciclato per la creazione di isole verdi su laghi, stagni e bacini artificiali. Ogni modulo esagonale da un metro di diametro si aggancia agli altri tramite connettori flessibili e supporta un substrato per piante palustri o ortaggi. Il sistema favorisce la biodiversità acquatica creando zone d'ombra e habitat per pesci e anfibi. È pensato sia per parchi pubblici sia per proprietà private. La manutenzione richiede un intervento annuale.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Ambiente e sostenibilità",
     tags: ["energy", "sustainability", "water", "garden", "biodiversity", "outdoor"],
     cfml: 38,
@@ -520,7 +520,7 @@ export const concepts: Concept[] = [
     tagline: "Tactile coding kit for children",
     description:
       "Duna è un kit di programmazione tangibile per bambini dai 5 anni composto da blocchi fisici colorati che rappresentano istruzioni logiche. I bambini compongono sequenze sul tappeto di gioco e un robot tartaruga da 15 cm esegue il programma costruito. Non ci sono schermi: tutta l'interazione avviene nel mondo fisico. Il kit include quaranta blocchi, tre missioni stampate su cartoncino e una guida per insegnanti. Il materiale è legno di faggio certificato FSC.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Educazione e apprendimento",
     tags: ["education", "kids", "coding", "tangible", "screen-free", "wood"],
     cfml: 44,
@@ -536,7 +536,7 @@ export const concepts: Concept[] = [
     tagline: "Wearable surf performance analyzer",
     description:
       "Onda è un sistema di due sensori impermeabili da attaccare alla tavola da surf e alla caviglia del surfista per analizzare traiettorie, velocità di drop, manovre e tempo in acqua. I dati vengono elaborati e visualizzati sull'app entro dieci secondi dall'uscita dall'acqua, con clip video automaticamente sincronizzati con i picchi di performance. Il modulo è autoalimentato tramite pannello solare flessibile integrato nella cover. Compatibile con tavole shortboard, longboard e foil.",
-    image: "/concepts/placeholder.jpg",
+    images: ["/concepts/placeholder.jpg"],
     sector: "Sport e tempo libero",
     tags: ["sport", "surf", "wearable", "analytics", "solar", "waterproof"],
     cfml: 32,

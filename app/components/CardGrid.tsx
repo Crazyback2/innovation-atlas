@@ -38,7 +38,7 @@ function ArchiveConceptCard({ concept }: { concept: Concept }) {
 
       <div className="relative border border-fg-primary bg-bg-elevated transition-transform duration-150 ease-out group-hover:-translate-x-[2px] group-hover:-translate-y-[2px]">
         <div className="border-b border-fg-primary">
-          <ConceptCardImage src={concept.image} alt={concept.title} />
+          <ConceptCardImage src={concept.images[0]} alt={concept.title} />
         </div>
         <div className="h-[68px] px-[13px] py-[9px] flex gap-x-[6px]">
           <div className="flex-1 flex flex-col overflow-hidden">
