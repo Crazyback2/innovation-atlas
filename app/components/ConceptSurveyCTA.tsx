@@ -14,7 +14,7 @@ const DIAGONAL_ANGLE = Math.atan2(CONSTRUCTION_H, CONSTRUCTION_W) * (180 / Math.
 
 function ConstructionZone() {
   return (
-    <div className="relative h-full w-[245px] shrink-0 overflow-hidden border-t border-r border-b border-dashed border-fg-primary">
+    <div className="relative h-full w-[245px] shrink-0 overflow-hidden border-t border-b border-dashed border-fg-primary">
       <div
         className="pointer-events-none absolute left-0 top-0 w-0 border-l border-dashed border-fg-primary"
         style={{
@@ -36,7 +36,11 @@ export default function ConceptSurveyCTA({ concept }: Props) {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 border-r border-dashed border-fg-primary"
+        className="pointer-events-none absolute right-0 top-0 h-[244px] border-r border-dashed border-fg-primary"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 h-[64px] border-r border-dashed border-fg-primary"
         aria-hidden="true"
       />
 
