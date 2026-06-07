@@ -5,6 +5,7 @@ import Footer from "@/app/components/Footer";
 import ConceptHero from "@/app/components/ConceptHero";
 import ConceptStats from "@/app/components/ConceptStats";
 import ConceptQuadrant from "@/app/components/ConceptQuadrant";
+import ConceptSurveyCTA from "@/app/components/ConceptSurveyCTA";
 import { concepts } from "@/src/data/concepts";
 
 type PageProps = {
@@ -54,6 +55,7 @@ export default async function ConceptPage({ params }: PageProps) {
             <ConceptHero concept={concept} />
             <ConceptStats concept={concept} />
             <ConceptQuadrant concept={concept} />
+            <ConceptSurveyCTA concept={concept} />
           </div>
         </section>
       </main>
