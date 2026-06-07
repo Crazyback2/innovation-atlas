@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import type { Concept } from "@/src/data/concepts";
 import { getQuadrant } from "@/src/data/concepts";
 
@@ -29,8 +30,28 @@ function ConceptHeroImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
+function LightboxImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return <div className="size-[200px] bg-accent-tertiary" aria-hidden="true" />;
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className="max-h-[80vh] max-w-[80vw] object-contain"
+      onError={() => setFailed(true)}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
+}
+
 export default function ConceptHero({ concept }: Props) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const imageCount = concept.images.length;
   const hasMultipleImages = imageCount > 1;
@@ -47,6 +68,24 @@ export default function ConceptHero({ concept }: Props) {
     setCurrentImageIndex((prev) => (prev === imageCount - 1 ? 0 : prev + 1));
   }
 
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxOpen, hasMultipleImages, imageCount]);
+
   return (
     <div className="w-[1160px]">
       {/* ── Hero box ── */}
@@ -54,7 +93,18 @@ export default function ConceptHero({ concept }: Props) {
         {/* Left column — image */}
         <div className="size-[580px] shrink-0 border-r border-fg-primary overflow-hidden">
           {currentImage ? (
-            <ConceptHeroImage src={currentImage} alt={concept.title} />
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              className="group relative size-full cursor-zoom-in"
+              aria-label="Ingrandisci immagine"
+            >
+              <ConceptHeroImage src={currentImage} alt={concept.title} />
+              <div
+                className="pointer-events-none absolute inset-0 bg-fg-primary/10 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                aria-hidden="true"
+              />
+            </button>
           ) : (
             <div className="size-full bg-accent-tertiary" aria-hidden="true" />
           )}
@@ -164,6 +214,55 @@ export default function ConceptHero({ concept }: Props) {
           </p>
         )}
       </div>
+
+      {/* ── Lightbox ── */}
+      {lightboxOpen && currentImage && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Galleria immagini"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg-elevated/80 backdrop-blur-sm"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            aria-label="Chiudi"
+            onClick={() => setLightboxOpen(false)}
+            className={`${GALLERY_BTN} absolute top-8 left-8 cursor-pointer hover:bg-accent-primary`}
+          >
+            <X className="size-3.5" strokeWidth={1.5} />
+          </button>
+
+          <LightboxImage src={currentImage} alt={concept.title} />
+
+          {hasMultipleImages && (
+            <div
+              className="absolute bottom-8 left-8 flex items-center gap-[8px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label="Immagine precedente"
+                onClick={goToPrevious}
+                className={`${GALLERY_BTN} cursor-pointer hover:bg-accent-primary`}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                aria-label="Immagine successiva"
+                onClick={goToNext}
+                className={`${GALLERY_BTN} cursor-pointer hover:bg-accent-primary`}
+              >
+                →
+              </button>
+              <p className="font-mono text-metadata text-fg-primary leading-normal">
+                {currentImageIndex + 1} / {imageCount}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
