@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import ConceptHero from "@/app/components/ConceptHero";
+import ConceptStats from "@/app/components/ConceptStats";
+import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import { concepts } from "@/src/data/concepts";
 
 type PageProps = {
@@ -50,6 +52,8 @@ export default async function ConceptPage({ params }: PageProps) {
 
           <div className="pl-[141px] pt-[64px] pb-[120px]">
             <ConceptHero concept={concept} />
+            <ConceptStats concept={concept} />
+            <ConceptQuadrant concept={concept} />
           </div>
         </section>
       </main>

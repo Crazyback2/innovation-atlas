@@ -10,6 +10,11 @@ export type Concept = {
   cfml: number;
   sp: number;
   spResponses: number;
+  cfmlLevelsPassed?: number;
+  cfmlCompletedAt?: string;
+  spWindowStart?: string;
+  spWindowEnd?: string;
+  positioningNotes?: string;
   author: { name: string; handle: string };
   createdAt: string;
 };
@@ -174,7 +179,7 @@ export const concepts: Concept[] = [
 
   // ── Q2 (cfml<50, sp≥50) ────────────────────────────────────────────────
   {
-    id: "sglor",
+    id: "0273",
     number: "NR. 0507",
     title: "SGLØR",
     tagline: "Ambient sound masking device",
@@ -185,7 +190,13 @@ export const concepts: Concept[] = [
     tags: ["workspace", "acoustic", "privacy", "open-space", "sound", "office"],
     cfml: 44,
     sp: 95,
-    spResponses: 87,
+    spResponses: 26,
+    cfmlLevelsPassed: 3,
+    cfmlCompletedAt: "2026-05-12",
+    spWindowStart: "2026-05-02",
+    spWindowEnd: "2026-05-11",
+    positioningNotes:
+      "Sglør si posiziona nel quadrante della promessa simbolica: l'immaginario d'uso che attiva è molto più maturo del suo stato tecnico. L'oggetto comunica gioco, ritualità e domesticità con grande forza, ma il funzionamento è ancora in fase di verifica iniziale.\n\nLa risposta emotiva è alta e la lettura del ruolo è chiara: chi lo osserva capisce subito cosa fa e si proietta nell'uso. Il punto debole resta il consolidamento tecnico, da costruire prima che il quadro d'uso possa stabilizzarsi.",
     author: { name: "Luca Ricci", handle: "@lucarricci" },
     createdAt: "2025-10-28",
   },
