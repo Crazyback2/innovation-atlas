@@ -9,21 +9,27 @@ const SURVEY_BTN =
 
 const CONSTRUCTION_W = 245;
 const CONSTRUCTION_H = 180;
-const DIAGONAL_LENGTH = Math.hypot(CONSTRUCTION_W, CONSTRUCTION_H);
-const DIAGONAL_ANGLE = Math.atan2(CONSTRUCTION_H, CONSTRUCTION_W) * (180 / Math.PI);
 
 function ConstructionZone() {
   return (
     <div className="relative h-full w-[245px] shrink-0 overflow-hidden border-t border-b border-dashed border-fg-primary">
-      <div
-        className="pointer-events-none absolute left-0 top-0 w-0 border-l border-dashed border-fg-primary"
-        style={{
-          height: `${DIAGONAL_LENGTH}px`,
-          transform: `rotate(${DIAGONAL_ANGLE}deg)`,
-          transformOrigin: "0 0",
-        }}
+      <svg
+        viewBox={`0 0 ${CONSTRUCTION_W} ${CONSTRUCTION_H}`}
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-0 size-full text-fg-primary"
         aria-hidden="true"
-      />
+      >
+        <line
+          x1="0"
+          y1="0"
+          x2={CONSTRUCTION_W}
+          y2={CONSTRUCTION_H}
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeDasharray="2 2"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
     </div>
   );
 }
