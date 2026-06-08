@@ -1,12 +1,19 @@
 import Link from "next/link";
+import { createClient } from "@/src/lib/supabase/server";
+import { logout } from "./header-actions";
+import ProfileMenu from "./ProfileMenu";
 
 const NAV_LINKS = [
   { label: "Archivio", href: "/archivio" },
   { label: "Framework", href: "/framework" },
-  { label: "Profilo", href: "/profilo" },
 ] as const;
 
-export default function Header() {
+export default async function Header() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <header className="flex items-center justify-between h-[69px] w-full bg-bg-elevated px-8 shrink-0">
       {/* ── Logo + Wordmark ── */}
@@ -19,13 +26,17 @@ export default function Header() {
           <Link
             key={label}
             href={href}
-            // box-shadow inset: nessun impatto sul box-model, lo spazio del bordo
-            // non è mai riservato nella struttura → zero layout shift
             className="flex h-[30px] items-center justify-center px-2 font-sans text-body text-fg-primary leading-[30px] whitespace-nowrap cursor-pointer transition-[box-shadow] duration-150 ease-out hover:shadow-[inset_0_0_0_1px_var(--color-fg-primary)] focus-visible:shadow-[inset_0_0_0_1px_var(--color-fg-primary)] focus-visible:outline-none"
           >
             {label}
           </Link>
         ))}
+
+        {/* ── Profile dropdown ── */}
+        <ProfileMenu
+          userEmail={user?.email ?? null}
+          logoutAction={logout}
+        />
 
         {/* CTA — variante forte: viola → bianco */}
         <Link
