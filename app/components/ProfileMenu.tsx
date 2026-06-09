@@ -63,6 +63,14 @@ export default function ProfileMenu({ userEmail, logoutAction }: Props) {
 >
   {userEmail}
 </div>
+              <Link
+                href="/concept"
+                onClick={() => setOpen(false)}
+                className="block w-full text-left px-4 py-3 font-sans text-body text-fg-primary cursor-pointer hover:bg-bg-primary transition-colors duration-150 ease-out"
+              >
+                I miei concept
+              </Link>
+              <div className="border-t border-accent-tertiary" aria-hidden="true" />
               <form action={logoutAction}>
                 <button
                   type="submit"
