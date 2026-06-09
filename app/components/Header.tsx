@@ -26,6 +26,7 @@ export default async function Header() {
           <Link
             key={label}
             href={href}
+            prefetch={href === "/framework" ? false : undefined}
             className="flex h-[30px] items-center justify-center px-2 font-sans text-body text-fg-primary leading-[30px] whitespace-nowrap cursor-pointer transition-[box-shadow] duration-150 ease-out hover:shadow-[inset_0_0_0_1px_var(--color-fg-primary)] focus-visible:shadow-[inset_0_0_0_1px_var(--color-fg-primary)] focus-visible:outline-none"
           >
             {label}
@@ -41,6 +42,7 @@ export default async function Header() {
         {/* CTA — variante forte: viola → bianco */}
         <Link
           href="/analizza"
+          prefetch={false}
           className="flex h-[30px] items-center justify-center px-2 font-sans text-body text-bg-elevated bg-accent-secondary border border-fg-primary leading-[30px] whitespace-nowrap cursor-pointer transition-colors duration-150 ease-out hover:bg-fg-primary hover:text-bg-elevated focus-visible:bg-fg-primary focus-visible:text-bg-elevated focus-visible:outline-none"
         >
           Analizza concept

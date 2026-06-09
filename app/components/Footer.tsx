@@ -40,6 +40,7 @@ export default function Footer() {
               <Link
                 key={label}
                 href={href}
+                prefetch={false}
                 className="font-sans text-body text-bg-elevated uppercase whitespace-nowrap leading-none"
               >
                 {label} ←
@@ -72,6 +73,7 @@ export default function Footer() {
               <Link
                 key={label}
                 href={href}
+                prefetch={false}
                 className="font-sans text-body text-bg-elevated whitespace-nowrap leading-none"
               >
                 {label}
