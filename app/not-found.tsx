@@ -8,19 +8,17 @@ export default function NotFound() {
       <Header />
 
       <main className="flex-1">
-        <section className="relative min-h-[800px] w-full overflow-hidden bg-fg-primary">
-          {/* Background SVG — scaled up, anchored right */}
-          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/background_error404.svg"
-              alt=""
-              className="absolute right-0 top-0 h-full w-full origin-top-right scale-[1.45] object-cover"
-            />
-          </div>
+        <section className="relative min-h-[calc(100vh-406px)] w-full overflow-hidden bg-fg-primary">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/error404.svg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+          />
 
           {/* Content frame — 1440px, desktop only */}
-          <div className="relative mx-auto min-h-[800px] w-[1440px]">
+          <div className="relative z-10 mx-auto min-h-[calc(100vh-406px)] w-[1440px]">
             {/* Left column — vertically centered, shifted +20px */}
             <div className="absolute left-[108px] top-[calc(50%+20px)] flex -translate-y-1/2 flex-col items-start">
               <p className="mb-2 font-mono text-metadata leading-normal text-bg-elevated">
@@ -42,7 +40,7 @@ export default function NotFound() {
             </div>
 
             {/* Right label — aligned with ERROR 404 box center, shifted +20px */}
-            <p className="absolute right-[96px] top-[calc(50%+10px)] -translate-y-1/2 font-mono text-metadata uppercase leading-normal text-bg-elevated">
+            <p className="absolute right-[56px] top-[calc(50%+10px)] -translate-y-1/2 font-mono text-metadata uppercase leading-normal text-bg-elevated">
               WE&apos;RE OFF THE CHART
             </p>
           </div>
