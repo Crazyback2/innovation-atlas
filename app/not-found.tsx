@@ -8,7 +8,7 @@ export default function NotFound() {
       <Header />
 
       <main className="flex-1">
-        <section className="relative min-h-[calc(100vh-406px)] w-full overflow-hidden bg-fg-primary">
+        <section className="relative min-h-[calc(100vh-80px-320px)] w-full overflow-hidden bg-fg-primary">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/error404.svg"
