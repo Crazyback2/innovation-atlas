@@ -1,0 +1,17 @@
+export const VALID_SECTORS = [
+  "mobilità e trasporti",
+  "salute e benessere",
+  "casa e abitare",
+  "cura della persona",
+  "lavoro e produttività",
+  "educazione e apprendimento",
+  "comunicazione e media",
+  "cibo e cucina",
+  "abbigliamento e accessori",
+  "sport e tempo libero",
+  "ambiente e sostenibilità",
+  "sicurezza e protezioni",
+  "inclusione e accessibilità",
+  "cultura e intrattenimento",
+  "servizi e pubblica utilità",
+] as const;
