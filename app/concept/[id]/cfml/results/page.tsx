@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import CreateSPSurveyButton from "./CreateSPSurveyButton";
 import { CFML_LEVELS } from "../questions";
 import { createClient } from "@/src/lib/supabase/server";
 import {
@@ -226,6 +227,14 @@ export default async function CFMLResultsPage({ params }: PageProps) {
             >
               Torna al concept
             </Link>
+          </div>
+
+          {/* TODO: rimuovere quando esiste la pagina /concept/[id]/sp dedicata */}
+          <div className="mt-12 pt-8 border-t border-tertiary">
+            <p className="font-mono text-[11px] uppercase tracking-wide text-fg-secondary mb-4">
+              Test SP (provvisorio)
+            </p>
+            <CreateSPSurveyButton conceptId={typedConcept.id} />
           </div>
         </div>
       </main>
