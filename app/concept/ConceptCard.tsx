@@ -20,13 +20,9 @@ const metadataBoxClassName =
   "inline-flex items-center border border-accent-tertiary px-3 py-1 font-mono text-metadata uppercase leading-normal text-fg-primary";
 
 export default function ConceptCard({ concept }: { concept: UserConceptSummary }) {
-  const href = concept.cfml_completed_at
-    ? `/concept/${concept.id}/cfml/results`
-    : `/concept/${concept.id}/cfml`;
-
   return (
     <Link
-      href={href}
+      href={`/concept/${concept.id}`}
       className="group flex flex-col gap-6 border border-accent-tertiary bg-bg-elevated p-8 transition-colors duration-150 ease-out hover:bg-bg-primary"
     >
       <h2 className="font-sans text-display font-medium leading-normal text-fg-primary">

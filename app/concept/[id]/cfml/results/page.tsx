@@ -143,6 +143,14 @@ export default async function CFMLResultsPage({ params }: PageProps) {
   const consolidationLevel = (typedConcept.cfml_level ?? 0) as 0 | CFMLLevel;
   const displayScore = typedConcept.cfml_score ?? result.score;
 
+  const { data: existingSurvey } = await supabase
+    .from("sp_surveys")
+    .select("id")
+    .eq("concept_id", id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
@@ -229,13 +237,24 @@ export default async function CFMLResultsPage({ params }: PageProps) {
             </Link>
           </div>
 
-          {/* TODO: rimuovere quando esiste la pagina /concept/[id]/sp dedicata */}
-          <div className="mt-12 pt-8 border-t border-tertiary">
-            <p className="font-mono text-[11px] uppercase tracking-wide text-fg-secondary mb-4">
-              Test SP (provvisorio)
-            </p>
-            <CreateSPSurveyButton conceptId={typedConcept.id} />
-          </div>
+          {/* TODO: rimuovere quando esiste UI dedicata SP nella pagina concept */}
+          {existingSurvey ? (
+            <div className="mt-12 pt-8 border-t border-accent-tertiary">
+              <Link
+                href={`/concept/${typedConcept.id}`}
+                className="font-sans text-body font-medium leading-normal text-accent-primary"
+              >
+                Vedi azioni del concept →
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-12 pt-8 border-t border-accent-tertiary">
+              <p className="mb-4 font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
+                Test SP (provvisorio)
+              </p>
+              <CreateSPSurveyButton conceptId={typedConcept.id} />
+            </div>
+          )}
         </div>
       </main>
 
