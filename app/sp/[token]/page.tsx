@@ -7,6 +7,12 @@ type PageProps = {
   params: Promise<{ token: string }>;
 };
 
+type ConceptStimulus = {
+  title: string;
+  description: string | null;
+  sector: string;
+};
+
 function ScaleRadios({
   itemId,
   scaleMin,
@@ -156,6 +162,17 @@ export default async function SPSurveyPage({ params }: PageProps) {
     notFound();
   }
 
+  const { data: concept, error: conceptError } = await supabase
+    .from("concepts")
+    .select("title, description, sector")
+    .eq("id", survey.concept_id)
+    .maybeSingle();
+
+  if (conceptError || !concept) {
+    notFound();
+  }
+
+  const typedConcept = concept as ConceptStimulus;
   const config = survey.config_snapshot as SPConfig;
 
   return (
@@ -173,7 +190,18 @@ export default async function SPSurveyPage({ params }: PageProps) {
 
         <section className="mt-8 border border-accent-tertiary bg-bg-elevated px-6 py-5">
           <p className="font-mono text-metadata uppercase tracking-wide text-fg-primary opacity-70">
-            [Stimulus pack del concept — da implementare]
+            {typedConcept.sector}
+          </p>
+          <h2 className="mt-2 font-heading text-lead font-medium leading-normal text-fg-primary">
+            {typedConcept.title}
+          </h2>
+          {typedConcept.description ? (
+            <p className="mt-3 font-sans text-body leading-relaxed text-fg-primary">
+              {typedConcept.description}
+            </p>
+          ) : null}
+          <p className="mt-4 font-mono text-metadata uppercase tracking-wide text-fg-primary opacity-70">
+            [ALTRI MATERIALI DI CONTESTO DA IMPLEMENTARE]
           </p>
         </section>
 
