@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
-  calculateCFML,
   CFML_LEVEL_QUESTIONS,
   isLevelUnlocked,
   type CFMLAnswer,
@@ -10,6 +10,7 @@ import {
   type CFMLLevel,
   type CFMLLevelKey,
 } from "@/src/lib/scoring";
+import { submitCFML } from "./actions";
 import { CFML_LEVELS } from "./questions";
 
 export const defaultAllNo: CFMLAnswers = {
@@ -143,6 +144,7 @@ export default function CFMLWizard({
     useState<Partial<CFMLAnswers>>(initialAnswers);
   const [currentLevel, setCurrentLevel] = useState<CFMLLevel>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const currentLevelData = CFML_LEVELS.find(
     (level) => level.level === currentLevel
@@ -162,12 +164,26 @@ export default function CFMLWizard({
     setAnswers((previous) => ({ ...previous, [code]: value }));
   }
 
-  function handleCalculate() {
+  async function handleCalculate() {
     setSubmitting(true);
+    setSubmitError(null);
+
     const filled: CFMLAnswers = { ...defaultAllNo, ...answers };
-    const result = calculateCFML(filled);
-    console.log("submit", { conceptId, answers, result });
-    setSubmitting(false);
+
+    try {
+      await submitCFML({ conceptId, answers: filled });
+    } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
+
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Si è verificato un errore imprevisto. Riprova."
+      );
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -320,27 +336,34 @@ export default function CFMLWizard({
           <span />
         )}
 
-        <div className="flex items-center gap-4">
-          {showForwardButton && (
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentLevel((previous) => (previous + 1) as CFMLLevel)
-              }
-              className={primaryButtonClassName}
-            >
-              Avanti
-            </button>
-          )}
-          {showCalculateButton && (
-            <button
-              type="button"
-              onClick={handleCalculate}
-              disabled={submitting}
-              className={primaryButtonClassName}
-            >
-              {submitting ? "Calcolo in corso…" : "Calcola risultato"}
-            </button>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-4">
+            {showForwardButton && (
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentLevel((previous) => (previous + 1) as CFMLLevel)
+                }
+                className={primaryButtonClassName}
+              >
+                Avanti
+              </button>
+            )}
+            {showCalculateButton && (
+              <button
+                type="button"
+                onClick={handleCalculate}
+                disabled={submitting}
+                className={primaryButtonClassName}
+              >
+                {submitting ? "Calcolo in corso…" : "Calcola risultato"}
+              </button>
+            )}
+          </div>
+          {submitError && (
+            <p className="font-sans text-body leading-normal text-red-600">
+              {submitError}
+            </p>
           )}
         </div>
       </div>
