@@ -24,7 +24,7 @@ export default async function MyConceptsPage() {
 
   const { data: concepts } = await supabase
     .from("concepts")
-    .select("id, title, sector, cfml_score, cfml_level, created_at")
+    .select("id, title, sector, cfml_score, cfml_level, cfml_completed_at, created_at")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 

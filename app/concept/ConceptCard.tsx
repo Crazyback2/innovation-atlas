@@ -6,6 +6,7 @@ export type UserConceptSummary = {
   sector: string;
   cfml_score: number | null;
   cfml_level: string | number | null;
+  cfml_completed_at: string | null;
   created_at: string;
 };
 
@@ -15,35 +16,41 @@ function formatCfmlLevel(level: string | number | null): string {
   return `L${level}`;
 }
 
+const metadataBoxClassName =
+  "inline-flex items-center border border-accent-tertiary px-3 py-1 font-mono text-metadata uppercase leading-normal text-fg-primary";
+
 export default function ConceptCard({ concept }: { concept: UserConceptSummary }) {
-  const hasScore = concept.cfml_score != null;
+  const href = concept.cfml_completed_at
+    ? `/concept/${concept.id}/cfml/results`
+    : `/concept/${concept.id}/cfml`;
 
   return (
     <Link
-      href={`/concept/${concept.id}`}
-      className="group flex flex-col gap-6 border border-accent-tertiary bg-bg-elevated p-8 transition-colors duration-150 ease-out hover:border-fg-primary"
+      href={href}
+      className="group flex flex-col gap-6 border border-accent-tertiary bg-bg-elevated p-8 transition-colors duration-150 ease-out hover:bg-bg-primary"
     >
       <h2 className="font-sans text-display font-medium leading-normal text-fg-primary">
         {concept.title}
       </h2>
 
       <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center border border-accent-tertiary px-3 py-1 font-mono text-metadata uppercase leading-normal text-fg-primary">
-          {concept.sector}
-        </span>
+        <span className={metadataBoxClassName}>{concept.sector}</span>
 
-        {hasScore ? (
-          <span className="font-mono text-metadata leading-normal text-fg-primary">
-            CFML {concept.cfml_score}
-            {concept.cfml_level != null && (
-              <>
-                {" "}
-                · {formatCfmlLevel(concept.cfml_level)}
-              </>
-            )}
-          </span>
+        {concept.cfml_completed_at ? (
+          <>
+            <span className={metadataBoxClassName}>
+              {formatCfmlLevel(concept.cfml_level)}
+            </span>
+            <span className={metadataBoxClassName}>
+              {concept.cfml_score != null
+                ? `${concept.cfml_score.toFixed(1)}/100`
+                : "—/100"}
+            </span>
+          </>
         ) : (
-          <span className="inline-flex items-center border border-accent-tertiary bg-bg-primary px-3 py-1 font-mono text-metadata uppercase leading-normal text-fg-primary">
+          <span
+            className={`${metadataBoxClassName} bg-bg-primary`}
+          >
             Bozza
           </span>
         )}
