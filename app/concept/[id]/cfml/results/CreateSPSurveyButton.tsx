@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { createSPSurvey } from "@/app/concept/[id]/sp/actions";
 
@@ -75,6 +76,14 @@ export default function CreateSPSurveyButton({
               </a>
             </p>
           )}
+          <p>
+            <Link
+              href={`/concept/${conceptId}/sp/results`}
+              className="text-accent-primary underline underline-offset-2"
+            >
+              Vai ai risultati SP
+            </Link>
+          </p>
         </div>
       )}
     </div>
