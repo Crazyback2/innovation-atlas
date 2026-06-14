@@ -39,7 +39,9 @@ export async function createSPSurvey({
 
   const { data: concept } = await supabase
     .from("concepts")
-    .select("id")
+    .select(
+      "id, title, description, sector, context_scenario, target_user, images, image_captions, video_url"
+    )
     .eq("id", conceptId)
     .eq("owner_id", user.id)
     .limit(1)
@@ -48,6 +50,17 @@ export async function createSPSurvey({
   if (!concept) {
     throw new Error("Concept non trovato o non autorizzato");
   }
+
+  const pack_snapshot = {
+    title: concept.title,
+    description: concept.description,
+    sector: concept.sector,
+    context_scenario: concept.context_scenario,
+    target_user: concept.target_user,
+    images: concept.images ?? [],
+    image_captions: concept.image_captions ?? {},
+    video_url: concept.video_url,
+  };
 
   for (let attempt = 0; attempt < MAX_TOKEN_COLLISION_RETRIES; attempt++) {
     const publicToken = generateSPToken();
@@ -59,6 +72,7 @@ export async function createSPSurvey({
         public_token: publicToken,
         sp_version: SP_CONFIG_V1.version,
         config_snapshot: SP_CONFIG_V1,
+        pack_snapshot,
         min_responses: SP_CONFIG_V1.minResponses,
       })
       .select("id, public_token")
