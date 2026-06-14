@@ -10,13 +10,14 @@ const labelClassName =
   "font-mono text-metadata uppercase leading-normal tracking-wide text-fg-primary";
 
 const fieldClassName =
-  "w-full border border-accent-tertiary bg-bg-elevated px-[14px] py-3 font-sans text-body leading-normal text-fg-primary outline-none transition-colors duration-150 ease-out focus:border-fg-primary";
+  "w-full border border-accent-tertiary bg-bg-elevated px-[14px] py-3 font-sans text-body leading-normal text-fg-primary outline-none transition-colors duration-150 ease-out focus:border-fg-primary disabled:cursor-not-allowed disabled:opacity-60";
 
 const counterClassName =
   "font-sans text-metadata leading-normal text-fg-primary opacity-50";
 
 type EditConceptFormProps = {
   conceptId: string;
+  packLocked: boolean;
   initialTitle: string;
   initialSector: string;
   initialDescription: string;
@@ -29,6 +30,7 @@ type EditConceptFormProps = {
 
 export default function EditConceptForm({
   conceptId,
+  packLocked,
   initialTitle,
   initialSector,
   initialDescription,
@@ -74,6 +76,16 @@ export default function EditConceptForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {packLocked ? (
+        <div className="bg-accent-tertiary px-6 py-5 font-sans text-body leading-relaxed text-fg-primary">
+          <span className="font-medium">Stimulus pack bloccato</span>
+          {" — "}
+          Questo concept ha una o più survey SP attive. Per modificare il pack,
+          vai sulla detail del concept e cancella tutte le survey, oppure crea
+          un nuovo concept. Titolo e settore restano modificabili.
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="title" className={labelClassName}>
           Titolo del concept
@@ -123,6 +135,7 @@ export default function EditConceptForm({
           name="description"
           rows={4}
           value={description}
+          disabled={packLocked}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Cosa è e a cosa serve, in poche righe."
           className={`${fieldClassName} resize-y`}
@@ -139,6 +152,7 @@ export default function EditConceptForm({
           name="context_scenario"
           rows={4}
           value={contextScenario}
+          disabled={packLocked}
           onChange={(event) => setContextScenario(event.target.value)}
           placeholder="In quale situazione viene usato? Descrivi il contesto d'uso."
           className={`${fieldClassName} resize-y`}
@@ -155,6 +169,7 @@ export default function EditConceptForm({
           name="target_user"
           type="text"
           value={targetUser}
+          disabled={packLocked}
           onChange={(event) => setTargetUser(event.target.value)}
           placeholder="Es. Professionisti urbani 25-40 anni"
           className={fieldClassName}
@@ -168,6 +183,7 @@ export default function EditConceptForm({
           conceptId={conceptId}
           initialImages={initialImages}
           initialCaptions={initialCaptions}
+          readOnly={packLocked}
           onChange={(nextImages, nextCaptions) => {
             setImages(nextImages);
             setCaptions(nextCaptions);
@@ -184,6 +200,7 @@ export default function EditConceptForm({
           name="video_url"
           type="text"
           value={videoUrl}
+          disabled={packLocked}
           onChange={(event) => setVideoUrl(event.target.value)}
           placeholder="https://..."
           className={fieldClassName}

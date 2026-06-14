@@ -58,10 +58,6 @@ export async function updateConcept(
 ): Promise<{ error: string } | void> {
   const title = String(formData.get("title") ?? "").trim();
   const sector = String(formData.get("sector") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-  const contextScenario = String(formData.get("context_scenario") ?? "").trim();
-  const targetUser = String(formData.get("target_user") ?? "").trim();
-  const videoUrl = String(formData.get("video_url") ?? "").trim();
 
   if (!title) {
     return { error: "Inserisci un titolo per il concept." };
@@ -69,18 +65,6 @@ export async function updateConcept(
 
   if (!sector || !VALID_SECTORS.includes(sector as ValidSector)) {
     return { error: "Seleziona un settore valido." };
-  }
-
-  const images = parseImagesField(String(formData.get("images") ?? "[]"));
-  if (images === null) {
-    return { error: "Formato immagini non valido." };
-  }
-
-  const imageCaptions = parseImageCaptionsField(
-    String(formData.get("image_captions") ?? "{}")
-  );
-  if (imageCaptions === undefined) {
-    return { error: "Formato didascalie non valido." };
   }
 
   const supabase = await createClient();
@@ -102,6 +86,51 @@ export async function updateConcept(
 
   if (!concept) {
     return { error: "Concept non trovato o non autorizzato." };
+  }
+
+  const { count: surveyCount } = await supabase
+    .from("sp_surveys")
+    .select("*", { count: "exact", head: true })
+    .eq("concept_id", conceptId);
+
+  const packLocked = (surveyCount ?? 0) > 0;
+
+  if (packLocked) {
+    const { error } = await supabase
+      .from("concepts")
+      .update({
+        title,
+        sector,
+      })
+      .eq("id", conceptId)
+      .eq("owner_id", user.id);
+
+    if (error) {
+      return { error: "Impossibile salvare le modifiche. Riprova più tardi." };
+    }
+
+    revalidatePath(`/concept/${conceptId}`);
+    revalidatePath(`/concept/${conceptId}/edit`);
+    revalidatePath("/concept");
+
+    redirect(`/concept/${conceptId}`);
+  }
+
+  const description = String(formData.get("description") ?? "").trim();
+  const contextScenario = String(formData.get("context_scenario") ?? "").trim();
+  const targetUser = String(formData.get("target_user") ?? "").trim();
+  const videoUrl = String(formData.get("video_url") ?? "").trim();
+
+  const images = parseImagesField(String(formData.get("images") ?? "[]"));
+  if (images === null) {
+    return { error: "Formato immagini non valido." };
+  }
+
+  const imageCaptions = parseImageCaptionsField(
+    String(formData.get("image_captions") ?? "{}")
+  );
+  if (imageCaptions === undefined) {
+    return { error: "Formato didascalie non valido." };
   }
 
   const { error } = await supabase

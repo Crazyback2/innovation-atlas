@@ -100,3 +100,50 @@ export async function createSPSurvey({
     "Impossibile generare un token univoco per la SP survey. Riprova più tardi."
   );
 }
+
+export async function deleteSurvey(surveyId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: survey } = await supabase
+    .from("sp_surveys")
+    .select("id, concept_id")
+    .eq("id", surveyId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!survey) {
+    throw new Error("Survey non trovata");
+  }
+
+  const { data: concept } = await supabase
+    .from("concepts")
+    .select("id")
+    .eq("id", survey.concept_id)
+    .eq("owner_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!concept) {
+    throw new Error("Survey non trovata o non autorizzata");
+  }
+
+  const { error } = await supabase
+    .from("sp_surveys")
+    .delete()
+    .eq("id", surveyId);
+
+  if (error) {
+    throw new Error(
+      error.message ?? "Impossibile cancellare la survey. Riprova più tardi."
+    );
+  }
+
+  revalidatePath(`/concept/${survey.concept_id}`);
+}

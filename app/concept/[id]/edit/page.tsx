@@ -68,6 +68,13 @@ export default async function EditConceptPage({ params }: PageProps) {
 
   const typedConcept = concept as ConceptRow;
 
+  const { count: surveyCount } = await supabase
+    .from("sp_surveys")
+    .select("*", { count: "exact", head: true })
+    .eq("concept_id", id);
+
+  const packLocked = (surveyCount ?? 0) > 0;
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
@@ -85,6 +92,7 @@ export default async function EditConceptPage({ params }: PageProps) {
           <div className="mt-10">
             <EditConceptForm
               conceptId={typedConcept.id}
+              packLocked={packLocked}
               initialTitle={typedConcept.title}
               initialSector={typedConcept.sector}
               initialDescription={typedConcept.description ?? ""}

@@ -21,6 +21,7 @@ type ImageUploaderProps = {
   conceptId: string;
   initialImages: string[];
   initialCaptions: Record<string, string>;
+  readOnly?: boolean;
   onChange: (images: string[], captions: Record<string, string>) => void;
 };
 
@@ -67,6 +68,7 @@ export default function ImageUploader({
   conceptId,
   initialImages,
   initialCaptions,
+  readOnly = false,
   onChange,
 }: ImageUploaderProps) {
   const [images, setImages] = useState(initialImages);
@@ -93,7 +95,7 @@ export default function ImageUploader({
   }
 
   function openFilePicker(slotIndex: number) {
-    if (isBusy) {
+    if (readOnly || isBusy) {
       return;
     }
     pendingSlotRef.current = slotIndex;
@@ -154,7 +156,7 @@ export default function ImageUploader({
   }
 
   async function handleRemove(slotIndex: number) {
-    if (isBusy) {
+    if (readOnly || isBusy) {
       return;
     }
 
@@ -191,12 +193,15 @@ export default function ImageUploader({
   }
 
   function handleCaptionChange(slotIndex: number, value: string) {
+    if (readOnly) {
+      return;
+    }
     const nextCaptions = { ...captions, [String(slotIndex)]: value };
     emitChange(images, nextCaptions);
   }
 
   function handleAddSlot() {
-    if (isBusy || images.length >= MAX_IMAGES || slotCount >= MAX_IMAGES) {
+    if (readOnly || isBusy || images.length >= MAX_IMAGES || slotCount >= MAX_IMAGES) {
       return;
     }
     setSlotCount((current) => Math.min(current + 1, MAX_IMAGES));
@@ -204,6 +209,7 @@ export default function ImageUploader({
   }
 
   const showAddButton =
+    !readOnly &&
     images.length < MAX_IMAGES &&
     slotCount < MAX_IMAGES &&
     images.length === slotCount &&
@@ -231,6 +237,10 @@ export default function ImageUploader({
               : `Immagine ${slotIndex + 1}`;
 
           if (!isFilled) {
+            if (readOnly) {
+              return null;
+            }
+
             return (
               <li key={`slot-${slotIndex}`} className="flex flex-col gap-1.5">
                 {slotIndex === 0 ? (
@@ -283,14 +293,16 @@ export default function ImageUploader({
                   <span className="truncate font-sans text-body leading-normal text-fg-primary">
                     {filenameFromUrl(url)}
                   </span>
-                  <button
-                    type="button"
-                    disabled={isBusy}
-                    onClick={() => handleRemove(slotIndex)}
-                    className="self-start font-sans text-metadata leading-normal text-fg-primary underline opacity-70 transition-opacity duration-150 ease-out hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Rimuovi
-                  </button>
+                  {!readOnly ? (
+                    <button
+                      type="button"
+                      disabled={isBusy}
+                      onClick={() => handleRemove(slotIndex)}
+                      className="self-start font-sans text-metadata leading-normal text-fg-primary underline opacity-70 transition-opacity duration-150 ease-out hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Rimuovi
+                    </button>
+                  ) : null}
                 </div>
               </div>
 
@@ -305,7 +317,7 @@ export default function ImageUploader({
                   id={`caption-${slotIndex}`}
                   type="text"
                   value={captions[String(slotIndex)] ?? ""}
-                  disabled={isBusy}
+                  disabled={isBusy || readOnly}
                   onChange={(event) =>
                     handleCaptionChange(slotIndex, event.target.value)
                   }
