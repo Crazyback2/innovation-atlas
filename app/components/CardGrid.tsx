@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Concept } from "@/src/data/concepts";
 
@@ -39,7 +40,13 @@ function ConceptCardImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export function ArchiveConceptCard({ concept }: { concept: ArchiveConceptCardData }) {
+export function ArchiveConceptCard({
+  concept,
+  editable = false,
+}: {
+  concept: ArchiveConceptCardData;
+  editable?: boolean;
+}) {
   const imageSrc = concept.images[0] ?? "/concepts/placeholder.jpg";
 
   return (
@@ -53,6 +60,14 @@ export function ArchiveConceptCard({ concept }: { concept: ArchiveConceptCardDat
       />
 
       <div className="relative border border-fg-primary bg-bg-elevated transition-transform duration-150 ease-out group-hover:-translate-x-[2px] group-hover:-translate-y-[2px]">
+        {editable && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute right-[13px] top-[13px] z-10 flex size-8 items-center justify-center border border-fg-primary bg-bg-elevated opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+          >
+            <Pencil className="size-4 text-fg-primary" strokeWidth={1.5} />
+          </span>
+        )}
         <div className="border-b border-fg-primary">
           <ConceptCardImage src={imageSrc} alt={concept.title} />
         </div>

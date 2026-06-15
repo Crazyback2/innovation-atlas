@@ -247,7 +247,7 @@ function DashboardSection({
           style={{ width: CONCEPT_CARD_GRID_W }}
         >
           {concepts.map((concept) => (
-            <ArchiveConceptCard key={concept.id} concept={concept} />
+            <ArchiveConceptCard key={concept.id} concept={concept} editable />
           ))}
         </div>
       )}
