@@ -1,16 +1,17 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { createClient } from "@/src/lib/supabase/server";
-import ConceptCard, { type UserConceptSummary } from "./ConceptCard";
+import type { SPConfig, SPAnswers } from "@/src/data/sp-config/types";
+import ConceptDashboard from "./ConceptDashboard";
+import {
+  buildConceptsByPhase,
+  createEmptyConceptsByPhase,
+} from "./concept-phases";
 
 export const metadata = {
   title: "I miei concept — Innovation Atlas",
 };
-
-const newConceptLinkClassName =
-  "inline-flex items-center justify-center border border-fg-primary bg-accent-secondary px-6 py-3 font-sans text-body font-medium leading-normal text-bg-elevated transition-colors duration-150 ease-out hover:bg-fg-primary";
 
 export default async function MyConceptsPage() {
   const supabase = await createClient();
@@ -22,65 +23,66 @@ export default async function MyConceptsPage() {
     redirect("/login");
   }
 
+  const authorName =
+    typeof user.user_metadata?.full_name === "string" &&
+    user.user_metadata.full_name.trim().length > 0
+      ? user.user_metadata.full_name.trim()
+      : (user.email ?? "—");
+
   const { data: concepts } = await supabase
     .from("concepts")
-    .select("id, title, sector, cfml_score, cfml_level, cfml_completed_at, created_at")
+    .select(
+      "id, title, images, cfml_score, cfml_completed_at, created_at"
+    )
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
-  const userConcepts = (concepts ?? []) as UserConceptSummary[];
-  const isEmpty = userConcepts.length === 0;
+  const typedConcepts = concepts ?? [];
+  let conceptsByPhase = createEmptyConceptsByPhase();
+
+  if (typedConcepts.length > 0) {
+    const conceptIds = typedConcepts.map((concept) => concept.id);
+    const { data: surveys } = await supabase
+      .from("sp_surveys")
+      .select("id, concept_id, config_snapshot, created_at")
+      .in("concept_id", conceptIds);
+
+    const typedSurveys = (surveys ?? []).map((survey) => ({
+      id: survey.id as string,
+      concept_id: survey.concept_id as string,
+      config_snapshot: survey.config_snapshot as SPConfig,
+      created_at: survey.created_at as string,
+    }));
+
+    const surveyIds = typedSurveys.map((survey) => survey.id);
+    let typedResponses: { survey_id: string; answers: SPAnswers }[] = [];
+
+    if (surveyIds.length > 0) {
+      const { data: responses } = await supabase
+        .from("sp_responses")
+        .select("survey_id, answers")
+        .in("survey_id", surveyIds);
+
+      typedResponses = (responses ?? []).map((response) => ({
+        survey_id: response.survey_id as string,
+        answers: response.answers as SPAnswers,
+      }));
+    }
+
+    conceptsByPhase = buildConceptsByPhase(
+      typedConcepts,
+      typedSurveys,
+      typedResponses,
+      authorName
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
 
-      <main
-        className={
-          isEmpty
-            ? "flex flex-1 items-center justify-center"
-            : "flex-1 py-[var(--spacing-section)]"
-        }
-      >
-        {isEmpty ? (
-          <div className="mx-auto flex w-full max-w-[var(--container-page)] flex-col items-center px-[var(--spacing-gutter)] text-center">
-            <h1 className="font-sans text-display font-medium leading-normal text-fg-primary">
-              Non hai ancora valutato nessun concept
-            </h1>
-            <p className="mt-4 max-w-[520px] font-heading text-lead leading-normal text-fg-primary opacity-70">
-              Crea il tuo primo concept per iniziare a usarlo con la CFML e la SP.
-            </p>
-            <Link
-              href="/concept/new"
-              className={`mt-10 px-8 py-4 font-sans text-lead font-medium leading-normal ${newConceptLinkClassName}`}
-            >
-              + Crea il tuo primo concept
-            </Link>
-          </div>
-        ) : (
-          <div className="mx-auto w-full max-w-[var(--container-page)] px-[var(--spacing-gutter)]">
-            <div className="mb-12 flex items-start justify-between gap-8">
-              <div>
-                <h1 className="font-sans text-display font-medium leading-normal text-fg-primary">
-                  I miei concept
-                </h1>
-                <p className="mt-2 font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-                  {userConcepts.length} concept
-                </p>
-              </div>
-
-              <Link href="/concept/new" className={newConceptLinkClassName}>
-                + Nuovo concept
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6">
-              {userConcepts.map((concept) => (
-                <ConceptCard key={concept.id} concept={concept} />
-              ))}
-            </div>
-          </div>
-        )}
+      <main className="flex-1 py-[var(--spacing-section)]">
+        <ConceptDashboard conceptsByPhase={conceptsByPhase} />
       </main>
 
       <Footer />

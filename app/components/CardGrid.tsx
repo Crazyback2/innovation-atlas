@@ -5,7 +5,21 @@ import { useEffect, useRef, useState } from "react";
 import type { Concept } from "@/src/data/concepts";
 
 const PAGE_SIZE = 20;
-const GRID_W = 4 * 248 + 3 * 24; // 1064
+export const CONCEPT_CARD_GRID_W = 4 * 248 + 3 * 24; // 1064
+const GRID_W = CONCEPT_CARD_GRID_W;
+
+export type ArchiveConceptCardData = {
+  id: string;
+  title: string;
+  author: { name: string };
+  images: string[];
+  sp: number | null;
+  cfml: number | null;
+};
+
+function formatCardScore(value: number | null | undefined): string {
+  return value == null ? "-" : String(value);
+}
 
 function ConceptCardImage({ src, alt }: { src: string; alt: string }) {
   const [failed, setFailed] = useState(false);
@@ -25,7 +39,9 @@ function ConceptCardImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-function ArchiveConceptCard({ concept }: { concept: Concept }) {
+export function ArchiveConceptCard({ concept }: { concept: ArchiveConceptCardData }) {
+  const imageSrc = concept.images[0] ?? "/concepts/placeholder.jpg";
+
   return (
     <Link
       href={`/concept/${concept.id}`}
@@ -38,7 +54,7 @@ function ArchiveConceptCard({ concept }: { concept: Concept }) {
 
       <div className="relative border border-fg-primary bg-bg-elevated transition-transform duration-150 ease-out group-hover:-translate-x-[2px] group-hover:-translate-y-[2px]">
         <div className="border-b border-fg-primary">
-          <ConceptCardImage src={concept.images[0]} alt={concept.title} />
+          <ConceptCardImage src={imageSrc} alt={concept.title} />
         </div>
         <div className="h-[68px] px-[13px] py-[9px] flex gap-x-[6px]">
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -57,10 +73,10 @@ function ArchiveConceptCard({ concept }: { concept: Concept }) {
               &nbsp;
             </span>
             <span className="font-mono font-bold text-metadata text-fg-primary leading-normal whitespace-nowrap">
-              {concept.sp} SP
+              {formatCardScore(concept.sp)} SP
             </span>
             <span className="font-mono font-bold text-metadata text-fg-primary leading-normal whitespace-nowrap">
-              {concept.cfml} CFML
+              {formatCardScore(concept.cfml)} CFML
             </span>
           </div>
         </div>
@@ -109,7 +125,17 @@ export default function CardGrid({ concepts, filterKey }: Props) {
       <div className="mx-auto w-[1440px] flex flex-col items-center pt-[64px] pb-[120px]">
         <div ref={gridRef} className="grid grid-cols-4 gap-[24px]" style={{ width: GRID_W }}>
           {pageConcepts.map((concept) => (
-            <ArchiveConceptCard key={concept.id} concept={concept} />
+            <ArchiveConceptCard
+              key={concept.id}
+              concept={{
+                id: concept.id,
+                title: concept.title,
+                author: concept.author,
+                images: concept.images,
+                sp: concept.sp,
+                cfml: concept.cfml,
+              }}
+            />
           ))}
         </div>
 
