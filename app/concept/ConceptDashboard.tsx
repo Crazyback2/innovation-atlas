@@ -52,7 +52,7 @@ const PHASE_ORDER = [
 
 function ConceptCounter({ count }: { count: number }) {
   return (
-    <p className="font-mono text-metadata uppercase leading-normal text-fg-primary">
+    <p className="font-mono text-metadata uppercase leading-normal text-accent-secondary">
       {count} CONCEPT
     </p>
   );
@@ -80,23 +80,133 @@ function SectionInfoIcon({ tooltip }: { tooltip: string }) {
   );
 }
 
+const HOW_IT_WORKS_STEPS = [
+  {
+    number: "01",
+    title: "CARICHI IL CONCEPT",
+    description:
+      "Carichi le informazioni inerenti il tuo concept come titolo, descrizione, immagini e categoria.",
+  },
+  {
+    number: "02",
+    title: "COMPILI LA CFML",
+    description:
+      "Rispondi alla checklist di autovalutazione per misurare quanto il tuo concept è pronto a livello tecnico.",
+  },
+  {
+    number: "03",
+    title: "DISTRIBUISCI LA SP",
+    description:
+      "Genera il sondaggio e condividilo per capire come le persone percepirebbero il tuo prodotto.",
+  },
+  {
+    number: "04",
+    title: "MAPPATURA",
+    description:
+      "Ottieni la posizione nella matrice, punteggi per dimensione, profilo simbolico e direzione futura di lavoro.",
+  },
+] as const;
+
+const HOW_IT_WORKS_GRID_W = 502 + 57 + 502; // 1061
+const HOW_IT_WORKS_GRID_H = 163 + 48 + 163; // 374
+
+function HowItWorksStepBox({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="relative h-[163px] w-[502px] border border-fg-primary bg-bg-elevated">
+      <p className="absolute left-[27px] top-[50px] font-heading text-h1 font-bold uppercase leading-[60px] text-fg-primary">
+        {number}
+      </p>
+      <p className="absolute left-[150px] top-[20px] w-[313px] font-sans text-display-caps uppercase leading-[60px] text-fg-primary">
+        {title}
+      </p>
+      <p className="absolute left-[150px] top-[70px] w-[309px] font-sans text-body leading-normal text-fg-primary">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function HowItWorksConnectorLines() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 text-fg-primary"
+      width={HOW_IT_WORKS_GRID_W}
+      height={HOW_IT_WORKS_GRID_H}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M251 163 V211"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+      <path
+        d="M810 163 V211"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+      <path
+        d="M502 293 H531 V85 H559"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+    </svg>
+  );
+}
+
+function HowItWorksPanel() {
+  return (
+    <div
+      className="relative mt-2"
+      style={{ width: HOW_IT_WORKS_GRID_W, height: HOW_IT_WORKS_GRID_H }}
+    >
+      <div
+        className="grid grid-cols-2 gap-x-[57px] gap-y-[48px]"
+        style={{ width: HOW_IT_WORKS_GRID_W }}
+      >
+        <HowItWorksStepBox {...HOW_IT_WORKS_STEPS[0]} />
+        <HowItWorksStepBox {...HOW_IT_WORKS_STEPS[2]} />
+        <HowItWorksStepBox {...HOW_IT_WORKS_STEPS[1]} />
+        <HowItWorksStepBox {...HOW_IT_WORKS_STEPS[3]} />
+      </div>
+      <HowItWorksConnectorLines />
+    </div>
+  );
+}
+
 function ComeFunzionaButton() {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <button
-      type="button"
-      onClick={() => setExpanded((value) => !value)}
-      aria-expanded={expanded}
-      className="mt-4 inline-flex h-[29px] items-center gap-2 border border-fg-primary bg-bg-elevated px-3 font-sans text-body uppercase leading-normal text-fg-primary"
-    >
-      <span>Come funziona?</span>
-      <ChevronDown
-        aria-hidden="true"
-        className={`h-3 w-3 shrink-0 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
-        strokeWidth={2}
-      />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={expanded}
+        className="mt-4 inline-flex h-[29px] items-center gap-2 border border-fg-primary bg-bg-elevated px-3 font-sans text-body uppercase leading-normal text-fg-primary transition-colors duration-150 ease-out hover:bg-accent-primary"
+      >
+        <span>Come funziona?</span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h-3 w-3 shrink-0 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
+          strokeWidth={2}
+        />
+      </button>
+
+      {expanded && <HowItWorksPanel />}
+    </>
   );
 }
 
