@@ -17,8 +17,10 @@ export default async function Header() {
   return (
     <header className="flex items-center justify-between h-[69px] w-full bg-bg-elevated px-8 shrink-0">
       {/* ── Logo + Wordmark ── */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo-header.svg" alt="Innovation Atlas" height={39} />
+      <Link href="/" className="cursor-pointer">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-header.svg" alt="Innovation Atlas" height={39} />
+      </Link>
 
       {/* ── Nav + CTA ── */}
       <nav className="flex items-center gap-10" aria-label="Navigazione principale">
