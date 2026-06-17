@@ -43,15 +43,17 @@ function ConceptCardImage({ src, alt }: { src: string; alt: string }) {
 export function ArchiveConceptCard({
   concept,
   editable = false,
+  detailBase = "concept",
 }: {
   concept: ArchiveConceptCardData;
   editable?: boolean;
+  detailBase?: "concept" | "archivio";
 }) {
   const imageSrc = concept.images[0] ?? "/concepts/placeholder.jpg";
 
   return (
     <Link
-      href={`/concept/${concept.id}`}
+      href={`/${detailBase}/${concept.id}`}
       className="relative group block w-[248px] shrink-0"
     >
       <div
@@ -142,6 +144,7 @@ export default function CardGrid({ concepts, filterKey }: Props) {
           {pageConcepts.map((concept) => (
             <ArchiveConceptCard
               key={concept.id}
+              detailBase="archivio"
               concept={{
                 id: concept.id,
                 title: concept.title,
