@@ -8,6 +8,7 @@
   --color-accent-primary: #d0ff00;
   --color-accent-secondary: #5e00ff;
   --color-accent-tertiary: #e3e3e3;
+  --color-error: #dc2626;
 
   /* Famiglie font */
   --font-sans: var(--font-space-grotesk);

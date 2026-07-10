@@ -361,7 +361,7 @@ export default function CFMLWizard({
             )}
           </div>
           {submitError && (
-            <p className="font-sans text-body leading-normal text-red-600">
+            <p className="font-sans text-body leading-normal text-error">
               {submitError}
             </p>
           )}
