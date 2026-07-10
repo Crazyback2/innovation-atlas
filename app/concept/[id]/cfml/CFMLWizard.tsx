@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   CFML_LEVEL_QUESTIONS,
@@ -47,6 +47,8 @@ const ANSWER_OPTIONS: { value: CFMLAnswer; label: string }[] = [
 ];
 
 const LEVELS: CFMLLevel[] = [1, 2, 3, 4, 5, 6];
+
+const STEPPER_LABELS = ["L0", "L1", "L2", "L3", "L4", "L5", "L6"] as const;
 
 function getLevelKey(level: CFMLLevel): CFMLLevelKey {
   return `L${level}` as CFMLLevelKey;
@@ -119,16 +121,31 @@ function getSegmentClassName(
   let base: string;
   switch (baseState) {
     case "consolidated":
-      base = "border border-accent-primary bg-accent-primary";
+      base = "bg-accent-primary";
       break;
     case "waiting":
-      base = "border border-dashed border-accent-tertiary bg-transparent";
+      base = "bg-bg-primary";
       break;
     case "empty":
-      base = "border border-accent-tertiary bg-transparent";
+      base = "bg-bg-primary";
       break;
   }
   return isCurrent ? `${base} ring-2 ring-inset ring-fg-primary` : base;
+}
+
+function StepperDivider({
+  label,
+}: {
+  label: (typeof STEPPER_LABELS)[number];
+}) {
+  return (
+    <div className="flex shrink-0 flex-col items-center">
+      <div className="h-11 w-px border-l border-dashed border-border-muted" />
+      <span className="mt-2 font-mono text-metadata uppercase leading-normal text-fg-primary">
+        {label}
+      </span>
+    </div>
+  );
 }
 
 export default function CFMLWizard({
@@ -182,49 +199,67 @@ export default function CFMLWizard({
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-6 gap-2">
-        {LEVELS.map((level) => {
-          const baseState = getSegmentBaseState(level, answers);
-          const isCurrent = level === currentLevel;
-          const clickable = isSegmentClickable(level, currentLevel, answers);
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <div className="inline-flex w-fit border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pb-2 pt-2">
+          <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
+            CONCEPT FUNCTIONAL MATURITY LEVEL
+          </span>
+        </div>
 
-          return (
-            <div key={level} className="flex flex-col gap-2">
-              <button
-                type="button"
-                disabled={!clickable}
-                onClick={() => {
-                  if (clickable) {
-                    setCurrentLevel(level);
-                  }
-                }}
-                className={`h-3 w-full transition-colors duration-150 ease-out ${getSegmentClassName(baseState, isCurrent)} ${
-                  clickable ? "cursor-pointer" : "cursor-not-allowed"
-                }`}
-                aria-label={`Livello ${level}`}
-                aria-current={isCurrent ? "step" : undefined}
-              />
-              <span className="text-center font-mono text-metadata uppercase leading-normal text-fg-primary">
-                L{level}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      <section className="flex flex-col gap-8">
-        <div>
-          <h2 className="font-heading text-lead font-semibold leading-normal text-fg-primary">
-            Livello {currentLevelData.level} — {currentLevelData.title}
+        <div className="border border-fg-primary bg-bg-elevated px-14 pb-6 pt-8">
+          <p className="font-sans text-lead leading-normal text-fg-primary">
+            Livello {currentLevelData.level}
+          </p>
+          <h2 className="mt-7 font-heading text-h1 font-bold uppercase text-fg-primary">
+            {currentLevelData.title}
           </h2>
           {currentLevelData.levelTooltip && (
             <p className="mt-2 font-sans text-body leading-relaxed text-fg-primary opacity-60">
               {currentLevelData.levelTooltip}
             </p>
           )}
-        </div>
 
+          <div className="mt-6">
+            <div className="flex items-start gap-2">
+              <StepperDivider label="L0" />
+              {LEVELS.map((level) => {
+                const baseState = getSegmentBaseState(level, answers);
+                const isCurrent = level === currentLevel;
+                const clickable = isSegmentClickable(
+                  level,
+                  currentLevel,
+                  answers
+                );
+
+                return (
+                  <Fragment key={level}>
+                    <button
+                      type="button"
+                      disabled={!clickable}
+                      onClick={() => {
+                        if (clickable) {
+                          setCurrentLevel(level);
+                        }
+                      }}
+                      className={`h-11 min-w-0 flex-1 transition-colors duration-150 ease-out ${getSegmentClassName(baseState, isCurrent)} ${
+                        clickable
+                          ? "cursor-pointer enabled:hover:bg-accent-primary"
+                          : "cursor-not-allowed"
+                      }`}
+                      aria-label={`Livello ${level}`}
+                      aria-current={isCurrent ? "step" : undefined}
+                    />
+                    <StepperDivider label={STEPPER_LABELS[level]} />
+                  </Fragment>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section className="flex flex-col gap-8">
         {!currentLevelAccessible && (
           <div className="mb-10 border-l-4 border-fg-primary border-t border-r border-b border-accent-tertiary bg-bg-elevated p-6">
             <p className="mb-2 font-mono text-metadata font-semibold uppercase leading-normal text-fg-primary">
@@ -239,43 +274,44 @@ export default function CFMLWizard({
         )}
 
         <div
-          className={`flex flex-col gap-8 ${!currentLevelAccessible ? "opacity-40" : ""}`}
+          className={`flex flex-col gap-2 ${!currentLevelAccessible ? "opacity-40" : ""}`}
         >
           {currentLevelData.questions.map((question) => {
             const code = question.code as keyof CFMLAnswers;
             const selected = answers[code];
 
             return (
-              <div key={question.code} className="flex flex-col gap-3">
-                <div className="flex items-start gap-3">
-                  <span className="shrink-0 pt-0.5 font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-                    {question.code}
-                  </span>
-                  <div className="flex flex-1 items-start gap-2">
-                    <p className="font-sans text-body leading-relaxed text-fg-primary">
-                      {question.text}
-                    </p>
-                    {question.tooltip && (
-                      <span className="group relative shrink-0">
-                        <button
-                          type="button"
-                          aria-label={`Informazioni su ${question.code}`}
-                          className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-accent-tertiary font-mono text-metadata leading-none text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary focus-visible:border-fg-primary focus-visible:outline-none"
-                        >
-                          i
-                        </button>
-                        <span
-                          role="tooltip"
-                          className="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden w-72 border border-accent-tertiary bg-bg-elevated px-3 py-2 font-sans text-body leading-relaxed text-fg-primary shadow-sm group-hover:block group-focus-within:block"
-                        >
-                          {question.tooltip}
-                        </span>
+              <div
+                key={question.code}
+                className="flex items-center justify-between gap-4 border border-fg-primary bg-bg-elevated px-8 py-8"
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-2">
+                  <p className="font-sans text-body uppercase leading-relaxed text-fg-primary">
+                    <span className="text-accent-secondary">
+                      {question.code}.
+                    </span>{" "}
+                    {question.text}
+                  </p>
+                  {question.tooltip && (
+                    <span className="group relative shrink-0">
+                      <button
+                        type="button"
+                        aria-label={`Informazioni su ${question.code}`}
+                        className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-accent-tertiary font-mono text-metadata leading-none text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary focus-visible:border-fg-primary focus-visible:outline-none"
+                      >
+                        i
+                      </button>
+                      <span
+                        role="tooltip"
+                        className="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden w-72 border border-accent-tertiary bg-bg-elevated px-3 py-2 font-sans text-body leading-relaxed text-fg-primary shadow-sm group-hover:block group-focus-within:block"
+                      >
+                        {question.tooltip}
                       </span>
-                    )}
-                  </div>
+                    </span>
+                  )}
                 </div>
 
-                <div className="ml-6 flex w-full divide-x divide-accent-tertiary overflow-hidden border border-accent-tertiary">
+                <div className="flex shrink-0 gap-2">
                   {ANSWER_OPTIONS.map((option) => {
                     const isSelected = selected === option.value;
 
@@ -289,16 +325,16 @@ export default function CFMLWizard({
                             handleAnswerChange(code, option.value);
                           }
                         }}
-                        className={`flex-1 px-4 py-2.5 font-sans text-body leading-normal transition-colors duration-150 ease-out ${
+                        className={`h-11 shrink-0 px-4 font-sans text-body font-semibold leading-normal transition-colors duration-150 ease-out ${
                           !currentLevelAccessible
                             ? "cursor-not-allowed"
                             : "cursor-pointer"
                         } ${
                           isSelected
-                            ? "bg-fg-primary text-bg-elevated"
+                            ? "bg-accent-primary text-fg-primary"
                             : currentLevelAccessible
-                              ? "bg-bg-elevated text-fg-primary hover:bg-bg-primary"
-                              : "bg-bg-elevated text-fg-primary"
+                              ? "bg-bg-primary text-fg-primary hover:bg-accent-primary"
+                              : "bg-bg-primary text-fg-primary"
                         }`}
                         aria-pressed={isSelected}
                       >

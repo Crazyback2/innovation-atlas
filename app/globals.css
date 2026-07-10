@@ -8,6 +8,7 @@
   --color-accent-primary: #d0ff00;
   --color-accent-secondary: #5e00ff;
   --color-accent-tertiary: #e3e3e3;
+  --color-border-muted: #b9b9b9;
   --color-error: #dc2626;
 
   /* Famiglie font */
@@ -28,7 +29,7 @@
   --spacing-gutter: 96px;
   --spacing-section: 120px;
   --container-page: 1248px;
-  --container-wizard: 840px;
+  --container-wizard: 883px;
 
   /* Animazione marquee — crea la utility `animate-marquee` in Tailwind v4 */
   --animate-marquee: marquee 40s linear infinite;

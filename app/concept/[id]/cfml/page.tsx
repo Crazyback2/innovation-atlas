@@ -67,20 +67,10 @@ export default async function CFMLPage({ params }: PageProps) {
 
       <main className="flex-1 py-[var(--spacing-section)]">
         <div className="mx-auto w-full max-w-[var(--container-wizard)] px-[var(--spacing-gutter)]">
-          <h1 className="font-heading text-display font-bold leading-normal text-fg-primary">
-            CFML — {typedConcept.title}
-          </h1>
-          <p className="mt-2 font-heading text-body leading-relaxed text-fg-primary opacity-70">
-            Compila le 16 domande per valutare la maturità funzionale del tuo
-            concept.
-          </p>
-
-          <div className="mt-10">
-            <CFMLWizard
-              conceptId={typedConcept.id}
-              initialAnswers={typedConcept.cfml_answers ?? {}}
-            />
-          </div>
+          <CFMLWizard
+            conceptId={typedConcept.id}
+            initialAnswers={typedConcept.cfml_answers ?? {}}
+          />
         </div>
       </main>
 
