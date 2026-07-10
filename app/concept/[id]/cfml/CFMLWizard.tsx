@@ -219,14 +219,14 @@ export default function CFMLWizard({
             Livello {currentLevelData.level} — {currentLevelData.title}
           </h2>
           {currentLevelData.levelTooltip && (
-            <p className="mt-2 font-heading text-body italic leading-relaxed text-fg-primary opacity-60">
+            <p className="mt-2 font-sans text-body leading-relaxed text-fg-primary opacity-60">
               {currentLevelData.levelTooltip}
             </p>
           )}
         </div>
 
         {!currentLevelAccessible && (
-          <div className="mb-10 border-l-[4px] border-fg-primary border-t border-r border-b border-accent-tertiary bg-bg-elevated p-6">
+          <div className="mb-10 border-l-4 border-fg-primary border-t border-r border-b border-accent-tertiary bg-bg-elevated p-6">
             <p className="mb-2 font-mono text-metadata font-semibold uppercase leading-normal text-fg-primary">
               Accesso bloccato
             </p>
@@ -252,24 +252,21 @@ export default function CFMLWizard({
                     {question.code}
                   </span>
                   <div className="flex flex-1 items-start gap-2">
-                    <p className="font-heading text-body leading-relaxed text-fg-primary">
+                    <p className="font-sans text-body leading-relaxed text-fg-primary">
                       {question.text}
                     </p>
                     {question.tooltip && (
-                      <span
-                        className="group relative shrink-0"
-                        title={question.tooltip}
-                      >
+                      <span className="group relative shrink-0">
                         <button
                           type="button"
                           aria-label={`Informazioni su ${question.code}`}
-                          className="flex h-[18px] w-[18px] cursor-help items-center justify-center rounded-full border border-accent-tertiary font-mono text-[10px] leading-none text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary focus-visible:border-fg-primary focus-visible:outline-none"
+                          className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-accent-tertiary font-mono text-metadata leading-none text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary focus-visible:border-fg-primary focus-visible:outline-none"
                         >
                           i
                         </button>
                         <span
                           role="tooltip"
-                          className="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden w-[280px] border border-accent-tertiary bg-bg-elevated px-3 py-2 font-heading text-[13px] leading-relaxed text-fg-primary shadow-sm group-hover:block group-focus-within:block"
+                          className="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden w-72 border border-accent-tertiary bg-bg-elevated px-3 py-2 font-sans text-body leading-relaxed text-fg-primary shadow-sm group-hover:block group-focus-within:block"
                         >
                           {question.tooltip}
                         </span>
@@ -278,7 +275,7 @@ export default function CFMLWizard({
                   </div>
                 </div>
 
-                <div className="ml-[calc(11px+12px)] flex w-fit overflow-hidden border border-accent-tertiary">
+                <div className="ml-6 flex w-full divide-x divide-accent-tertiary overflow-hidden border border-accent-tertiary">
                   {ANSWER_OPTIONS.map((option) => {
                     const isSelected = selected === option.value;
 
@@ -292,7 +289,7 @@ export default function CFMLWizard({
                             handleAnswerChange(code, option.value);
                           }
                         }}
-                        className={`border-r border-accent-tertiary px-4 py-2.5 font-sans text-body leading-normal transition-colors duration-150 ease-out last:border-r-0 ${
+                        className={`flex-1 px-4 py-2.5 font-sans text-body leading-normal transition-colors duration-150 ease-out ${
                           !currentLevelAccessible
                             ? "cursor-not-allowed"
                             : "cursor-pointer"

@@ -66,7 +66,7 @@ export default async function CFMLPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full max-w-[840px] px-[var(--spacing-gutter)]">
+        <div className="mx-auto w-full max-w-[var(--container-wizard)] px-[var(--spacing-gutter)]">
           <h1 className="font-heading text-display font-bold leading-normal text-fg-primary">
             CFML — {typedConcept.title}
           </h1>
