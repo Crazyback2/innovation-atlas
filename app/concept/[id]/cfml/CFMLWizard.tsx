@@ -10,6 +10,7 @@ import {
   type CFMLLevel,
   type CFMLLevelKey,
 } from "@/src/lib/scoring";
+import Button from "@/app/components/Button";
 import { submitCFML } from "./actions";
 import { CFML_LEVELS } from "./questions";
 
@@ -46,12 +47,6 @@ const ANSWER_OPTIONS: { value: CFMLAnswer; label: string }[] = [
 ];
 
 const LEVELS: CFMLLevel[] = [1, 2, 3, 4, 5, 6];
-
-const primaryButtonClassName =
-  "cursor-pointer border-none bg-fg-primary px-6 py-[14px] font-sans text-body font-medium leading-normal text-bg-primary transition-opacity duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-60";
-
-const secondaryButtonClassName =
-  "cursor-pointer border border-accent-tertiary bg-transparent px-6 py-[14px] font-sans text-body font-medium leading-normal text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary";
 
 function getLevelKey(level: CFMLLevel): CFMLLevelKey {
   return `L${level}` as CFMLLevelKey;
@@ -323,15 +318,14 @@ export default function CFMLWizard({
 
       <div className="flex items-center justify-between gap-4">
         {currentLevel > 1 ? (
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() =>
               setCurrentLevel((previous) => (previous - 1) as CFMLLevel)
             }
-            className={secondaryButtonClassName}
           >
             Indietro
-          </button>
+          </Button>
         ) : (
           <span />
         )}
@@ -339,25 +333,18 @@ export default function CFMLWizard({
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-4">
             {showForwardButton && (
-              <button
-                type="button"
+              <Button
                 onClick={() =>
                   setCurrentLevel((previous) => (previous + 1) as CFMLLevel)
                 }
-                className={primaryButtonClassName}
               >
                 Avanti
-              </button>
+              </Button>
             )}
             {showCalculateButton && (
-              <button
-                type="button"
-                onClick={handleCalculate}
-                disabled={submitting}
-                className={primaryButtonClassName}
-              >
+              <Button onClick={handleCalculate} disabled={submitting}>
                 {submitting ? "Calcolo in corso…" : "Calcola risultato"}
-              </button>
+              </Button>
             )}
           </div>
           {submitError && (
