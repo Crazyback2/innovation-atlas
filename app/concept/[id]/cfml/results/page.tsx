@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
@@ -40,6 +41,7 @@ const LEVEL_NAMES: Record<0 | CFMLLevel, string> = {
 
 const LEVELS: CFMLLevel[] = [1, 2, 3, 4, 5, 6];
 const SCORE_SEGMENT_COUNT = 20;
+const STEPPER_LABELS = ["L0", "L1", "L2", "L3", "L4", "L5", "L6"] as const;
 
 function getLevelKey(level: CFMLLevel): CFMLLevelKey {
   return `L${level}` as CFMLLevelKey;
@@ -47,6 +49,21 @@ function getLevelKey(level: CFMLLevel): CFMLLevelKey {
 
 function formatScore(value: number): string {
   return value.toFixed(1);
+}
+
+function StepperDivider({
+  label,
+}: {
+  label: (typeof STEPPER_LABELS)[number];
+}) {
+  return (
+    <div className="flex shrink-0 flex-col items-center">
+      <div className="h-11 w-px border-l border-dashed border-border-muted" />
+      <span className="mt-2 font-mono text-metadata uppercase leading-normal text-fg-primary">
+        {label}
+      </span>
+    </div>
+  );
 }
 
 function getLevelStatus(
@@ -141,7 +158,8 @@ export default async function CFMLResultsPage({ params }: PageProps) {
 
   const answers = typedConcept.cfml_answers;
   const result = calculateCFML(answers);
-  const consolidationLevel = (typedConcept.cfml_level ?? 0) as 0 | CFMLLevel;
+  const consolidationLevel = (typedConcept.cfml_level ??
+    result.level) as 0 | CFMLLevel;
   const displayScore = typedConcept.cfml_score ?? result.score;
   const filledScoreSegments = Math.round(
     (displayScore / 100) * SCORE_SEGMENT_COUNT
@@ -175,7 +193,7 @@ export default async function CFMLResultsPage({ params }: PageProps) {
                 </p>
                 <p className="mt-2 font-heading font-semibold leading-[60px] text-fg-primary">
                   <span className="text-hero">{formatScore(displayScore)}</span>
-                  <span className="text-[60px]">/100</span>
+                  <span className="text-h1">/100</span>
                 </p>
                 <div
                   className="mt-8 flex h-[107px] min-w-0 gap-1"
@@ -192,6 +210,42 @@ export default async function CFMLResultsPage({ params }: PageProps) {
                       }`}
                     />
                   ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-fg-primary bg-bg-elevated px-14 pb-6 pt-8">
+              <p className="font-sans text-lead leading-normal text-fg-primary">
+                Livello raggiunto:
+              </p>
+              <h2 className="mt-2 font-heading font-semibold uppercase leading-[60px] text-fg-primary">
+                <span className="text-hero">L{consolidationLevel}</span>{" "}
+                <span className="text-display">
+                  {LEVEL_NAMES[consolidationLevel]}
+                </span>
+              </h2>
+
+              <div className="mt-6">
+                <div className="flex min-w-0 items-start gap-2">
+                  <StepperDivider label="L0" />
+                  {LEVELS.map((level) => {
+                    const levelKey = getLevelKey(level);
+                    const consolidated = result.levelConsolidation[levelKey];
+                    const isReached =
+                      consolidationLevel > 0 && level === consolidationLevel;
+
+                    return (
+                      <Fragment key={level}>
+                        <div
+                          className={`h-11 min-w-0 flex-1 ${consolidated ? "bg-accent-primary" : "bg-bg-primary"} ${isReached ? "ring-2 ring-inset ring-fg-primary" : ""}`}
+                          aria-label={`Livello ${level}${
+                            isReached ? ", livello raggiunto" : ""
+                          }`}
+                        />
+                        <StepperDivider label={STEPPER_LABELS[level]} />
+                      </Fragment>
+                    );
+                  })}
                 </div>
               </div>
             </div>
