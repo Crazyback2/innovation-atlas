@@ -199,7 +199,7 @@ export default function CFMLWizard({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full min-w-0 flex-col gap-8">
       <div className="flex flex-col gap-2">
         <div className="inline-flex w-fit border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pb-2 pt-2">
           <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
