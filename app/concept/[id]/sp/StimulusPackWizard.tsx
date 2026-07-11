@@ -453,7 +453,7 @@ function TagsField({ tags, onChange }: TagsFieldProps) {
     <div className={fieldShellClassName}>
       <div className="flex min-w-0 items-start justify-between gap-4">
         <span className={fieldLabelClassName}>Tag:</span>
-        <LimitHint>[facoltativo, max {MAX_TAGS}]</LimitHint>
+        <LimitHint>{`[facoltativo, max ${MAX_TAGS}]`}</LimitHint>
       </div>
       <div className="flex min-w-0 flex-col gap-3 px-3 pb-3">
         <div className="flex min-w-0 gap-2">
