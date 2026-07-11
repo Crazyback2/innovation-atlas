@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
@@ -80,16 +81,39 @@ function getLevelStatus(
   return "bloccato";
 }
 
-function getStatusClassName(status: "consolidato" | "in corso" | "bloccato"): string {
+function getStatusBadgeLabel(
+  status: "consolidato" | "in corso" | "bloccato",
+  score: number,
+  maxScore: number
+): string {
   switch (status) {
     case "consolidato":
-      return "text-accent-primary";
+      return "superato";
     case "in corso":
-      return "text-fg-primary";
+      return `${formatScore(score)} / ${maxScore}`;
     case "bloccato":
-      return "text-fg-primary opacity-40";
+      return "bloccato";
   }
 }
+
+function getStatusBadgeClassName(
+  status: "consolidato" | "in corso" | "bloccato"
+): string {
+  const base =
+    "flex h-[29px] shrink-0 items-center border border-fg-primary px-3 pt-2 pb-[7px] font-mono text-metadata uppercase leading-none text-fg-primary";
+
+  switch (status) {
+    case "consolidato":
+      return `${base} bg-accent-primary`;
+    case "in corso":
+      return `${base} bg-bg-elevated`;
+    case "bloccato":
+      return `${base} bg-bg-elevated opacity-40`;
+  }
+}
+
+const LEVEL_DETAIL_ACTION_CLASS =
+  "flex h-[29px] shrink-0 items-center gap-2.5 border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pt-2 pb-[7px] font-mono text-metadata leading-none text-fg-primary transition-colors duration-150 ease-out hover:bg-accent-primary";
 
 function getInterpretiveMessage(level: 0 | CFMLLevel): string {
   if (level === 6) {
@@ -250,11 +274,8 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <section className="flex flex-col gap-4">
-              <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-                Dettaglio per livello
-              </h2>
-              <ul className="flex flex-col gap-3">
+            <section className="w-full min-w-0 max-w-full border-y border-fg-primary py-6">
+              <ul className="flex w-full min-w-0 flex-col">
                 {LEVELS.map((level) => {
                   const levelKey = getLevelKey(level);
                   const levelMeta = CFML_LEVELS.find(
@@ -264,25 +285,35 @@ export default async function CFMLResultsPage({ params }: PageProps) {
                   const maxScore = CFML_WEIGHTS[levelKey];
                   const consolidated = result.levelConsolidation[levelKey];
                   const status = getLevelStatus(level, answers, consolidated);
+                  const title = levelMeta?.title ?? LEVEL_NAMES[level];
 
                   return (
                     <li
                       key={level}
-                      className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-accent-tertiary py-3"
+                      className="flex w-full min-w-0 min-h-16 items-center justify-between gap-4"
                     >
-                      <span className="font-heading text-body leading-relaxed text-fg-primary">
-                        L{level} — {levelMeta?.title ?? LEVEL_NAMES[level]}
-                      </span>
-                      <span className="flex flex-wrap items-baseline gap-3">
-                        <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
-                          {formatScore(score)} / {maxScore}
-                        </span>
+                      <p className="min-w-0 flex-1 basis-0 font-sans text-fg-primary">
+                        <span className="text-display font-medium">{`L${level}: `}</span>
+                        <span className="text-body uppercase">{title}</span>
+                      </p>
+                      <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                         <span
-                          className={`font-mono text-metadata uppercase leading-normal ${getStatusClassName(status)}`}
+                          className={getStatusBadgeClassName(status)}
+                          aria-label={`Stato livello ${level}: ${status}, punteggio ${formatScore(score)} su ${maxScore}`}
                         >
-                          {status}
+                          {getStatusBadgeLabel(status, score, maxScore)}
                         </span>
-                      </span>
+                        <Link
+                          href={`/concept/${typedConcept.id}/cfml`}
+                          className={LEVEL_DETAIL_ACTION_CLASS}
+                        >
+                          Vedi domande
+                          <ChevronDown
+                            className="size-3 shrink-0 -rotate-90"
+                            aria-hidden
+                          />
+                        </Link>
+                      </div>
                     </li>
                   );
                 })}
