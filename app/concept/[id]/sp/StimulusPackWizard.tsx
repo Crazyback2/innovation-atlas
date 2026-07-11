@@ -5,6 +5,7 @@ import { Upload, X } from "lucide-react";
 import { VALID_SECTORS } from "@/app/concept/new/data";
 import { createClient } from "@/src/lib/supabase/client";
 import { sanitizeFilename } from "@/src/lib/sanitize-filename";
+import { saveStimulusPack } from "./actions";
 
 export type StimulusPack = {
   descrizione: string;
@@ -38,9 +39,6 @@ const BUCKET = "concept-images";
 const metadataBadgeClassName =
   "inline-flex shrink-0 items-center gap-2.5 border border-fg-primary bg-bg-elevated px-2.5 py-2";
 
-const limitHintClassName =
-  "shrink-0 font-sans text-body font-bold uppercase leading-normal text-fg-primary";
-
 const fieldShellClassName =
   "relative flex min-w-0 flex-col border border-fg-primary bg-bg-elevated";
 
@@ -51,7 +49,7 @@ const fieldControlClassName =
   "min-w-0 w-full resize-none border-none bg-transparent px-3 pb-3 font-sans text-body leading-normal text-fg-primary outline-none placeholder:text-border-muted";
 
 const counterClassName =
-  "px-3 pb-2 font-sans text-metadata leading-normal text-fg-primary opacity-50";
+  "px-3 pb-2 font-sans text-metadata leading-normal text-accent-secondary";
 
 const slotInputClassName =
   "min-w-0 w-full border border-fg-primary bg-bg-elevated px-3 py-2 font-sans text-body leading-normal text-fg-primary outline-none placeholder:text-border-muted focus:border-fg-primary";
@@ -71,40 +69,6 @@ function counterClass(isOverLimit: boolean): string {
   return isOverLimit
     ? "px-3 pb-2 font-sans text-metadata leading-normal text-error"
     : counterClassName;
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 12 13"
-      className="pointer-events-none absolute top-1/2 right-2.5 size-3 -translate-y-1/2 text-fg-primary"
-      fill="none"
-    >
-      <path
-        d="M2 4.5L6 8.5L10 4.5"
-        stroke="currentColor"
-        strokeWidth="1"
-      />
-    </svg>
-  );
-}
-
-function ArrowIcon({ direction }: { direction: "left" | "right" }) {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 8 8"
-      className={`size-2 text-fg-primary ${direction === "left" ? "rotate-180" : ""}`}
-      fill="currentColor"
-    >
-      <path d="M0 4L6 0V8L0 4Z" />
-    </svg>
-  );
-}
-
-function LimitHint({ children }: { children: string }) {
-  return <span className={limitHintClassName}>{children}</span>;
 }
 
 function CompletionBar({ pack }: { pack: StimulusPack }) {
@@ -130,6 +94,23 @@ function CompletionBar({ pack }: { pack: StimulusPack }) {
         />
       ))}
     </div>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 12 13"
+      className="pointer-events-none absolute top-1/2 right-2.5 size-3 -translate-y-1/2 text-fg-primary"
+      fill="none"
+    >
+      <path
+        d="M2 4.5L6 8.5L10 4.5"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+    </svg>
   );
 }
 
@@ -414,11 +395,11 @@ function GallerySection({
 
   return (
     <section className="flex w-full min-w-0 max-w-full flex-col gap-6">
-      <div className="flex min-w-0 items-start justify-between gap-4">
+      <div className="flex min-w-0 items-baseline gap-3">
         <h2 className="font-sans text-display-caps uppercase leading-none text-fg-primary">
           Galleria
         </h2>
-        <span className={counterClassName}>
+        <span className="font-sans text-display-caps uppercase leading-none text-accent-secondary">
           {imageCount}/{MAX_IMAGES}
         </span>
       </div>
@@ -502,7 +483,6 @@ type TextareaFieldProps = {
   value: string;
   onChange: (value: string) => void;
   maxLength: number;
-  limitHint: string;
   placeholder: string;
   rows: number;
 };
@@ -513,18 +493,14 @@ function TextareaField({
   value,
   onChange,
   maxLength,
-  limitHint,
   placeholder,
   rows,
 }: TextareaFieldProps) {
   return (
     <div className={fieldShellClassName}>
-      <div className="flex min-w-0 items-start justify-between gap-4">
-        <label htmlFor={id} className={fieldLabelClassName}>
-          {label}
-        </label>
-        <LimitHint>{limitHint}</LimitHint>
-      </div>
+      <label htmlFor={id} className={fieldLabelClassName}>
+        {label}
+      </label>
       <textarea
         id={id}
         value={value}
@@ -567,10 +543,7 @@ function TagsField({ tags, onChange }: TagsFieldProps) {
 
   return (
     <div className={fieldShellClassName}>
-      <div className="flex min-w-0 items-start justify-between gap-4">
-        <span className={fieldLabelClassName}>Tag:</span>
-        <LimitHint>{`[facoltativo, max ${MAX_TAGS}]`}</LimitHint>
-      </div>
+      <span className={fieldLabelClassName}>Tag:</span>
       <div className="flex min-w-0 flex-col gap-3 px-3 pb-3">
         <div className="flex min-w-0 gap-2">
           <input
@@ -622,6 +595,12 @@ export default function StimulusPackWizard({
   conceptId,
 }: StimulusPackWizardProps) {
   const [pack, setPack] = useState<StimulusPack>(initialPack);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(
+    null
+  );
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const savedTimeoutRef = useRef<number | null>(null);
 
   function updatePack<K extends keyof StimulusPack>(
     key: K,
@@ -634,8 +613,48 @@ export default function StimulusPackWizard({
     updatePack("sector", event.target.value);
   }
 
+  async function handleSave() {
+    if (savedTimeoutRef.current !== null) {
+      window.clearTimeout(savedTimeoutRef.current);
+      savedTimeoutRef.current = null;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccessMessage(null);
+
+    const result = await saveStimulusPack({
+      conceptId,
+      pack: {
+        descrizione: pack.descrizione,
+        contesto_scenario: pack.contesto_scenario,
+        target_user: pack.target_user,
+        images: pack.images,
+        video_url: pack.video_url,
+        sector: pack.sector,
+      },
+    });
+
+    setIsSaving(false);
+
+    if (result?.error) {
+      setSaveError(result.error);
+      return;
+    }
+
+    const savedAt = new Date().toLocaleTimeString("it-IT", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setSaveSuccessMessage(`✓ Salvato alle ${savedAt}`);
+    savedTimeoutRef.current = window.setTimeout(() => {
+      setSaveSuccessMessage(null);
+      savedTimeoutRef.current = null;
+    }, 4000);
+  }
+
   return (
-    <div className="flex w-full min-w-0 flex-col gap-8">
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-8">
       <header className="flex min-w-0 flex-col gap-6">
         <h1 className="font-heading text-h1 font-bold uppercase text-fg-primary">
           Stimulus Pack
@@ -692,7 +711,6 @@ export default function StimulusPackWizard({
             value={pack.descrizione}
             onChange={(value) => updatePack("descrizione", value)}
             maxLength={MAX_DESCRIPTION}
-            limitHint="[≤350 caratteri]"
             placeholder="Spiega cos'è il concept e a cosa serve..."
             rows={7}
           />
@@ -703,7 +721,6 @@ export default function StimulusPackWizard({
             value={pack.contesto_scenario}
             onChange={(value) => updatePack("contesto_scenario", value)}
             maxLength={MAX_CONTEXT}
-            limitHint="[≤500 caratteri]"
             placeholder="Descrivi dove, quando e come viene usato il concept. Descrivi una situazione ipotetica di utilizzo del concept..."
             rows={10}
           />
@@ -714,18 +731,14 @@ export default function StimulusPackWizard({
             value={pack.target_user}
             onChange={(value) => updatePack("target_user", value)}
             maxLength={MAX_TARGET}
-            limitHint="[≤120 caratteri]"
             placeholder="Identifica o descrivi il target di persone a cui è destinato il concept..."
             rows={5}
           />
 
           <div className={fieldShellClassName}>
-            <div className="flex min-w-0 items-start justify-between gap-4">
-              <label htmlFor="sp-video" className={fieldLabelClassName}>
-                Link video:
-              </label>
-              <LimitHint>[facoltativo]</LimitHint>
-            </div>
+            <label htmlFor="sp-video" className={fieldLabelClassName}>
+              Link video:
+            </label>
             <input
               id="sp-video"
               type="url"
@@ -743,21 +756,25 @@ export default function StimulusPackWizard({
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center justify-center gap-2 pb-4">
+      <div className="flex min-w-0 flex-wrap items-center justify-center gap-3 pb-4">
         <button
           type="button"
-          aria-label="Indietro"
-          className="flex size-5 items-center justify-center border border-fg-primary bg-bg-elevated"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="border border-fg-primary bg-bg-primary px-6 py-2.5 font-sans text-body font-bold uppercase leading-normal text-fg-primary transition-opacity duration-150 ease-out hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ArrowIcon direction="left" />
+          {isSaving ? "Salvataggio…" : "Salva"}
         </button>
-        <button
-          type="button"
-          aria-label="Avanti"
-          className="flex size-5 items-center justify-center border border-fg-primary bg-bg-elevated"
-        >
-          <ArrowIcon direction="right" />
-        </button>
+        {saveSuccessMessage ? (
+          <p className="font-sans text-metadata leading-normal text-fg-primary">
+            {saveSuccessMessage}
+          </p>
+        ) : null}
+        {saveError ? (
+          <p className="font-sans text-metadata leading-normal text-error">
+            {saveError}
+          </p>
+        ) : null}
       </div>
     </div>
   );

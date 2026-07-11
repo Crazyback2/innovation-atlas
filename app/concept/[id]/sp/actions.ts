@@ -5,8 +5,103 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { generateSPToken } from "@/src/lib/sp-token";
 import SP_CONFIG_V1 from "@/src/data/sp-config/v1_2026-06";
+import { VALID_SECTORS } from "@/app/concept/new/data";
 
 const MAX_TOKEN_COLLISION_RETRIES = 5;
+const MAX_IMAGES = 5;
+
+type ValidSector = (typeof VALID_SECTORS)[number];
+
+export type SaveStimulusPackInput = {
+  descrizione: string;
+  contesto_scenario: string;
+  target_user: string;
+  images: string[];
+  video_url: string;
+  sector: string;
+};
+
+function validateImages(images: unknown): string[] | null {
+  if (!Array.isArray(images) || !images.every((item) => typeof item === "string")) {
+    return null;
+  }
+
+  if (images.length > MAX_IMAGES) {
+    return null;
+  }
+
+  return images;
+}
+
+export async function saveStimulusPack({
+  conceptId,
+  pack,
+}: {
+  conceptId: string;
+  pack: SaveStimulusPackInput;
+}): Promise<{ error: string } | void> {
+  const sector = pack.sector.trim();
+
+  if (!sector || !VALID_SECTORS.includes(sector as ValidSector)) {
+    return { error: "Seleziona un settore valido." };
+  }
+
+  const images = validateImages(pack.images);
+  if (images === null) {
+    return { error: "Formato immagini non valido." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Devi essere autenticato per salvare lo stimulus pack." };
+  }
+
+  const { data: concept } = await supabase
+    .from("concepts")
+    .select("id")
+    .eq("id", conceptId)
+    .eq("owner_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!concept) {
+    return { error: "Concept non trovato o non autorizzato." };
+  }
+
+  const description = pack.descrizione.trim();
+  const contextScenario = pack.contesto_scenario.trim();
+  const targetUser = pack.target_user.trim();
+  const videoUrl = pack.video_url.trim();
+  const now = new Date().toISOString();
+
+  const { error } = await supabase
+    .from("concepts")
+    .update({
+      description: description || null,
+      context_scenario: contextScenario || null,
+      target_user: targetUser || null,
+      video_url: videoUrl || null,
+      sector,
+      images,
+      updated_at: now,
+    })
+    .eq("id", conceptId)
+    .eq("owner_id", user.id);
+
+  if (error) {
+    return { error: "Impossibile salvare lo stimulus pack. Riprova più tardi." };
+  }
+
+  revalidatePath(`/concept/${conceptId}`);
+  revalidatePath(`/concept/${conceptId}/sp`);
+  revalidatePath(`/concept/${conceptId}/sp/new`);
+  revalidatePath(`/concept/${conceptId}/edit`);
+  revalidatePath("/concept");
+}
 
 function isUniqueViolation(error: { code?: string }): boolean {
   return error.code === "23505";

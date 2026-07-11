@@ -3,6 +3,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { createClient } from "@/src/lib/supabase/server";
 import StimulusPackWizard from "./StimulusPackWizard";
+import { wizardContainerClassName } from "@/app/concept/wizard-container";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -63,8 +64,8 @@ export default async function StimulusPackPage({ params }: PageProps) {
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
 
-      <main className="flex-1 min-w-0 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full min-w-0 max-w-[890px] px-6 lg:px-0">
+      <main className="flex-1 min-w-0 overflow-x-clip py-[var(--spacing-section)]">
+        <div className={wizardContainerClassName}>
           <StimulusPackWizard conceptId={typedConcept.id} />
         </div>
       </main>

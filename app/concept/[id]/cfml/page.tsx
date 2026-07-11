@@ -4,6 +4,7 @@ import Footer from "@/app/components/Footer";
 import { createClient } from "@/src/lib/supabase/server";
 import type { CFMLAnswers } from "@/src/lib/scoring";
 import CFMLWizard from "./CFMLWizard";
+import { wizardContainerClassName } from "@/app/concept/wizard-container";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -66,7 +67,7 @@ export default async function CFMLPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full min-w-0 max-w-[890px] px-6 lg:px-0">
+        <div className={wizardContainerClassName}>
           <CFMLWizard
             conceptId={typedConcept.id}
             initialAnswers={typedConcept.cfml_answers ?? {}}
