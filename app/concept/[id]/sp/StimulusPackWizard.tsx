@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { Upload, X } from "lucide-react";
 import { VALID_SECTORS } from "@/app/concept/new/data";
 
 export type StimulusPack = {
@@ -21,8 +22,14 @@ type StimulusPackWizardProps = {
 const MAX_DESCRIPTION = 350;
 const MAX_CONTEXT = 500;
 const MAX_TARGET = 120;
-const MAX_CAPTION = 60;
 const MAX_IMAGES = 5;
+const MIN_IMAGES = 3;
+const MAX_FILE_SIZE = 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]);
 const MAX_TAGS = 5;
 
 const metadataBadgeClassName =
@@ -45,13 +52,6 @@ const counterClassName =
 
 const slotInputClassName =
   "min-w-0 w-full border border-fg-primary bg-bg-elevated px-3 py-2 font-sans text-body leading-normal text-fg-primary outline-none placeholder:text-border-muted focus:border-fg-primary";
-
-const emptyStackLayers = [
-  { offset: "translate-x-0 z-40", size: "h-96 w-full max-w-md" },
-  { offset: "translate-x-6 z-30", size: "h-80 w-full max-w-sm" },
-  { offset: "translate-x-12 z-20", size: "h-72 w-full max-w-xs" },
-  { offset: "translate-x-16 z-10", size: "h-64 w-full max-w-64" },
-];
 
 const initialPack: StimulusPack = {
   descrizione: "",
@@ -100,18 +100,6 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function DropzoneCross() {
-  return (
-    <span
-      aria-hidden
-      className="pointer-events-none absolute inset-0 flex items-center justify-center"
-    >
-      <span className="absolute h-px w-3/4 rotate-45 bg-border-muted" />
-      <span className="absolute h-px w-3/4 -rotate-45 bg-border-muted" />
-    </span>
-  );
-}
-
 function LimitHint({ children }: { children: string }) {
   return <span className={limitHintClassName}>{children}</span>;
 }
@@ -144,238 +132,340 @@ function CompletionBar({ pack }: { pack: StimulusPack }) {
 
 type GallerySectionProps = {
   images: string[];
-  captions: Record<string, string>;
   onImagesChange: (images: string[]) => void;
-  onCaptionsChange: (captions: Record<string, string>) => void;
 };
 
-function GallerySection({
-  images,
-  captions,
-  onImagesChange,
-  onCaptionsChange,
-}: GallerySectionProps) {
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const [urlDraft, setUrlDraft] = useState("");
+function isBlobUrl(url: string): boolean {
+  return url.startsWith("blob:");
+}
 
-  const filledImages = images.filter(Boolean);
-  const filledCount = filledImages.length;
-  const activePreview =
-    filledCount > 0
-      ? filledImages[Math.min(galleryIndex, filledCount - 1)]
-      : null;
+function validateImageFile(file: File): string | null {
+  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+    return `"${file.name}": formato non supportato. Usa PNG, JPG o WebP.`;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return `"${file.name}" supera il limite di 1 MB.`;
+  }
+  return null;
+}
 
-  const slotCount = (() => {
-    const filledLength = images.length;
-    const base = Math.max(3, filledLength);
-    const lastFilled = images[filledLength - 1]?.trim();
-    const withExtra =
-      lastFilled && filledLength < MAX_IMAGES ? filledLength + 1 : base;
-    return Math.min(MAX_IMAGES, Math.max(3, withExtra));
-  })();
+function mockUploadFile(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      resolve(URL.createObjectURL(file));
+    }, 400);
+  });
+}
 
-  function handlePrevImage() {
-    if (filledCount === 0) {
-      return;
+type GalleryThumbnailProps = {
+  url: string;
+  index: number;
+  isHero: boolean;
+  isDragging: boolean;
+  isDragOver: boolean;
+  onRemove: () => void;
+  onDragStart: (event: DragEvent<HTMLLIElement>) => void;
+  onDragOver: (event: DragEvent<HTMLLIElement>) => void;
+  onDragLeave: () => void;
+  onDrop: (event: DragEvent<HTMLLIElement>) => void;
+  onDragEnd: () => void;
+};
+
+function GalleryThumbnail({
+  url,
+  index,
+  isHero,
+  isDragging,
+  isDragOver,
+  onRemove,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+}: GalleryThumbnailProps) {
+  return (
+    <li
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className={`relative aspect-square min-w-0 cursor-grab overflow-hidden border border-fg-primary bg-bg-primary active:cursor-grabbing ${
+        isDragging ? "opacity-40" : ""
+      } ${isDragOver ? "border-2 border-fg-primary" : ""}`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt="" className="size-full object-cover" draggable={false} />
+
+      {isHero ? (
+        <span className="absolute top-2 left-2 border border-fg-primary bg-bg-elevated px-2 py-0.5 font-mono text-metadata uppercase leading-normal text-fg-primary">
+          HERO
+        </span>
+      ) : null}
+
+      <button
+        type="button"
+        aria-label={`Rimuovi immagine ${index + 1}`}
+        onClick={onRemove}
+        className="absolute top-2 right-2 flex size-7 items-center justify-center border border-fg-primary bg-bg-elevated text-fg-primary transition-opacity duration-150 ease-out hover:opacity-80"
+      >
+        <X className="size-3.5" aria-hidden />
+      </button>
+    </li>
+  );
+}
+
+function GallerySection({ images, onImagesChange }: GallerySectionProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDropzoneActive, setIsDropzoneActive] = useState(false);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [galleryError, setGalleryError] = useState<string | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const imageCount = images.length;
+  const isAtMax = imageCount >= MAX_IMAGES;
+  const isUploading = uploadingCount > 0;
+  const dropzoneDisabled = isAtMax || isUploading;
+
+  function revokeBlobUrl(url: string) {
+    if (isBlobUrl(url)) {
+      URL.revokeObjectURL(url);
     }
-    setGalleryIndex((current) =>
-      current === 0 ? filledCount - 1 : current - 1
-    );
   }
 
-  function handleNextImage() {
-    if (filledCount === 0) {
+  function handleRemove(index: number) {
+    const url = images[index];
+    if (!url) {
       return;
     }
-    setGalleryIndex((current) =>
-      current === filledCount - 1 ? 0 : current + 1
-    );
+    revokeBlobUrl(url);
+    onImagesChange(images.filter((_, currentIndex) => currentIndex !== index));
+    setGalleryError(null);
   }
 
-  function handleSlotUrlChange(index: number, value: string) {
+  function reorderImages(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) {
+      return;
+    }
     const nextImages = [...images];
-    while (nextImages.length <= index) {
-      nextImages.push("");
+    const [moved] = nextImages.splice(fromIndex, 1);
+    nextImages.splice(toIndex, 0, moved);
+    onImagesChange(nextImages);
+  }
+
+  function handleDragStart(index: number, event: DragEvent<HTMLLIElement>) {
+    setDragIndex(index);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(index));
+  }
+
+  function handleDragOver(index: number, event: DragEvent<HTMLLIElement>) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOverIndex(index);
+  }
+
+  function handleDrop(index: number, event: DragEvent<HTMLLIElement>) {
+    event.preventDefault();
+    if (dragIndex === null) {
+      return;
     }
-    nextImages[index] = value;
-    onImagesChange(nextImages.slice(0, MAX_IMAGES));
+    reorderImages(dragIndex, index);
+    setDragIndex(null);
+    setDragOverIndex(null);
   }
 
-  function handleCaptionChange(index: number, value: string) {
-    onCaptionsChange({
-      ...captions,
-      [String(index)]: value,
-    });
+  function handleDragEnd() {
+    setDragIndex(null);
+    setDragOverIndex(null);
   }
 
-  function handleAddFromDraft() {
-    const trimmed = urlDraft.trim();
-    if (!trimmed) {
+  async function processFiles(files: File[]) {
+    if (files.length === 0) {
       return;
     }
 
-    const emptyIndex = images.findIndex((url) => !url.trim());
-    const targetIndex = emptyIndex === -1 ? images.length : emptyIndex;
+    setGalleryError(null);
 
-    if (targetIndex >= MAX_IMAGES) {
+    const remainingSlots = MAX_IMAGES - images.length;
+    if (remainingSlots <= 0) {
+      setGalleryError(`Puoi caricare al massimo ${MAX_IMAGES} immagini.`);
       return;
     }
 
-    handleSlotUrlChange(targetIndex, trimmed);
-    setUrlDraft("");
-    setGalleryIndex(
-      filledCount === 0 ? 0 : Math.min(galleryIndex, filledCount)
-    );
+    const validationErrors: string[] = [];
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (validFiles.length >= remainingSlots) {
+        validationErrors.push(
+          `Solo ${remainingSlots} immagini aggiuntive consentite (max ${MAX_IMAGES}).`
+        );
+        break;
+      }
+
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        validationErrors.push(validationError);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) {
+      setGalleryError(validationErrors.join(" "));
+      return;
+    }
+
+    setUploadingCount((current) => current + validFiles.length);
+
+    const uploadedUrls: string[] = [];
+    const uploadErrors: string[] = [...validationErrors];
+
+    for (const file of validFiles) {
+      try {
+        const mockUrl = await mockUploadFile(file);
+        uploadedUrls.push(mockUrl);
+      } catch {
+        uploadErrors.push(`Impossibile caricare "${file.name}". Riprova.`);
+      } finally {
+        setUploadingCount((current) => Math.max(0, current - 1));
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      onImagesChange([...images, ...uploadedUrls]);
+    }
+
+    if (uploadErrors.length > 0) {
+      setGalleryError(uploadErrors.join(" "));
+    }
+  }
+
+  function handleFiles(fileList: FileList | null | undefined) {
+    if (!fileList?.length) {
+      return;
+    }
+    void processFiles(Array.from(fileList));
+  }
+
+  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
+    handleFiles(event.target.files);
+    event.target.value = "";
+  }
+
+  function handleDropzoneClick() {
+    if (dropzoneDisabled) {
+      return;
+    }
+    fileInputRef.current?.click();
+  }
+
+  function handleDropzoneDragOver(event: DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    if (dropzoneDisabled) {
+      return;
+    }
+    setIsDropzoneActive(true);
+  }
+
+  function handleDropzoneDragLeave() {
+    setIsDropzoneActive(false);
+  }
+
+  function handleDropzoneDrop(event: DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setIsDropzoneActive(false);
+    if (dropzoneDisabled) {
+      return;
+    }
+    handleFiles(event.dataTransfer.files);
   }
 
   return (
-    <section className="flex min-w-0 flex-col gap-6">
+    <section className="flex w-full min-w-0 max-w-full flex-col gap-6">
       <div className="flex min-w-0 items-start justify-between gap-4">
         <h2 className="font-sans text-display-caps uppercase leading-none text-fg-primary">
           Galleria
         </h2>
-        <LimitHint>[1 immagine hero + 2 obbligatorie, limite 5]</LimitHint>
+        <span className={counterClassName}>
+          {imageCount}/{MAX_IMAGES}
+        </span>
       </div>
 
       <div className="border-t border-fg-primary" />
 
-      <div className="flex min-w-0 items-start justify-between gap-8">
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <div className="relative min-h-96 w-full min-w-0">
-            {activePreview ? (
-              <div className="absolute top-0 left-0 z-40 h-96 w-full max-w-md overflow-hidden border border-fg-primary bg-bg-primary">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={activePreview}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              </div>
-            ) : (
-              emptyStackLayers.map((layer) => (
-                <div
-                  key={layer.offset}
-                  className={`absolute top-0 left-0 border border-fg-primary bg-bg-primary ${layer.size} ${layer.offset}`}
-                />
-              ))
-            )}
-          </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        disabled={dropzoneDisabled}
+        onChange={handleFileInputChange}
+      />
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Immagine precedente"
-              disabled={filledCount === 0}
-              onClick={handlePrevImage}
-              className="flex size-7 shrink-0 items-center justify-center border border-fg-primary bg-bg-elevated disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ArrowIcon direction="left" />
-            </button>
-            <button
-              type="button"
-              aria-label="Immagine successiva"
-              disabled={filledCount === 0}
-              onClick={handleNextImage}
-              className="flex size-7 shrink-0 items-center justify-center border border-fg-primary bg-bg-elevated disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ArrowIcon direction="right" />
-            </button>
-          </div>
-        </div>
+      <button
+        type="button"
+        disabled={dropzoneDisabled}
+        onClick={handleDropzoneClick}
+        onDragOver={handleDropzoneDragOver}
+        onDragLeave={handleDropzoneDragLeave}
+        onDrop={handleDropzoneDrop}
+        className={`flex min-h-40 w-full min-w-0 max-w-full flex-col items-center justify-center gap-3 border border-dashed border-fg-primary bg-bg-elevated px-6 py-8 transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-40 ${
+          isDropzoneActive ? "border-fg-primary bg-bg-primary" : ""
+        }`}
+      >
+        <Upload
+          aria-hidden
+          className="size-8 text-fg-primary opacity-70"
+          strokeWidth={1.25}
+        />
+        <span className="font-sans text-body font-bold uppercase leading-normal text-fg-primary">
+          {isUploading
+            ? "Caricamento in corso…"
+            : "Clicca per caricare o trascina"}
+        </span>
+        <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
+          PNG, JPG, WebP · max 1MB
+        </span>
+        {imageCount < MIN_IMAGES ? (
+          <span className="font-sans text-metadata leading-normal text-fg-primary opacity-50">
+            Minimo {MIN_IMAGES} immagini richieste
+          </span>
+        ) : null}
+      </button>
 
-        <div className="relative flex min-h-48 w-44 shrink-0 flex-col justify-center gap-3 border border-dashed border-fg-primary bg-bg-elevated p-3">
-          <DropzoneCross />
-          <div className="relative z-10 flex min-w-0 flex-col gap-2">
-            <p className="text-center font-sans text-body font-bold uppercase leading-normal text-fg-primary">
-              Inserisci
-              <br />
-              immagine
-              <br />
-              {filledCount}/{MAX_IMAGES}
-            </p>
-            <input
-              type="url"
-              value={urlDraft}
-              onChange={(event) => setUrlDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleAddFromDraft();
-                }
-              }}
-              placeholder="Incolla URL"
-              className="min-w-0 w-full border border-fg-primary bg-bg-elevated px-2 py-1.5 text-center font-sans text-metadata leading-normal text-fg-primary outline-none placeholder:text-border-muted"
+      {galleryError ? (
+        <p className="font-sans text-metadata leading-normal text-error">
+          {galleryError}
+        </p>
+      ) : null}
+
+      {images.length > 0 ? (
+        <ul className="grid w-full min-w-0 max-w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))]">
+          {images.map((url, index) => (
+            <GalleryThumbnail
+              key={url}
+              url={url}
+              index={index}
+              isHero={index === 0}
+              isDragging={dragIndex === index}
+              isDragOver={dragOverIndex === index && dragIndex !== index}
+              onRemove={() => handleRemove(index)}
+              onDragStart={(event) => handleDragStart(index, event)}
+              onDragOver={(event) => handleDragOver(index, event)}
+              onDragLeave={() => setDragOverIndex(null)}
+              onDrop={(event) => handleDrop(index, event)}
+              onDragEnd={handleDragEnd}
             />
-            <button
-              type="button"
-              onClick={handleAddFromDraft}
-              className="border border-fg-primary bg-bg-primary px-2 py-1 font-sans text-metadata uppercase leading-normal text-fg-primary transition-opacity duration-150 ease-out hover:opacity-80"
-            >
-              Aggiungi
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <ul className="flex min-w-0 flex-col gap-4">
-        {Array.from({ length: slotCount }, (_, index) => {
-          const url = images[index] ?? "";
-          const caption = captions[String(index)] ?? "";
-          const slotLabel =
-            index === 0 ? "Immagine principale (hero)" : `Immagine ${index + 1}`;
-
-          return (
-            <li
-              key={`image-slot-${index}`}
-              className="flex min-w-0 flex-col gap-2 border border-fg-primary bg-bg-elevated p-4"
-            >
-              <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
-                {slotLabel}
-              </span>
-              <input
-                type="url"
-                value={url}
-                onChange={(event) =>
-                  handleSlotUrlChange(index, event.target.value)
-                }
-                placeholder="Incolla URL immagine"
-                className={slotInputClassName}
-              />
-              {url.trim() ? (
-                <div className="overflow-hidden border border-fg-primary bg-bg-primary">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt={caption || slotLabel}
-                    className="max-h-48 w-full object-cover"
-                  />
-                </div>
-              ) : null}
-              <div className="flex min-w-0 flex-col gap-1">
-                <label
-                  htmlFor={`caption-${index}`}
-                  className="font-sans text-metadata leading-normal text-fg-primary opacity-70"
-                >
-                  Didascalia (opzionale)
-                </label>
-                <input
-                  id={`caption-${index}`}
-                  type="text"
-                  value={caption}
-                  onChange={(event) =>
-                    handleCaptionChange(index, event.target.value)
-                  }
-                  placeholder="Breve descrizione dell'immagine"
-                  className={slotInputClassName}
-                />
-                <span className={counterClass(caption.length > MAX_CAPTION)}>
-                  {caption.length}/{MAX_CAPTION}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      ) : null}
     </section>
   );
 }
@@ -519,8 +609,7 @@ export default function StimulusPackWizard({
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[890px] px-6 lg:px-0">
-      <div className="flex w-full min-w-0 flex-col gap-8">
+    <div className="flex w-full min-w-0 flex-col gap-8">
       <header className="flex min-w-0 flex-col gap-6">
         <h1 className="font-heading text-h1 font-bold uppercase text-fg-primary">
           Stimulus Pack
@@ -533,9 +622,7 @@ export default function StimulusPackWizard({
 
       <GallerySection
         images={pack.images}
-        captions={pack.captions}
         onImagesChange={(images) => updatePack("images", images)}
-        onCaptionsChange={(captions) => updatePack("captions", captions)}
       />
 
       <div className="border-t border-fg-primary" />
@@ -644,7 +731,6 @@ export default function StimulusPackWizard({
         >
           <ArrowIcon direction="right" />
         </button>
-      </div>
       </div>
     </div>
   );

@@ -64,7 +64,9 @@ export default async function StimulusPackPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 min-w-0 py-[var(--spacing-section)]">
-        <StimulusPackWizard conceptId={typedConcept.id} />
+        <div className="mx-auto w-full min-w-0 max-w-[890px] px-6 lg:px-0">
+          <StimulusPackWizard conceptId={typedConcept.id} />
+        </div>
       </main>
 
       <Footer />
