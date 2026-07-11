@@ -274,7 +274,7 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <section className="w-full min-w-0 max-w-full border-y border-fg-primary py-6">
+            <section className="w-full min-w-0 max-w-full border-y border-dashed border-border-muted py-6">
               <ul className="flex w-full min-w-0 flex-col">
                 {LEVELS.map((level) => {
                   const levelKey = getLevelKey(level);
@@ -351,9 +351,6 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </div>
             ) : (
               <div className="border-t border-accent-tertiary pt-8">
-                <p className="mb-4 font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-                  Test SP (provvisorio)
-                </p>
                 <CreateSPSurveyButton conceptId={typedConcept.id} />
               </div>
             )}
