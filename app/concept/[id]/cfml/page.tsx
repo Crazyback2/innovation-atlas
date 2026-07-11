@@ -66,7 +66,7 @@ export default async function CFMLPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full min-w-0 max-w-[900px]">
+        <div className="mx-auto w-full min-w-0 max-w-[820px] px-6 lg:px-0">
           <CFMLWizard
             conceptId={typedConcept.id}
             initialAnswers={typedConcept.cfml_answers ?? {}}

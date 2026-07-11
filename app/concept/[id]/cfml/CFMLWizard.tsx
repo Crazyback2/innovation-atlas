@@ -221,7 +221,7 @@ export default function CFMLWizard({
           )}
 
           <div className="mt-6">
-            <div className="flex items-start gap-2">
+            <div className="flex min-w-0 items-start gap-2">
               <StepperDivider label="L0" />
               {LEVELS.map((level) => {
                 const baseState = getSegmentBaseState(level, answers);
