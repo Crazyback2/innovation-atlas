@@ -3,6 +3,8 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { Upload, X } from "lucide-react";
 import { VALID_SECTORS } from "@/app/concept/new/data";
+import { createClient } from "@/src/lib/supabase/client";
+import { sanitizeFilename } from "@/src/lib/sanitize-filename";
 
 export type StimulusPack = {
   descrizione: string;
@@ -31,6 +33,7 @@ const ACCEPTED_IMAGE_TYPES = new Set([
   "image/webp",
 ]);
 const MAX_TAGS = 5;
+const BUCKET = "concept-images";
 
 const metadataBadgeClassName =
   "inline-flex shrink-0 items-center gap-2.5 border border-fg-primary bg-bg-elevated px-2.5 py-2";
@@ -131,6 +134,7 @@ function CompletionBar({ pack }: { pack: StimulusPack }) {
 }
 
 type GallerySectionProps = {
+  conceptId: string;
   images: string[];
   onImagesChange: (images: string[]) => void;
 };
@@ -149,12 +153,30 @@ function validateImageFile(file: File): string | null {
   return null;
 }
 
-function mockUploadFile(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      resolve(URL.createObjectURL(file));
-    }, 400);
-  });
+function buildUploadPath(conceptId: string, file: File): string {
+  const lastDot = file.name.lastIndexOf(".");
+  const ext = lastDot > 0 ? file.name.slice(lastDot + 1) : "jpg";
+  const nameWithoutExt = lastDot > 0 ? file.name.slice(0, lastDot) : file.name;
+  return `${conceptId}/${Date.now()}-${sanitizeFilename(nameWithoutExt)}.${sanitizeFilename(ext)}`;
+}
+
+async function uploadConceptImage(conceptId: string, file: File): Promise<string> {
+  const supabase = createClient();
+  const path = buildUploadPath(conceptId, file);
+
+  const { error: uploadError } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file);
+
+  if (uploadError) {
+    throw new Error("Impossibile caricare l'immagine. Riprova.");
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(BUCKET).getPublicUrl(path);
+
+  return publicUrl;
 }
 
 type GalleryThumbnailProps = {
@@ -217,7 +239,11 @@ function GalleryThumbnail({
   );
 }
 
-function GallerySection({ images, onImagesChange }: GallerySectionProps) {
+function GallerySection({
+  conceptId,
+  images,
+  onImagesChange,
+}: GallerySectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDropzoneActive, setIsDropzoneActive] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
@@ -328,8 +354,8 @@ function GallerySection({ images, onImagesChange }: GallerySectionProps) {
 
     for (const file of validFiles) {
       try {
-        const mockUrl = await mockUploadFile(file);
-        uploadedUrls.push(mockUrl);
+        const publicUrl = await uploadConceptImage(conceptId, file);
+        uploadedUrls.push(publicUrl);
       } catch {
         uploadErrors.push(`Impossibile caricare "${file.name}". Riprova.`);
       } finally {
@@ -593,7 +619,7 @@ function TagsField({ tags, onChange }: TagsFieldProps) {
 }
 
 export default function StimulusPackWizard({
-  conceptId: _conceptId,
+  conceptId,
 }: StimulusPackWizardProps) {
   const [pack, setPack] = useState<StimulusPack>(initialPack);
 
@@ -621,6 +647,7 @@ export default function StimulusPackWizard({
       </header>
 
       <GallerySection
+        conceptId={conceptId}
         images={pack.images}
         onImagesChange={(images) => updatePack("images", images)}
       />
