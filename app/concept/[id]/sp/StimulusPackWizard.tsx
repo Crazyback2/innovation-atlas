@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { Upload, X } from "lucide-react";
 import { VALID_SECTORS } from "@/app/concept/new/data";
 import { createClient } from "@/src/lib/supabase/client";
 import { sanitizeFilename } from "@/src/lib/sanitize-filename";
+import {
+  getStimulusPackCompletionSegments,
+  MIN_STIMULUS_PACK_IMAGES,
+} from "@/src/lib/stimulus-pack-complete";
 import { saveStimulusPack } from "./actions";
 
 export type StimulusPack = {
@@ -27,7 +32,6 @@ const MAX_DESCRIPTION = 350;
 const MAX_CONTEXT = 500;
 const MAX_TARGET = 120;
 const MAX_IMAGES = 5;
-const MIN_IMAGES = 3;
 const MAX_FILE_SIZE = 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
   "image/png",
@@ -62,13 +66,13 @@ function counterClass(isOverLimit: boolean): string {
 }
 
 function CompletionBar({ pack }: { pack: StimulusPack }) {
-  const hasSector = Boolean(pack.sector.trim());
-  const hasDescription = Boolean(pack.descrizione.trim());
-  const hasContextAndTarget =
-    Boolean(pack.contesto_scenario.trim()) && Boolean(pack.target_user.trim());
-  const hasImages = pack.images.filter(Boolean).length >= 3;
-
-  const segments = [hasSector, hasDescription, hasContextAndTarget, hasImages];
+  const segments = getStimulusPackCompletionSegments({
+    sector: pack.sector,
+    description: pack.descrizione,
+    context_scenario: pack.contesto_scenario,
+    target_user: pack.target_user,
+    images: pack.images,
+  });
 
   return (
     <div
@@ -430,9 +434,9 @@ function GallerySection({
         <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
           PNG, JPG, WebP · max 1MB
         </span>
-        {imageCount < MIN_IMAGES ? (
+        {imageCount < MIN_STIMULUS_PACK_IMAGES ? (
           <span className="font-sans text-metadata leading-normal text-fg-primary opacity-50">
-            Minimo {MIN_IMAGES} immagini richieste
+            Minimo {MIN_STIMULUS_PACK_IMAGES} immagini richieste
           </span>
         ) : null}
       </button>
@@ -756,6 +760,12 @@ export default function StimulusPackWizard({
         >
           {isSaving ? "Salvataggio…" : "Salva"}
         </button>
+        <Link
+          href={`/concept/${conceptId}/sp/new`}
+          className="border border-fg-primary bg-fg-primary px-6 py-2.5 font-sans text-body font-bold uppercase leading-normal text-bg-primary transition-opacity duration-150 ease-out hover:opacity-90"
+        >
+          Continua all&apos;anteprima →
+        </Link>
         {saveSuccessMessage ? (
           <p className="font-sans text-metadata leading-normal text-fg-primary">
             {saveSuccessMessage}

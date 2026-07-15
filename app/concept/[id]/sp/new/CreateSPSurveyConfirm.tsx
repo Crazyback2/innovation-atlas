@@ -7,8 +7,12 @@ import { createSPSurvey } from "@/app/concept/[id]/sp/actions";
 
 export default function CreateSPSurveyConfirm({
   conceptId,
+  packComplete,
+  missingFields,
 }: {
   conceptId: string;
+  packComplete: boolean;
+  missingFields: string[];
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -34,6 +38,13 @@ export default function CreateSPSurveyConfirm({
 
   return (
     <div className="mt-12 flex flex-col gap-4">
+      {!packComplete ? (
+        <div className="border border-accent-tertiary bg-bg-primary px-3 py-2.5 font-sans text-[13px] leading-normal text-fg-primary">
+          Completa lo stimulus pack prima di generare la survey. Mancano:{" "}
+          {missingFields.join(", ")}.
+        </div>
+      ) : null}
+
       {error ? (
         <div className="border border-accent-tertiary bg-bg-primary px-3 py-2.5 font-sans text-[13px] leading-normal text-fg-primary">
           {error}
@@ -43,7 +54,7 @@ export default function CreateSPSurveyConfirm({
       <button
         type="button"
         onClick={handleCreate}
-        disabled={loading}
+        disabled={loading || !packComplete}
         className="cursor-pointer border-none bg-fg-primary px-6 py-[14px] font-sans text-body font-medium leading-normal text-bg-primary transition-opacity duration-150 ease-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Creazione in corso…" : "Crea survey ora"}

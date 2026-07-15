@@ -5,6 +5,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import StimulusPackPreview from "@/app/components/sp/StimulusPackPreview";
 import { createClient } from "@/src/lib/supabase/server";
+import { isStimulusPackComplete } from "@/src/lib/stimulus-pack-complete";
 import CreateSPSurveyConfirm from "./CreateSPSurveyConfirm";
 
 type PageProps = {
@@ -81,6 +82,14 @@ export default async function NewSPSurveyPage({ params }: PageProps) {
     video_url: typedConcept.video_url,
   };
 
+  const packCompleteness = isStimulusPackComplete({
+    sector: typedConcept.sector,
+    description: typedConcept.description,
+    context_scenario: typedConcept.context_scenario,
+    target_user: typedConcept.target_user,
+    images: typedConcept.images,
+  });
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
@@ -108,7 +117,11 @@ export default async function NewSPSurveyPage({ params }: PageProps) {
 
           <StimulusPackPreview pack={pack} />
 
-          <CreateSPSurveyConfirm conceptId={typedConcept.id} />
+          <CreateSPSurveyConfirm
+            conceptId={typedConcept.id}
+            packComplete={packCompleteness.complete}
+            missingFields={packCompleteness.missing}
+          />
         </div>
       </main>
 

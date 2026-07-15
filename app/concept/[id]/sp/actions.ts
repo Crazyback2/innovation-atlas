@@ -6,6 +6,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { generateSPToken } from "@/src/lib/sp-token";
 import SP_CONFIG_V1 from "@/src/data/sp-config/v1_2026-06";
 import { VALID_SECTORS } from "@/app/concept/new/data";
+import { isStimulusPackComplete } from "@/src/lib/stimulus-pack-complete";
 
 const MAX_TOKEN_COLLISION_RETRIES = 5;
 const MAX_IMAGES = 5;
@@ -158,6 +159,20 @@ export async function createSPSurvey({
 
   if (!concept) {
     throw new Error("Concept non trovato o non autorizzato");
+  }
+
+  const packCompleteness = isStimulusPackComplete({
+    sector: concept.sector,
+    description: concept.description,
+    context_scenario: concept.context_scenario,
+    target_user: concept.target_user,
+    images: concept.images,
+  });
+
+  if (!packCompleteness.complete) {
+    throw new Error(
+      `Stimulus pack incompleto. Mancano: ${packCompleteness.missing.join(", ")}.`
+    );
   }
 
   const pack_snapshot = {

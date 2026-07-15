@@ -4,7 +4,6 @@ import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import CreateSPSurveyButton from "./CreateSPSurveyButton";
 import { CFML_LEVELS } from "../questions";
 import { createClient } from "@/src/lib/supabase/server";
 import {
@@ -339,7 +338,6 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </Link>
             </div>
 
-            {/* TODO: rimuovere quando esiste UI dedicata SP nella pagina concept */}
             {existingSurvey ? (
               <div className="border-t border-accent-tertiary pt-8">
                 <Link
@@ -351,7 +349,12 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </div>
             ) : (
               <div className="border-t border-accent-tertiary pt-8">
-                <CreateSPSurveyButton conceptId={typedConcept.id} />
+                <Link
+                  href={`/concept/${typedConcept.id}/sp`}
+                  className="inline-block bg-fg-primary px-6 py-[14px] font-sans text-body font-medium leading-normal text-bg-primary transition-opacity duration-150 ease-out hover:opacity-90"
+                >
+                  Prepara stimulus pack SP →
+                </Link>
               </div>
             )}
           </div>

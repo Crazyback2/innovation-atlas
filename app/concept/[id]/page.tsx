@@ -248,7 +248,7 @@ export default async function ConceptPage({ params }: PageProps) {
                       Nessuna survey creata
                     </span>
                     <Link
-                      href={`/concept/${typedConcept.id}/sp/new`}
+                      href={`/concept/${typedConcept.id}/sp`}
                       className={actionLinkClassName}
                     >
                       Crea survey →
@@ -285,7 +285,7 @@ export default async function ConceptPage({ params }: PageProps) {
                     ))}
 
                     <Link
-                      href={`/concept/${typedConcept.id}/sp/new`}
+                      href={`/concept/${typedConcept.id}/sp`}
                       className={actionLinkClassName}
                     >
                       + Nuova survey
