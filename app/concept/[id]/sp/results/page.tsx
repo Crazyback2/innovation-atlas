@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import SPRadar from "@/app/components/SPRadar";
 import { createClient } from "@/src/lib/supabase/server";
 import { calculateSP, aggregateSP } from "@/src/lib/sp-scoring";
 import type { SPConfig, SPAnswers, SPResult } from "@/src/data/sp-config/types";
@@ -94,21 +95,24 @@ function SPResultsContent({
         <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
           Profilo per dimensione
         </h2>
-        <ul className="flex flex-col gap-3">
-          {aggregatedResult.perDimension.map((dimension) => (
-            <li
-              key={dimension.dimensionId}
-              className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-accent-tertiary py-3"
-            >
-              <span className="font-heading text-body leading-relaxed text-fg-primary">
-                {dimension.title}
-              </span>
-              <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
-                {formatScore(dimension.score)} / 100
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:gap-10">
+          <SPRadar perDimension={aggregatedResult.perDimension} />
+          <ul className="flex min-w-0 flex-1 flex-col gap-3">
+            {aggregatedResult.perDimension.map((dimension) => (
+              <li
+                key={dimension.dimensionId}
+                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-accent-tertiary py-3"
+              >
+                <span className="font-heading text-body leading-relaxed text-fg-primary">
+                  {dimension.title}
+                </span>
+                <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
+                  {formatScore(dimension.score)} / 100
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </>
   );
