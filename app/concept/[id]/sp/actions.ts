@@ -72,6 +72,20 @@ export async function saveStimulusPack({
     return { error: "Concept non trovato o non autorizzato." };
   }
 
+  const { count: surveyCount } = await supabase
+    .from("sp_surveys")
+    .select("*", { count: "exact", head: true })
+    .eq("concept_id", conceptId);
+
+  const packLocked = (surveyCount ?? 0) > 0;
+
+  if (packLocked) {
+    return {
+      error:
+        "Pack bloccato: esiste già un sondaggio SP per questo concept, il materiale-stimolo non è più modificabile.",
+    };
+  }
+
   const description = pack.descrizione.trim();
   const contextScenario = pack.contesto_scenario.trim();
   const targetUser = pack.target_user.trim();
