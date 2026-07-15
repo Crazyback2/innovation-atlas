@@ -20,6 +20,7 @@ export type StimulusPack = {
 
 type StimulusPackWizardProps = {
   conceptId: string;
+  initialPack: StimulusPack;
 };
 
 const MAX_DESCRIPTION = 350;
@@ -53,17 +54,6 @@ const counterClassName =
 
 const slotInputClassName =
   "min-w-0 w-full border border-fg-primary bg-bg-elevated px-3 py-2 font-sans text-body leading-normal text-fg-primary outline-none placeholder:text-border-muted focus:border-fg-primary";
-
-const initialPack: StimulusPack = {
-  descrizione: "",
-  contesto_scenario: "",
-  target_user: "",
-  images: [],
-  captions: {},
-  video_url: "",
-  sector: "",
-  tags: [],
-};
 
 function counterClass(isOverLimit: boolean): string {
   return isOverLimit
@@ -593,6 +583,7 @@ function TagsField({ tags, onChange }: TagsFieldProps) {
 
 export default function StimulusPackWizard({
   conceptId,
+  initialPack,
 }: StimulusPackWizardProps) {
   const [pack, setPack] = useState<StimulusPack>(initialPack);
   const [isSaving, setIsSaving] = useState(false);
