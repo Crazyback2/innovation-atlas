@@ -1,7 +1,12 @@
+import { concepts } from "@/src/data/concepts";
+
 // SVG coordinate system for the bubble chart:
 // viewBox 0 0 885 482 — x=0 → CFML 0, x=885 → CFML 100
 //                     — y=0 → SP 100 (top), y=482 → SP 0 (bottom)
-// Bubble positions derived from Figma node 567:11822 pixel data.
+// Le bolle sono derivate dallo stesso array di src/data/concepts.ts usato in
+// /archivio (fonte dati unica). La proiezione usa il sistema di coordinate
+// documentato sopra; soglia di visibilità e tier di dimensione restano quelli
+// della landing (vedi sotto). Il rendering non cambia: solo i dati in ingresso.
 
 // CSS box: left=278, top=380, w=885, h=482.
 // Right outer edge at x=1163, bottom at section-y=863.
@@ -19,58 +24,34 @@ const gy = [CHART_H * 0.25, CHART_H * 0.5, CHART_H * 0.75] as const; // SP 75, 5
 
 type Bubble = { cx: number; cy: number; r: number };
 
-const BUBBLES: Bubble[] = [
-  // ─── r 7 (≥10 tier) ───────────────────────────────────────────
-  { cx: 133, cy:  97, r: 7 },
-  { cx: 557, cy:  83, r: 7 },
-  { cx: 112, cy: 410, r: 7 },
-  { cx: 133, cy: 378, r: 7 },
-  { cx: 205, cy: 420, r: 7 },
-  { cx: 222, cy: 362, r: 7 },
-  { cx: 250, cy: 314, r: 7 },
-  { cx: 162, cy: 317, r: 7 },
-  { cx: 213, cy: 181, r: 7 },
-  { cx: 219, cy: 139, r: 7 },
-  { cx: 326, cy: 300, r: 7 },
-  { cx: 484, cy: 324, r: 7 },
-  { cx: 522, cy: 203, r: 7 },
-  { cx: 595, cy: 368, r: 7 },
-  { cx: 629, cy: 345, r: 7 },
-  { cx: 176, cy: 375, r: 7 },
-  { cx: 705, cy:  70, r: 7 },
-  // ─── r 13 (≥30 tier) ──────────────────────────────────────────
-  { cx: 127, cy: 276, r: 13 },
-  { cx: 165, cy: 217, r: 13 },
-  { cx: 266, cy: 239, r: 13 },
-  { cx: 343, cy: 336, r: 13 },
-  { cx: 368, cy: 116, r: 13 },
-  { cx: 384, cy: 136, r: 13 },
-  { cx: 459, cy: 354, r: 13 },
-  { cx: 496, cy: 415, r: 13 },
-  { cx: 510, cy: 171, r: 13 },
-  { cx: 545, cy: 231, r: 13 },
-  { cx: 608, cy: 304, r: 13 },
-  { cx: 636, cy: 186, r: 13 },
-  { cx: 636, cy:  55, r: 13 },
-  { cx: 717, cy:  45, r: 13 },
-  // ─── r 22 (≥75 tier) ──────────────────────────────────────────
-  { cx: 162, cy: 166, r: 22 },
-  { cx: 219, cy:  68, r: 22 },
-  { cx: 310, cy: 121, r: 22 },
-  { cx: 315, cy: 249, r: 22 },
-  { cx: 394, cy: 196, r: 22 },
-  { cx: 424, cy: 280, r: 22 },
-  { cx: 451, cy: 162, r: 22 },
-  { cx: 504, cy: 278, r: 22 },
-  { cx: 509, cy: 114, r: 22 },
-  { cx: 571, cy: 187, r: 22 },
-  { cx: 573, cy: 101, r: 22 },
-  { cx: 654, cy: 128, r: 22 },
-  { cx: 506, cy: 365, r: 22 },
-  { cx: 717, cy: 339, r: 22 },
-  { cx: 730, cy: 157, r: 22 },
-  { cx: 792, cy:  75, r: 22 },
-];
+// ── Soglia di visibilità + tier di dimensione — INVARIATI (landing) ─────────
+// Soglia: un concept compare se ha spResponses ≥ 10 (uguale all'archivio).
+// Tier del raggio, specifici della landing: ≥75 → 22 · ≥30 → 13 · ≥10 → 7.
+// (L'archivio usa raggi diversi — 9/16/28 — e resta com'è: vedi report.)
+const MIN_SP_RESPONSES = 10;
+
+function tierRadius(spResponses: number): number {
+  if (spResponses >= 75) return 22;
+  if (spResponses >= 30) return 13;
+  return 7;
+}
+
+// ── Inset dell'area di plot — stessa logica dell'archivio (MatrixChart) ─────
+// L'area dati è rientrata dal bordo del chart di PLOT_PAD (> del raggio massimo
+// = 22) così un punto a CFML/SP = 100 o 0 resta interamente dentro il frame,
+// senza venire tagliato a metà sul bordo. Non tocca frame/assi/tick/legenda:
+// cambia solo dove cadono i punti nell'area di plot.
+const PLOT_PAD = 32;
+const toX = (cfml: number) => PLOT_PAD + (cfml / 100) * (CHART_W - 2 * PLOT_PAD);
+const toY = (sp: number) => PLOT_PAD + (1 - sp / 100) * (CHART_H - 2 * PLOT_PAD);
+
+const BUBBLES: Bubble[] = concepts
+  .filter((c) => c.spResponses >= MIN_SP_RESPONSES)
+  .map((c) => ({
+    cx: toX(c.cfml),
+    cy: toY(c.sp),
+    r: tierRadius(c.spResponses),
+  }));
 
 const Y_TICKS = [
   { label: "100", top: 373, left: 251 },
