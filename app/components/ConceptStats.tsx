@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from "react";
 import type { Concept } from "@/src/data/concepts";
-import { getCfmlBand, getSpBand } from "@/src/lib/bands";
 import { formatDate, formatRange } from "@/src/lib/format";
 import CFMLBreakdown from "@/app/components/CFMLBreakdown";
 import SPBreakdown from "@/app/components/SPBreakdown";
@@ -14,13 +13,9 @@ interface Props {
 const EXPAND_BTN =
   "flex h-[29px] shrink-0 items-center gap-[10px] border border-fg-primary bg-bg-elevated px-[12px] pt-[8px] pb-[7px] font-mono text-metadata text-fg-primary leading-none transition-colors duration-150 ease-out hover:bg-accent-primary";
 
-const BADGE =
-  "inline-flex h-[29px] items-center bg-fg-primary px-[12px] pt-[8px] pb-[7px] font-mono text-metadata font-bold text-bg-elevated leading-none";
-
 function StatColumn({
   title,
   score,
-  badge,
   metadata,
   expandable,
   isOpen,
@@ -29,7 +24,6 @@ function StatColumn({
 }: {
   title: ReactNode;
   score: number;
-  badge: string;
   metadata: ReactNode;
   expandable: boolean;
   isOpen: boolean;
@@ -48,9 +42,7 @@ function StatColumn({
           </p>
         </div>
 
-        <p className="mt-[18px]">
-          <span className={BADGE}>{badge}</span>
-        </p>
+        <div className="mt-[18px] h-[29px]" aria-hidden="true" />
 
         <div className="mt-auto flex items-end justify-between gap-[16px]">
           <div className="font-mono text-metadata leading-normal text-fg-primary">
@@ -77,8 +69,8 @@ function StatColumn({
 }
 
 export default function ConceptStats({ concept }: Props) {
-  const [cfmlOpen, setCfmlOpen] = useState(false);
-  const [spOpen, setSpOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const toggle = () => setOpen((prev) => !prev);
 
   const cfmlDetail = concept.cfmlDetail;
   const spDimensions = concept.spDimensions;
@@ -95,10 +87,9 @@ export default function ConceptStats({ concept }: Props) {
             </>
           }
           score={concept.cfml}
-          badge={getCfmlBand(concept.cfml)}
           expandable={Boolean(cfmlDetail)}
-          isOpen={cfmlOpen}
-          onToggle={() => setCfmlOpen((open) => !open)}
+          isOpen={open}
+          onToggle={toggle}
           metadata={
             <>
               <p className="font-bold uppercase">
@@ -129,10 +120,9 @@ export default function ConceptStats({ concept }: Props) {
             </>
           }
           score={concept.sp}
-          badge={getSpBand(concept.sp)}
           expandable={Boolean(spDimensions)}
-          isOpen={spOpen}
-          onToggle={() => setSpOpen((open) => !open)}
+          isOpen={open}
+          onToggle={toggle}
           metadata={
             <>
               <p className="font-bold uppercase">
