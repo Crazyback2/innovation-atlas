@@ -113,11 +113,11 @@ export default function ConceptStats({ concept }: Props) {
 
         <StatColumn
           title={
-            <>
+            <span className="block pl-[8px]">
               Symbolic
               <br />
               perception
-            </>
+            </span>
           }
           score={concept.sp}
           expandable={Boolean(spDimensions)}

@@ -3,23 +3,6 @@
 import { useState } from "react";
 import type { Concept } from "@/src/data/concepts";
 
-// ── Fixed chart-box dimensions (pixel-exact) ─────────────────────────────────
-const CHART_W = 882;
-const CHART_H = 482;
-
-// ── Container column widths (total = 1248 px) ────────────────────────────────
-// Equal Y/legend columns center the chart box in the 1248 px container,
-// which is also centered in the viewport → chart visually centered on the site.
-const SIDE = Math.floor((1248 - CHART_W) / 2);  // (1248 - 882) / 2 = 183
-const Y_COL   = SIDE;   // 183
-const LEG_COL = SIDE;   // 183  →  183 + 882 + 183 = 1248 ✓
-
-// ── Distance from section top to chart top border ────────────────────────────
-// This equals the gap from the stats-section bottom to the chart border.
-// The stats section has pb=0 (set in page.tsx), so this is the full visual gap.
-const CHART_TOP    = 64;
-const CHART_BOTTOM = CHART_TOP + CHART_H - 1;  // 545 — 1 px above outer bottom edge
-
 // ── Bubble radius — three fixed tiers (no continuous scale) ─────────────────
 // 10–29 → small · 30–74 → medium · 75+ → large
 const TIER_R = [9, 16, 28] as const;
@@ -36,14 +19,11 @@ const AXIS_LABEL_GAP = 32;
 const MATRIX_BORDER_W = 1;
 const TICK_CHART_GAP = 6;
 
-// ── Chart-local coordinate mapping ───────────────────────────────────────────
-// These produce pixel positions WITHIN the 882×482 chart SVG.
-function toX(cfml: number): number { return (cfml / 100) * CHART_W; }
-function toY(sp: number): number   { return (1 - sp / 100) * CHART_H; }
-
-// Centre-cross positions (CFML=50, SP=50)
-const CX = toX(50);  // 441
-const CY = toY(50);  // 241
+// ── Plot-area inner margin ───────────────────────────────────────────────────
+// The data area is inset from the matrix border by PLOT_PAD (> the largest
+// bubble radius) so a point at CFML/SP = 100 or 0 stays fully inside the frame
+// with its radius visible instead of being clipped in half on the border.
+const PLOT_PAD = 32;
 
 function quadrantLabel(cfml: number, sp: number): string {
   if (cfml < 50 && sp >= 50) return "Promessa simbolica";
@@ -62,22 +42,66 @@ function InfoIcon() {
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
-interface Props { concepts: Concept[] }
+interface Props {
+  concepts: Concept[];
+  /**
+   * Single-point mode: render the exact same matrix as /archivio, only at a
+   * reduced square scale and plotting just `concepts[0]` as one point.
+   * The spResponses ≥ 10 filter is bypassed, the point-size legend is hidden
+   * and the concept name is shown beside the point. When false/undefined the
+   * component renders the default many-concept matrix.
+   */
+  singleConcept?: boolean;
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function MatrixChart({ concepts }: Props) {
+export default function MatrixChart({ concepts, singleConcept = false }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const filtered = concepts.filter((c) => c.spResponses >= 10);
+  const isSingle = singleConcept;
 
-  const bubbles = filtered.map((c) => ({
+  // ── Layout dimensions ──────────────────────────────────────────────────────
+  // Multi (archivio): 882 × 482 chart centred in the 1248 px page container.
+  // Single: square chart filling the box's usable width (side columns hold the
+  // rotated axis titles + tick labels, exactly like archivio).
+  const CHART_W = isSingle ? 560 : 882;
+  const CHART_H = isSingle ? 306 : 482; // single keeps the archivio ~1.83 ratio
+  const SIDE = isSingle ? 88 : Math.floor((1248 - CHART_W) / 2); // multi → 183
+  const Y_COL = SIDE;
+  const LEG_COL = SIDE;
+  const CONTAINER = 2 * SIDE + CHART_W; // multi → 1248 · single → 736
+  const CHART_TOP = isSingle ? 0 : 64;
+  const CHART_BOTTOM = CHART_TOP + CHART_H - 1; // 1 px above outer bottom edge
+
+  // Matrix surface: white inside the (white) positioning panel, page-grey in
+  // the archivio catalog.
+  const SURFACE = isSingle ? "bg-bg-elevated" : "bg-bg-primary";
+
+  // ── Chart-local coordinate mapping (inset by PLOT_PAD) ─────────────────────
+  const toX = (cfml: number) => PLOT_PAD + (cfml / 100) * (CHART_W - 2 * PLOT_PAD);
+  const toY = (sp: number) => PLOT_PAD + (1 - sp / 100) * (CHART_H - 2 * PLOT_PAD);
+
+  // Centre-cross positions (CFML=50, SP=50) → dead centre of the frame.
+  const CX = toX(50);
+  const CY = toY(50);
+
+  // Single mode plots concepts[0] regardless of sample size; multi mode keeps
+  // the ≥10 responses filter.
+  const source = isSingle
+    ? concepts.slice(0, 1)
+    : concepts.filter((c) => c.spResponses >= 10);
+
+  const bubbles = source.map((c) => ({
     ...c,
     bx: toX(c.cfml),
     by: toY(c.sp),
-    r:  tierRadius(c.spResponses),
+    r: tierRadius(c.spResponses),
   }));
 
   const hovered = bubbles.find((b) => b.id === hoveredId) ?? null;
+
+  const singleBubble = isSingle ? bubbles[0] ?? null : null;
+  const singleFlipX = singleBubble ? singleBubble.bx / CHART_W > 0.7 : false;
 
   const legendItems = [
     { v: 10, r: TIER_R[0], label: "≥10" },
@@ -93,25 +117,30 @@ export default function MatrixChart({ concepts }: Props) {
   const Y_TICKS = [100, 75, 50, 25];
 
   return (
-    <section className="relative w-full bg-bg-primary">
+    <section className={`relative w-full ${SURFACE}`}>
 
       {/* ════════════════════════════════════════════════════════════════
-          FULL-VIEWPORT DASHED LINES at the chart top and bottom borders.
-          The chart box (bg-bg-primary + solid border) sits on top of these
-          in DOM order and visually covers them within the chart area,
-          making them appear only in the left/right margins.
+          FULL-WIDTH DASHED LINES at the chart top and bottom borders.
+          The chart box (solid border) sits on top of these in DOM order and
+          visually covers them within the chart area, making them appear only
+          in the left/right margins. Catalog (multi) only — the positioning
+          panel keeps a clean white surface with no bleeding lines.
       ════════════════════════════════════════════════════════════════ */}
-      <div
-        className="absolute inset-x-0 border-t border-dashed border-fg-primary pointer-events-none"
-        style={{ top: CHART_TOP }}
-      />
-      <div
-        className="absolute inset-x-0 border-t border-dashed border-fg-primary pointer-events-none"
-        style={{ top: CHART_BOTTOM }}
-      />
+      {!isSingle && (
+        <>
+          <div
+            className="absolute inset-x-0 border-t border-dashed border-fg-primary pointer-events-none"
+            style={{ top: CHART_TOP }}
+          />
+          <div
+            className="absolute inset-x-0 border-t border-dashed border-fg-primary pointer-events-none"
+            style={{ top: CHART_BOTTOM }}
+          />
+        </>
+      )}
 
-      {/* ── Centered 1248 px container ── */}
-      <div className="mx-auto" style={{ maxWidth: 1248 }}>
+      {/* ── Centered container ── */}
+      <div className="mx-auto" style={{ maxWidth: CONTAINER }}>
 
         {/* ── Content wrapper: paddingTop = CHART_TOP creates the 64px gap ── */}
         <div style={{ paddingTop: CHART_TOP, paddingBottom: 64 }}>
@@ -130,7 +159,7 @@ export default function MatrixChart({ concepts }: Props) {
               {Y_TICKS.map((sp) => (
                 <p
                   key={`yt-${sp}`}
-                  className="absolute font-mono text-metadata text-fg-primary leading-normal bg-bg-primary"
+                  className={`absolute font-mono text-metadata text-fg-primary leading-normal ${SURFACE}`}
                   style={{
                     right: 6,
                     top: toY(sp),
@@ -146,7 +175,7 @@ export default function MatrixChart({ concepts }: Props) {
             </div>
 
             {/* ════════════════════════════════════════════════════════
-                CHART BOX — exactly 882 × 482 px
+                CHART BOX
                 Wrapper aligns SP to the outer 1 px left border of the matrix.
             ════════════════════════════════════════════════════════ */}
             <div
@@ -154,20 +183,21 @@ export default function MatrixChart({ concepts }: Props) {
               style={{ width: CHART_W, height: CHART_H }}
             >
               <div
-                className="relative size-full overflow-visible bg-bg-primary border border-fg-primary"
+                className={`relative size-full overflow-visible ${SURFACE} border border-fg-primary`}
                 style={{ borderWidth: MATRIX_BORDER_W }}
               >
-              {/* SP group — AXIS_LABEL_GAP from matrix left; writing-mode = real bbox */}
+              {/* SP group — AXIS_LABEL_GAP from matrix left; writing-mode = real bbox.
+                  In single mode it's nudged 10 px further left for breathing room. */}
               <div
                 className="absolute top-0 z-10 flex items-center pointer-events-none"
                 style={{
-                  left: -AXIS_LABEL_GAP,
+                  left: -(AXIS_LABEL_GAP + (isSingle ? 10 : 0)),
                   height: CHART_H,
                   transform: "translateX(-100%)",
                 }}
               >
                 <div
-                  className="flex items-center gap-[8px] bg-bg-primary px-[2px]"
+                  className={`flex items-center gap-[8px] ${SURFACE} px-[2px]`}
                   style={{
                     writingMode: "vertical-rl",
                     transform: "rotate(180deg)",
@@ -235,9 +265,9 @@ export default function MatrixChart({ concepts }: Props) {
                       key={b.id}
                       cx={b.bx} cy={b.by} r={b.r}
                       fill="white" stroke="#171717" strokeWidth="1"
-                      style={{ cursor: "pointer" }}
-                      onMouseEnter={() => setHoveredId(b.id)}
-                      onMouseLeave={() => setHoveredId(null)}
+                      style={{ cursor: isSingle ? "default" : "pointer" }}
+                      onMouseEnter={isSingle ? undefined : () => setHoveredId(b.id)}
+                      onMouseLeave={isSingle ? undefined : () => setHoveredId(null)}
                     />
                   ))}
 
@@ -255,6 +285,30 @@ export default function MatrixChart({ concepts }: Props) {
                   />
                 )}
               </svg>
+
+              {/* ── Single mode: persistent concept-name label beside the point ── */}
+              {singleBubble && (
+                <div
+                  className="absolute z-10 pointer-events-none"
+                  style={{
+                    left: singleBubble.bx,
+                    top: singleBubble.by,
+                    transform: [
+                      singleFlipX
+                        ? `translateX(calc(-100% - ${singleBubble.r + 10}px))`
+                        : `translateX(${singleBubble.r + 10}px)`,
+                      "translateY(-50%)",
+                    ].join(" "),
+                  }}
+                >
+                  <span
+                    className="font-heading font-bold uppercase leading-normal text-fg-primary"
+                    style={{ fontSize: 11 }}
+                  >
+                    {singleBubble.title}
+                  </span>
+                </div>
+              )}
 
               {/* ── HTML Tooltip overlay (absolute within chart box) ── */}
               {hovered && (
@@ -298,32 +352,34 @@ export default function MatrixChart({ concepts }: Props) {
               className="relative shrink-0"
               style={{ width: LEG_COL, height: CHART_H }}
             >
-              {/* Stacked flex column, pinned to bottom-left of the legend column */}
-              <div
-                className="absolute flex flex-col"
-                style={{ left: 18, bottom: 12, gap: 10 }}
-              >
-                {legendItems.map(({ v, r, label }) => (
-                  <div key={v} className="flex items-center" style={{ gap: 8, minHeight: r * 2 + 2 }}>
-                    <div
-                      className="flex items-center justify-center"
-                      style={{ width: LEGEND_MAX_R * 2, flexShrink: 0 }}
-                    >
-                      <svg
-                        width={r * 2} height={r * 2}
-                        viewBox={`0 0 ${r * 2} ${r * 2}`}
-                        aria-hidden="true"
+              {/* Point-size legend — hidden in single mode (one point only) */}
+              {!isSingle && (
+                <div
+                  className="absolute flex flex-col"
+                  style={{ left: 18, bottom: 12, gap: 10 }}
+                >
+                  {legendItems.map(({ v, r, label }) => (
+                    <div key={v} className="flex items-center" style={{ gap: 8, minHeight: r * 2 + 2 }}>
+                      <div
+                        className="flex items-center justify-center"
+                        style={{ width: LEGEND_MAX_R * 2, flexShrink: 0 }}
                       >
-                        <circle
-                          cx={r} cy={r} r={r - 0.5}
-                          fill="white" stroke="#171717" strokeWidth="1"
-                        />
-                      </svg>
+                        <svg
+                          width={r * 2} height={r * 2}
+                          viewBox={`0 0 ${r * 2} ${r * 2}`}
+                          aria-hidden="true"
+                        >
+                          <circle
+                            cx={r} cy={r} r={r - 0.5}
+                            fill="white" stroke="#171717" strokeWidth="1"
+                          />
+                        </svg>
+                      </div>
+                      <span className="font-mono text-metadata text-fg-primary leading-normal">{label}</span>
                     </div>
-                    <span className="font-mono text-metadata text-fg-primary leading-normal">{label}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>{/* end main row */}
@@ -348,7 +404,7 @@ export default function MatrixChart({ concepts }: Props) {
 
             {/* CFML group — AXIS_LABEL_GAP from matrix bottom outer border */}
             <div
-              className="absolute flex items-center gap-[6px] bg-bg-primary px-[4px]"
+              className={`absolute flex items-center gap-[6px] ${SURFACE} px-[4px]`}
               style={{ left: toX(50), top: AXIS_LABEL_GAP, transform: "translateX(-50%)" }}
             >
               <p
