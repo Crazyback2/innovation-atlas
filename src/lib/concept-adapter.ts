@@ -1,5 +1,6 @@
 import type { Concept } from "@/src/data/concepts";
 import type { SPResult } from "@/src/data/sp-config/types";
+import type { CFMLResult, CFMLAnswers } from "@/src/lib/scoring";
 
 export type ConceptDbRow = {
   id: string;
@@ -17,13 +18,15 @@ export type ToConceptViewInput = {
   row: ConceptDbRow;
   spAggregate: SPResult | null;
   spResponseCount: number;
+  cfmlResult?: CFMLResult | null;
+  cfmlAnswers?: CFMLAnswers | null;
 };
 
 export function toConceptView(
   input: ToConceptViewInput,
   overrides?: Partial<Concept>
 ): Concept {
-  const { row, spAggregate, spResponseCount } = input;
+  const { row, spAggregate, spResponseCount, cfmlResult, cfmlAnswers } = input;
 
   const base: Concept = {
     // Campi con fonte diretta nel DB
@@ -48,6 +51,18 @@ export function toConceptView(
     // spWindowEnd: nessuna fonte DB // TODO editoriale
     // positioningNotes: nessuna fonte DB // TODO editoriale
   };
+
+  if (spAggregate) {
+    base.spDimensions = spAggregate.perDimension;
+  }
+
+  if (cfmlResult && cfmlAnswers) {
+    base.cfmlDetail = {
+      perLevelScores: cfmlResult.perLevelScores,
+      levelConsolidation: cfmlResult.levelConsolidation,
+      answers: cfmlAnswers,
+    };
+  }
 
   return { ...base, ...overrides };
 }

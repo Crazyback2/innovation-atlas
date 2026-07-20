@@ -136,7 +136,13 @@ export async function loadRealConcept(uuid: string): Promise<Concept | null> {
   const cfmlResult = row.cfml_answers ? calculateCFML(row.cfml_answers) : null;
 
   return toConceptView(
-    { row, spAggregate, spResponseCount },
+    {
+      row,
+      spAggregate,
+      spResponseCount,
+      cfmlResult,
+      cfmlAnswers: row.cfml_answers,
+    },
     {
       ...CONCEPT_EDITORIAL[uuid],
       ...(cfmlResult

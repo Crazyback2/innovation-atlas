@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import SPRadar from "@/app/components/SPRadar";
+import SPBreakdown from "@/app/components/SPBreakdown";
 import { createClient } from "@/src/lib/supabase/server";
 import { calculateSP, aggregateSP } from "@/src/lib/sp-scoring";
 import type { SPConfig, SPAnswers, SPResult } from "@/src/data/sp-config/types";
@@ -30,10 +30,6 @@ type ResponseRow = {
   answers: SPAnswers;
 };
 
-function formatScore(value: number): string {
-  return value.toFixed(1);
-}
-
 function formatDateItalian(isoDate: string): string {
   const date = new Date(isoDate);
   const day = String(date.getDate()).padStart(2, "0");
@@ -57,65 +53,6 @@ export async function generateMetadata({ params }: PageProps) {
       ? `Risultati SP — ${concept.title} — Innovation Atlas`
       : "Risultati SP — Innovation Atlas",
   };
-}
-
-function SPResultsContent({
-  aggregatedResult,
-  responseCount,
-  minResponses,
-}: {
-  aggregatedResult: SPResult;
-  responseCount: number;
-  minResponses: number;
-}) {
-  const belowThreshold =
-    responseCount > 0 && responseCount < minResponses;
-
-  return (
-    <>
-      {belowThreshold && (
-        <p className="mt-10 max-w-[640px] font-sans text-body leading-relaxed text-fg-primary opacity-75">
-          Soglia minima non raggiunta: {responseCount} su {minResponses}{" "}
-          risposte. I risultati sotto sono indicativi.
-        </p>
-      )}
-
-      <section
-        className={`flex flex-col gap-2 ${belowThreshold ? "mt-6" : "mt-10"}`}
-      >
-        <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-          Punteggio totale
-        </h2>
-        <p className="font-heading text-display font-bold leading-normal text-fg-primary">
-          {formatScore(aggregatedResult.total)} / 100
-        </p>
-      </section>
-
-      <section className="mt-10 flex flex-col gap-4">
-        <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-          Profilo per dimensione
-        </h2>
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:gap-10">
-          <SPRadar perDimension={aggregatedResult.perDimension} />
-          <ul className="flex min-w-0 flex-1 flex-col gap-3">
-            {aggregatedResult.perDimension.map((dimension) => (
-              <li
-                key={dimension.dimensionId}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-accent-tertiary py-3"
-              >
-                <span className="font-heading text-body leading-relaxed text-fg-primary">
-                  {dimension.title}
-                </span>
-                <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
-                  {formatScore(dimension.score)} / 100
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    </>
-  );
 }
 
 export default async function SPResultsPage({ params }: PageProps) {
@@ -247,8 +184,8 @@ export default async function SPResultsPage({ params }: PageProps) {
             </div>
           ) : (
             aggregatedResult && (
-              <SPResultsContent
-                aggregatedResult={aggregatedResult}
+              <SPBreakdown
+                perDimension={aggregatedResult.perDimension}
                 responseCount={responseCount}
                 minResponses={typedSurvey.min_responses}
               />

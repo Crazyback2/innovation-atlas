@@ -1,3 +1,6 @@
+import type { CFMLResult, CFMLAnswers } from "@/src/lib/scoring";
+import type { SPDimensionScore } from "@/src/data/sp-config/types";
+
 export type Concept = {
   id: string;
   number: string;
@@ -17,6 +20,12 @@ export type Concept = {
   positioningNotes?: string;
   author: { name: string; handle: string };
   createdAt: string;
+  cfmlDetail?: {
+    perLevelScores: CFMLResult["perLevelScores"];
+    levelConsolidation: CFMLResult["levelConsolidation"];
+    answers: CFMLAnswers;
+  };
+  spDimensions?: SPDimensionScore[];
 };
 
 export const SECTORS = [

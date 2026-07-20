@@ -2,16 +2,22 @@ import type { SPDimensionScore } from "@/src/data/sp-config/types";
 
 type Props = {
   perDimension: SPDimensionScore[];
+  className?: string;
 };
 
-const VIEW_SIZE = 760;
+const VIEW_SIZE = 600;
 const CX = VIEW_SIZE / 2;
 const CY = VIEW_SIZE / 2;
+// Ritaglio verticale del viewBox: il contenuto (etichette comprese) vive tra
+// ~y=134 (etichetta in alto) e ~y=505 (etichetta in basso). Croppiamo il
+// margine vuoto sopra/sotto così il radar sale e l'etichetta superiore resta
+// vicina al bordo del box.
+const VIEW_MIN_Y = 135;
+const VIEW_HEIGHT = 378;
 const MAX_RADIUS = 120;
-const LABEL_RADIUS = MAX_RADIUS * 1.38;
+const LABEL_RADIUS = MAX_RADIUS * 1.18;
 const RING_FRACTIONS = [0.25, 0.5, 0.75, 1] as const;
-const LABEL_LINE_HEIGHT = 12;
-const SCORE_GAP = 4;
+const LABEL_LINE_HEIGHT = 16;
 
 function getAxisAngle(index: number): number {
   return -90 + index * 60;
@@ -57,10 +63,6 @@ function profilePolygonPoints(dimensions: SPDimensionScore[]): string {
     .join(" ");
 }
 
-function formatScore(score: number): string {
-  return score.toFixed(1);
-}
-
 function splitLabel(title: string): string[] {
   if (title.length <= 22) {
     return [title];
@@ -82,9 +84,10 @@ function getLabelAnchor(index: number): {
   switch (index) {
     case 0:
       return { textAnchor: "middle", dominantBaseline: "hanging" };
+    case 3:
+      return { textAnchor: "middle", dominantBaseline: "hanging" };
     case 1:
     case 2:
-    case 3:
       return { textAnchor: "start", dominantBaseline: "middle" };
     case 4:
     case 5:
@@ -94,37 +97,19 @@ function getLabelAnchor(index: number): {
   }
 }
 
-function getScoreOffset(
-  index: number,
-  lineCount: number
-): { dx: number; dy: number } {
-  const titleHeight = lineCount * LABEL_LINE_HEIGHT;
-
-  switch (index) {
-    case 0:
-      return { dx: 0, dy: titleHeight + SCORE_GAP };
-    case 1:
-    case 2:
-    case 3:
-      return { dx: 0, dy: titleHeight / 2 + SCORE_GAP + 6 };
-    case 4:
-    case 5:
-      return { dx: 0, dy: titleHeight / 2 + SCORE_GAP + 6 };
-    default:
-      return { dx: 0, dy: titleHeight + SCORE_GAP };
-  }
-}
-
-export default function SPRadar({ perDimension }: Props) {
+export default function SPRadar({
+  perDimension,
+  className = "mx-auto w-full max-w-[360px] shrink-0",
+}: Props) {
   const axisCount = perDimension.length;
 
   return (
     <svg
-      viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
+      viewBox={`0 ${VIEW_MIN_Y} ${VIEW_SIZE} ${VIEW_HEIGHT}`}
       overflow="visible"
       role="img"
       aria-label="Profilo SP per dimensione"
-      className="mx-auto w-full max-w-[360px] shrink-0"
+      className={className}
     >
       {RING_FRACTIONS.map((fraction) => (
         <polygon
@@ -165,7 +150,6 @@ export default function SPRadar({ perDimension }: Props) {
         const labelPos = polarToCartesian(CX, CY, LABEL_RADIUS, getAxisAngle(index));
         const anchor = getLabelAnchor(index);
         const lines = splitLabel(dimension.title);
-        const scoreOffset = getScoreOffset(index, lines.length);
 
         return (
           <g key={dimension.dimensionId}>
@@ -175,8 +159,10 @@ export default function SPRadar({ perDimension }: Props) {
               textAnchor={anchor.textAnchor}
               dominantBaseline={anchor.dominantBaseline}
               fill="var(--color-fg-primary)"
-              fontSize={10}
-              fontFamily="var(--font-heading)"
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "var(--text-body)",
+              }}
             >
               {lines.map((line, lineIndex) => (
                 <tspan
@@ -187,18 +173,6 @@ export default function SPRadar({ perDimension }: Props) {
                   {line}
                 </tspan>
               ))}
-            </text>
-            <text
-              x={labelPos.x + scoreOffset.dx}
-              y={labelPos.y + scoreOffset.dy}
-              textAnchor={anchor.textAnchor}
-              dominantBaseline={anchor.dominantBaseline}
-              fill="var(--color-fg-primary)"
-              fontSize={9}
-              fontFamily="var(--font-mono)"
-              opacity={0.7}
-            >
-              {formatScore(dimension.score)}
             </text>
           </g>
         );

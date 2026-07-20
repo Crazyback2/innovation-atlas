@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
-import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { CFML_LEVELS } from "../questions";
+import CFMLBreakdown from "@/app/components/CFMLBreakdown";
 import { createClient } from "@/src/lib/supabase/server";
 import {
   calculateCFML,
-  CFML_WEIGHTS,
-  isLevelUnlocked,
   type CFMLAnswers,
   type CFMLLevel,
-  type CFMLLevelKey,
 } from "@/src/lib/scoring";
 
 type PageProps = {
@@ -29,90 +24,11 @@ type ConceptRow = {
   cfml_completed_at: string | null;
 };
 
-const LEVEL_NAMES: Record<0 | CFMLLevel, string> = {
-  0: "Nessun livello consolidato",
-  1: "Principio definito",
-  2: "Struttura definita",
-  3: "Funzione verificata",
-  4: "Prototipo fisico",
-  5: "Prototipo in ambiente rilevante",
-  6: "Definizione e replicabilità",
-};
-
-const LEVELS: CFMLLevel[] = [1, 2, 3, 4, 5, 6];
 const SCORE_SEGMENT_COUNT = 20;
-const STEPPER_LABELS = ["L0", "L1", "L2", "L3", "L4", "L5", "L6"] as const;
-
-function getLevelKey(level: CFMLLevel): CFMLLevelKey {
-  return `L${level}` as CFMLLevelKey;
-}
 
 function formatScore(value: number): string {
   return value.toFixed(1);
 }
-
-function StepperDivider({
-  label,
-}: {
-  label: (typeof STEPPER_LABELS)[number];
-}) {
-  return (
-    <div className="flex shrink-0 flex-col items-center">
-      <div className="h-11 w-px border-l border-dashed border-border-muted" />
-      <span className="mt-2 font-mono text-metadata uppercase leading-normal text-fg-primary">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function getLevelStatus(
-  level: CFMLLevel,
-  answers: CFMLAnswers,
-  consolidated: boolean
-): "consolidato" | "in corso" | "bloccato" {
-  if (consolidated) {
-    return "consolidato";
-  }
-  if (isLevelUnlocked(level, answers)) {
-    return "in corso";
-  }
-  return "bloccato";
-}
-
-function getStatusBadgeLabel(
-  status: "consolidato" | "in corso" | "bloccato",
-  score: number,
-  maxScore: number
-): string {
-  switch (status) {
-    case "consolidato":
-      return "superato";
-    case "in corso":
-      return `${formatScore(score)} / ${maxScore}`;
-    case "bloccato":
-      return "bloccato";
-  }
-}
-
-function getStatusBadgeClassName(
-  status: "consolidato" | "in corso" | "bloccato"
-): string {
-  const base =
-    "flex h-[29px] shrink-0 items-center border border-fg-primary px-3 pt-2 pb-[7px] font-mono text-metadata uppercase leading-none text-fg-primary";
-
-  switch (status) {
-    case "consolidato":
-      return `${base} bg-accent-primary`;
-    case "in corso":
-      return `${base} bg-bg-elevated`;
-    case "bloccato":
-      return `${base} bg-bg-elevated opacity-40`;
-  }
-}
-
-const LEVEL_DETAIL_ACTION_CLASS =
-  "flex h-[29px] shrink-0 items-center gap-2.5 border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pt-2 pb-[7px] font-mono text-metadata leading-none text-fg-primary transition-colors duration-150 ease-out hover:bg-accent-primary";
 
 function getInterpretiveMessage(level: 0 | CFMLLevel): string {
   if (level === 6) {
@@ -237,87 +153,12 @@ export default async function CFMLResultsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="border border-fg-primary bg-bg-elevated px-14 pb-6 pt-8">
-              <p className="font-sans text-lead leading-normal text-fg-primary">
-                Livello raggiunto:
-              </p>
-              <h2 className="mt-2 font-heading font-semibold uppercase leading-[60px] text-fg-primary">
-                <span className="text-hero">L{consolidationLevel}</span>{" "}
-                <span className="text-display">
-                  {LEVEL_NAMES[consolidationLevel]}
-                </span>
-              </h2>
-
-              <div className="mt-6">
-                <div className="flex min-w-0 items-start gap-2">
-                  <StepperDivider label="L0" />
-                  {LEVELS.map((level) => {
-                    const levelKey = getLevelKey(level);
-                    const consolidated = result.levelConsolidation[levelKey];
-                    const isReached =
-                      consolidationLevel > 0 && level === consolidationLevel;
-
-                    return (
-                      <Fragment key={level}>
-                        <div
-                          className={`h-11 min-w-0 flex-1 ${consolidated ? "bg-accent-primary" : "bg-bg-primary"} ${isReached ? "ring-2 ring-inset ring-fg-primary" : ""}`}
-                          aria-label={`Livello ${level}${
-                            isReached ? ", livello raggiunto" : ""
-                          }`}
-                        />
-                        <StepperDivider label={STEPPER_LABELS[level]} />
-                      </Fragment>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <section className="w-full min-w-0 max-w-full border-y border-dashed border-border-muted py-6">
-              <ul className="flex w-full min-w-0 flex-col">
-                {LEVELS.map((level) => {
-                  const levelKey = getLevelKey(level);
-                  const levelMeta = CFML_LEVELS.find(
-                    (entry) => entry.level === level
-                  );
-                  const score = result.perLevelScores[levelKey];
-                  const maxScore = CFML_WEIGHTS[levelKey];
-                  const consolidated = result.levelConsolidation[levelKey];
-                  const status = getLevelStatus(level, answers, consolidated);
-                  const title = levelMeta?.title ?? LEVEL_NAMES[level];
-
-                  return (
-                    <li
-                      key={level}
-                      className="flex w-full min-w-0 min-h-16 items-center justify-between gap-4"
-                    >
-                      <p className="min-w-0 flex-1 basis-0 font-sans text-fg-primary">
-                        <span className="text-display font-medium">{`L${level}: `}</span>
-                        <span className="text-body uppercase">{title}</span>
-                      </p>
-                      <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-                        <span
-                          className={getStatusBadgeClassName(status)}
-                          aria-label={`Stato livello ${level}: ${status}, punteggio ${formatScore(score)} su ${maxScore}`}
-                        >
-                          {getStatusBadgeLabel(status, score, maxScore)}
-                        </span>
-                        <Link
-                          href={`/concept/${typedConcept.id}/cfml`}
-                          className={LEVEL_DETAIL_ACTION_CLASS}
-                        >
-                          Vedi domande
-                          <ChevronDown
-                            className="size-3 shrink-0 -rotate-90"
-                            aria-hidden
-                          />
-                        </Link>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+            <CFMLBreakdown
+              perLevelScores={result.perLevelScores}
+              levelConsolidation={result.levelConsolidation}
+              answers={answers}
+              conceptId={typedConcept.id}
+            />
 
             <p className="max-w-[640px] font-sans text-body leading-relaxed text-fg-primary opacity-75">
               {getInterpretiveMessage(consolidationLevel)}
