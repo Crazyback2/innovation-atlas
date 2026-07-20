@@ -19,6 +19,37 @@ export const REAL_CONCEPT_IDS: Record<string, string> = {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Carica SOLO le immagini reali (colonna images) dei 3 concept pubblici dal DB,
+// mappate sullo slug pubblico (shu/cubit/hapto). Query leggera: niente aggregati
+// SP/CFML. Serve a mostrare la hero image reale nelle card dell'archivio senza
+// modificare src/data/concepts.ts.
+export async function loadRealConceptImages(): Promise<Record<string, string[]>> {
+  const supabase = await createClient();
+
+  const uuidToSlug = Object.fromEntries(
+    Object.entries(REAL_CONCEPT_IDS).map(([slug, uuid]) => [uuid, slug])
+  );
+
+  const { data, error } = await supabase
+    .from("concepts")
+    .select("id, images")
+    .in("id", Object.values(REAL_CONCEPT_IDS))
+    .eq("is_public", true);
+
+  if (error || !data) {
+    return {};
+  }
+
+  const result: Record<string, string[]> = {};
+  for (const row of data as { id: string; images: string[] | null }[]) {
+    const slug = uuidToSlug[row.id];
+    if (slug && row.images && row.images.length > 0) {
+      result[slug] = row.images;
+    }
+  }
+  return result;
+}
+
 export function resolveConceptId(param: string): string | null {
   const mapped = REAL_CONCEPT_IDS[param.toLowerCase()];
   if (mapped) {

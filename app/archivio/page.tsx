@@ -2,6 +2,11 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import ArchivioClient from "@/app/components/ArchivioClient";
 import { concepts } from "@/src/data/concepts";
+import { loadRealConceptImages } from "@/src/lib/archivio-source";
+
+// La griglia mostra le hero image reali (dal DB) per i 3 concept pubblici:
+// dati live → niente cache statica, coerente con /archivio/[id].
+export const dynamic = "force-dynamic";
 
 const totalConcepts = concepts.length;
 const totalSectors = new Set(concepts.map((c) => c.sector)).size;
@@ -16,7 +21,12 @@ export const metadata = {
   description: "Archivio di concept di prodotti futuri analizzati da Innovation Atlas.",
 };
 
-export default function ArchivioPage() {
+export default async function ArchivioPage() {
+  const realImages = await loadRealConceptImages();
+  const conceptsWithImages = concepts.map((c) =>
+    realImages[c.id] ? { ...c, images: realImages[c.id] } : c
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-bg-primary font-sans">
       <Header />
@@ -119,7 +129,7 @@ export default function ArchivioPage() {
           </div>
         </section>
 
-        <ArchivioClient concepts={concepts} />
+        <ArchivioClient concepts={conceptsWithImages} />
       </main>
 
       <Footer />

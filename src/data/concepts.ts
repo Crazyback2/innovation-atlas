@@ -47,23 +47,56 @@ export function getQuadrant(c: Concept): "Q1" | "Q2" | "Q3" | "Q4" {
 }
 
 export const concepts: Concept[] = [
-  // ── Q1 (cfml≥50, sp≥50) ────────────────────────────────────────────────
+  // ── Concept reali (allineati al DB) ─────────────────────────────────────
+  {
+    id: "shu",
+    number: "03",
+    title: "SHU",
+    tagline: "Oggetto speculativo relazionale",
+    description:
+      "SHU è un oggetto speculativo che indaga la relazione tra corpo e presenza dell'altro, mettendo in scena una forma d'uso ambigua e sensoriale più che funzionale.",
+    images: [],
+    sector: "Cultura e intrattenimento",
+    tags: ["speculative design", "corpo", "relazione"],
+    cfml: 100,
+    sp: 62.0,
+    spResponses: 25,
+    author: { name: "Diego Reggiani", handle: "diegoreggiani" },
+    createdAt: "2026-04-01",
+  },
   {
     id: "cubit",
-    number: "NR. 0174",
-    title: "CUBIT",
-    tagline: "Modular desk space system",
+    number: "01",
+    title: "Cubit",
+    tagline: "Pista per biglie modulare",
     description:
-      "Cubit è una piattaforma di scrivania modulare composta da unità magnetiche intercambiabili da 10 cm per lato. Ogni modulo integra funzioni diverse — caricatore wireless, portapenne, illuminazione LED, hub USB — e si aggancia senza attrezzi a qualsiasi configurazione. Il sistema è progettato per adattarsi ai ritmi del lavoro ibrido: si smonta in trenta secondi e si riconfigura altrettanto rapidamente in un nuovo spazio. I materiali sono alluminio riciclato e biopolimeri stampati a iniezione.",
+      "Cubit è una pista per biglie modulare pensata come strumento di gioco e regolazione per persone neurodivergenti. I moduli si compongono liberamente per costruire percorsi sempre nuovi, offrendo un'esperienza tattile e ripetibile.",
     images: ["/concepts/placeholder.jpg"],
     sector: "Lavoro e produttività",
-    tags: ["workspace", "modular", "desk", "productivity", "industrial-design"],
-    cfml: 74,
-    sp: 55,
-    spResponses: 41,
-    author: { name: "Marco Trentini", handle: "@marcotrentini" },
+    tags: ["gioco", "neurodivergenza", "modularità"],
+    cfml: 91,
+    sp: 84.3,
+    spResponses: 25,
+    author: { name: "Lorenzo Romano", handle: "lorenzoromano" },
     createdAt: "2025-10-03",
   },
+  {
+    id: "hapto",
+    number: "02",
+    title: "Hapto",
+    tagline: "Manopola aptica per motocicletta",
+    description:
+      "Hapto è una manopola aptica per motocicletta che traduce informazioni di guida e pericoli stradali in feedback tattili sul comando, permettendo al motociclista di restare concentrato sulla strada.",
+    images: ["/concepts/placeholder.jpg"],
+    sector: "Sicurezza e protezione",
+    tags: ["mobilità", "aptica", "sicurezza"],
+    cfml: 46,
+    sp: 84.0,
+    spResponses: 25,
+    author: { name: "Francesco Scaramuzzi", handle: "francescoscaramuzzi" },
+    createdAt: "2025-11-12",
+  },
+  // ── Q1 (cfml≥50, sp≥50) ────────────────────────────────────────────────
   {
     id: "lunare",
     number: "NR. 0321",
@@ -298,22 +331,6 @@ export const concepts: Concept[] = [
   },
 
   // ── Q3 (cfml≥50, sp<50) ────────────────────────────────────────────────
-  {
-    id: "hapto",
-    number: "NR. 0909",
-    title: "HAPTO",
-    tagline: "Haptic safety system",
-    description:
-      "Hapto è un sistema indossabile da polso che traduce i pericoli stradali in segnali tattili di intensità variabile. Pensato per ciclisti urbani e runner, elimina la necessità di distogliere lo sguardo dal percorso. Il modulo sensoriale analizza il traffico circostante tramite sensori di prossimità a ultrasuoni e restituisce pattern vibrotattili codificati. L'app companion permette di personalizzare le soglie di allerta e di registrare i percorsi più sicuri.",
-    images: ["/concepts/placeholder.jpg"],
-    sector: "Sicurezza e protezione",
-    tags: ["mobility", "safety", "wearable", "haptic", "urban", "cycling"],
-    cfml: 64,
-    sp: 48,
-    spResponses: 26,
-    author: { name: "Giulia Ferrante", handle: "@giuliaferrante" },
-    createdAt: "2025-11-12",
-  },
   {
     id: "volta",
     number: "NR. 0281",
