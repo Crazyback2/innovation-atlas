@@ -1,78 +1,40 @@
-const MARQUEE_UNIT =
-  "INNOVATION ATLAS: ATTIVO   //   47 CONCEPT VALUTATI   //   12 SETTORI COPERTI.   —   ";
+import { concepts, isPlaceholderConcept, type Concept } from "@/src/data/concepts";
+import { ArchiveConceptCard, CONCEPT_CARD_GRID_W } from "@/app/components/CardGrid";
+import { loadRealConceptImages } from "@/src/lib/archivio-source";
+
+// Ticker derivato dai dati reali (stessa fonte di /archivio):
+// conteggio concept = lunghezza dell'array, settori = valori distinti del campo
+// sector. "2 ASSI DIAGNOSTICI" è fisso (CFML × SP).
+const CONCEPT_COUNT = concepts.length;
+const SECTOR_COUNT = new Set(concepts.map((c) => c.sector)).size;
+
+const MARQUEE_UNIT = `INNOVATION ATLAS: ${CONCEPT_COUNT} CONCEPT MAPPATI   //   ${SECTOR_COUNT} SETTORI   //   2 ASSI DIAGNOSTICI.   —   `;
 const MARQUEE_HALF = MARQUEE_UNIT.repeat(4);
 
-// Larghezza gruppo card: 4 × 248 px + 3 × 24 px gap = 1 064 px
-const GRID_W = 4 * 248 + 3 * 24; // 1064
+// Larghezza gruppo card: 4 × 248 px + 3 × 24 px gap = 1 064 px (riusata dall'archivio)
+const GRID_W = CONCEPT_CARD_GRID_W; // 1064
 
-type ConceptCardData = {
-  project: string;
-  author: string;
-  sp: number;
-  cfml: number;
-};
+// Selezione preview: prima i tre concept reali (ordine cubit → shu → hapto),
+// poi i primi cinque dimostrativi in ordine d'array. L'array sorgente non viene
+// riordinato: la selezione avviene qui.
+const REAL_PREVIEW_ORDER = ["cubit", "shu", "hapto"] as const;
 
-const CARDS: ConceptCardData[] = [
-  { project: "Grogolix",       author: "Gabriele Beltrami", sp: 76,  cfml: 34  },
-  { project: "Red Bull Dakar", author: "Lorenzo Romano",    sp: 83,  cfml: 20  },
-  { project: "HZ.008",         author: "Heimplanet",        sp: 66,  cfml: 100 },
-  { project: "Wh.E3",          author: "Joshua O'Connor",   sp: 50,  cfml: 71  },
-  { project: "MK.Velox",       author: "Marta Kauffmann",   sp: 72,  cfml: 45  },
-  { project: "Solara IX",      author: "Takeshi Mori",      sp: 58,  cfml: 88  },
-  { project: "Ark.Zero",       author: "Elisa Ferretti",    sp: 91,  cfml: 30  },
-  { project: "NWD-7",          author: "Chloe Bernard",     sp: 44,  cfml: 62  },
-];
+const realPreview: Concept[] = REAL_PREVIEW_ORDER.map(
+  (id) => concepts.find((c) => c.id === id),
+).filter((c): c is Concept => Boolean(c));
 
-function ConceptCard({ project, author, sp, cfml }: ConceptCardData) {
-  return (
-    // Container: group per coordinare il double-transform; w/shrink risiedono qui
-    // L'hover si attiva sull'intera area del container (mouse-enter)
-    <div className="relative group cursor-pointer w-[248px] shrink-0">
+const demoPreview: Concept[] = concepts.filter(isPlaceholderConcept).slice(0, 5);
 
-      {/* Piastra nera — stessa footprint della card via absolute inset-0.
-          Default: translate(0,0) — coincide con la card, non visibile.
-          Hover:   translate(+1px, +1px). */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-fg-primary transition-transform duration-300 ease-out group-hover:translate-x-[1px] group-hover:translate-y-[1px]"
-      />
+const PREVIEW_CONCEPTS: Concept[] = [...realPreview, ...demoPreview];
 
-      {/* Card — sopra la piastra (relative crea stacking context).
-          Default: translate(0,0).
-          Hover:   translate(-2px, -2px) → gap visivo totale 3px. */}
-      <div className="relative border border-fg-primary bg-bg-elevated transition-transform duration-300 ease-out group-hover:-translate-x-[2px] group-hover:-translate-y-[2px]">
-        <div className="h-[180px] bg-accent-tertiary" />
-        <div className="h-[68px] border-t border-fg-primary px-[13px] py-[9px] flex gap-x-[6px]">
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <span className="font-mono text-metadata text-fg-primary leading-normal truncate">
-              Project: {project}
-            </span>
-            <span className="font-mono text-metadata text-fg-primary leading-normal">
-              Author:
-            </span>
-            <span className="font-mono text-metadata text-fg-primary leading-normal truncate">
-              {author}
-            </span>
-          </div>
-          <div className="flex flex-col items-end shrink-0">
-            <span className="font-mono font-bold text-metadata text-fg-primary leading-normal select-none">
-              &nbsp;
-            </span>
-            <span className="font-mono font-bold text-metadata text-fg-primary leading-normal whitespace-nowrap">
-              {sp} SP
-            </span>
-            <span className="font-mono font-bold text-metadata text-fg-primary leading-normal whitespace-nowrap">
-              {cfml} CFML
-            </span>
-          </div>
-        </div>
-      </div>
-
-    </div>
+export default async function AtlasPreview() {
+  // Come nella griglia /archivio: le hero image reali dei 3 concept pubblici
+  // arrivano dal DB; i dimostrativi usano le immagini definite in concepts.ts.
+  const realImages = await loadRealConceptImages();
+  const previewConcepts = PREVIEW_CONCEPTS.map((c) =>
+    realImages[c.id] ? { ...c, images: realImages[c.id] } : c,
   );
-}
 
-export default function AtlasPreview() {
   return (
     /*
       Ghost container: `absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1440px]`
@@ -145,8 +107,19 @@ export default function AtlasPreview() {
           <div className="pt-[120px] pb-0 flex flex-col items-center">
 
             <div className="grid grid-cols-4 gap-[24px]" style={{ width: GRID_W }}>
-              {CARDS.map((card) => (
-                <ConceptCard key={card.project} {...card} />
+              {previewConcepts.map((concept) => (
+                <ArchiveConceptCard
+                  key={concept.id}
+                  detailBase="archivio"
+                  concept={{
+                    id: concept.id,
+                    title: concept.title,
+                    author: concept.author,
+                    images: concept.images,
+                    sp: concept.sp,
+                    cfml: concept.cfml,
+                  }}
+                />
               ))}
             </div>
 
