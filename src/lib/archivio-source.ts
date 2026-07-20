@@ -1,4 +1,5 @@
 import type { Concept } from "@/src/data/concepts";
+import { REAL_CONCEPT_SLUG_TO_UUID } from "@/src/data/concepts";
 import type { SPConfig, SPAnswers, SPResult } from "@/src/data/sp-config/types";
 import type { CFMLAnswers } from "@/src/lib/scoring";
 import { createClient } from "@/src/lib/supabase/server";
@@ -8,13 +9,9 @@ import { toConceptView, type ConceptDbRow } from "@/src/lib/concept-adapter";
 import { CONCEPT_EDITORIAL } from "@/src/lib/concept-editorial";
 
 // Mappa slug pubblico -> UUID reale in DB (concepts.is_public = true).
-// Gli slug mock in src/data/concepts.ts sono "cubit" e "hapto" (combaciano);
-// per "shu" NON esiste un concept mock corrispondente (nessuna modifica al mock).
-export const REAL_CONCEPT_IDS: Record<string, string> = {
-  cubit: "22811dc5-b058-4df0-a8a3-f53db6178073",
-  shu: "e11e5c3a-19f8-429e-ae7e-aa8c95b4dedf",
-  hapto: "fad41e8a-ab6e-4b54-b9e8-bf802050207c",
-};
+// Fonte di verità unica in src/data/concepts.ts (REAL_CONCEPT_SLUG_TO_UUID),
+// riusata qui per non duplicare gli identificativi dei concept reali.
+export const REAL_CONCEPT_IDS: Record<string, string> = REAL_CONCEPT_SLUG_TO_UUID;
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

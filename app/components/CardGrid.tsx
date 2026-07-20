@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Concept } from "@/src/data/concepts";
+import { isPlaceholderConcept } from "@/src/data/concepts";
 
 const PAGE_SIZE = 20;
 export const CONCEPT_CARD_GRID_W = 4 * 248 + 3 * 24; // 1064
@@ -51,6 +52,12 @@ export function ArchiveConceptCard({
 }) {
   const imageSrc = concept.images[0] ?? "/concepts/placeholder.jpg";
 
+  // Solo nella griglia /archivio i concept dimostrativi mostrano "Placeholder"
+  // al posto del nome autore inventato. La dashboard (detailBase="concept")
+  // elenca concept reali dell'utente e non è interessata.
+  const isDemo = detailBase === "archivio" && isPlaceholderConcept(concept);
+  const authorName = isDemo ? "Placeholder" : concept.author.name;
+
   return (
     <Link
       href={`/${detailBase}/${concept.id}`}
@@ -82,7 +89,7 @@ export function ArchiveConceptCard({
               Author:
             </span>
             <span className="font-mono text-metadata text-fg-primary leading-normal truncate">
-              {concept.author.name}
+              {authorName}
             </span>
           </div>
           <div className="flex flex-col items-end shrink-0">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Concept } from "@/src/data/concepts";
+import InfoIcon from "@/app/components/InfoIcon";
 
 // ── Bubble radius — three fixed tiers (no continuous scale) ─────────────────
 // 10–29 → small · 30–74 → medium · 75+ → large
@@ -30,15 +31,6 @@ function quadrantLabel(cfml: number, sp: number): string {
   if (cfml >= 50 && sp >= 50) return "Concept allineato";
   if (cfml < 50 && sp < 50) return "Idea embrionale";
   return "In cerca di senso";
-}
-
-// ── Info icon — HTML, identical to the landing Matrix style ──────────────────
-function InfoIcon() {
-  return (
-    <div className="w-[18px] h-[18px] rounded-full border border-accent-secondary flex items-center justify-center shrink-0">
-      <span className="font-mono text-[11px] text-accent-secondary leading-none">i</span>
-    </div>
-  );
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────

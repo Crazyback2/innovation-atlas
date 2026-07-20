@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import type { Concept } from "@/src/data/concepts";
-import { getQuadrant } from "@/src/data/concepts";
+import { getQuadrant, isPlaceholderConcept } from "@/src/data/concepts";
+import InfoIcon from "@/app/components/InfoIcon";
 
 interface Props {
   concept: Concept;
@@ -52,11 +53,13 @@ function LightboxImage({ src, alt }: { src: string; alt: string }) {
 export default function ConceptHero({ concept }: Props) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const imageCount = concept.images.length;
   const hasMultipleImages = imageCount > 1;
   const currentImage = imageCount > 0 ? concept.images[currentImageIndex] : null;
   const quadrant = getQuadrant(concept);
+  const isPlaceholder = isPlaceholderConcept(concept);
 
   function goToPrevious() {
     if (!hasMultipleImages) return;
@@ -89,7 +92,42 @@ export default function ConceptHero({ concept }: Props) {
   return (
     <div className="w-[1160px]">
       {/* ── Hero box ── */}
-      <div className="flex border border-fg-primary bg-bg-elevated">
+      <div className="relative flex border border-fg-primary bg-bg-elevated">
+        {/* ── Etichetta PLACEHOLDER — solo per i concept dimostrativi ──
+            Tipografia metadata, affiancata dall'icona informativa condivisa
+            (stessa usata nelle intestazioni della matrice /archivio). */}
+        {isPlaceholder && (
+          <div className="absolute left-[16px] top-[16px] z-20">
+            <div className="flex items-center gap-[8px] border border-fg-primary bg-bg-elevated px-[10px] py-[7px]">
+              <span className="font-mono text-metadata uppercase text-fg-primary leading-none">
+                PLACEHOLDER
+              </span>
+              <button
+                type="button"
+                aria-label="Cos'è un concept dimostrativo"
+                aria-expanded={infoOpen}
+                onClick={() => setInfoOpen((prev) => !prev)}
+                className="flex items-center"
+              >
+                <InfoIcon />
+              </button>
+            </div>
+            {infoOpen && (
+              <div
+                role="tooltip"
+                className="mt-[8px] w-[320px] border border-fg-primary bg-bg-elevated p-[12px]"
+              >
+                <p className="font-mono text-metadata text-fg-primary leading-normal">
+                  Concept dimostrativo. Immagini e punteggi sono generati per
+                  popolare l&apos;archivio e illustrare il funzionamento della
+                  piattaforma. I dati reali provengono dalle valutazioni CFML e
+                  dalle rilevazioni SP dei concept analizzati.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Left column — image */}
         <div className="size-[580px] shrink-0 border-r border-fg-primary overflow-hidden">
           {currentImage ? (
