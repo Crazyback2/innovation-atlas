@@ -91,12 +91,21 @@ export default function Hero() {
         Scorri in basso ↓
       </button>
 
-      {/* ── Icon placeholder — 54×54px, right=96, bottom=96 ── */}
-      {/* White square with 1px black border — SVG to be added later */}
+      {/* ── Icon square — 54×54px, right=96, bottom=96 ── */}
+      {/* White square with 1px black border. Dimensione/posizione/bordo invariati:
+          il globe è centrato con un margine interno che gli lascia respiro. */}
       <div
-        className="absolute right-[96px] bottom-[96px] w-[54px] h-[54px] bg-bg-elevated border border-fg-primary"
+        className="absolute right-[96px] bottom-[96px] w-[54px] h-[54px] bg-bg-elevated border border-fg-primary flex items-center justify-center"
         aria-hidden="true"
-      />
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/globe1.svg"
+          alt=""
+          className="block"
+          style={{ width: 32, height: 32 }}
+        />
+      </div>
 
     </section>
   );

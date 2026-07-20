@@ -75,12 +75,33 @@ const LEGEND = [
   { r: 22, label: "≥ 75" },
 ] as const;
 
-// ─── Info icon (violet circle with "i") ─────────────────────────
-function InfoIcon() {
+// ─── Testi dei tooltip degli assi ───────────────────────────────
+const CFML_TOOLTIP =
+  "Concept Functional Maturity Level. Misura quanto il concept è definito sul piano tecnico e funzionale, attraverso una checklist di autovalutazione su sei livelli progressivi. Un livello si consolida solo se i precedenti sono superati.";
+const SP_TOOLTIP =
+  "Symbolic Perception. Misura come il concept viene percepito da chi lo guarda, su sei dimensioni: estetica, ruolo e categoria, significato identitario, morale, relazionale e risposta emotiva. Il punteggio deriva dalle risposte a un questionario.";
+
+// Stile del box tooltip — stesso pattern role="tooltip" già usato in
+// ConceptDashboard/ConceptHero. Sfondo pieno (bg-bg-elevated) così le linee
+// tratteggiate non traspaiono; padding ampio; z-50 sopra i box numerati.
+// maxWidth via style (niente arbitrary values). Si apre SEMPRE sopra l'etichetta.
+const TOOLTIP_CLASS =
+  "pointer-events-none absolute z-50 hidden group-hover:block group-focus-within:block whitespace-normal normal-case bg-bg-elevated border border-fg-primary font-sans text-body text-fg-primary leading-normal px-4 py-3";
+const TOOLTIP_MAX_W = 280;
+
+// ─── Info icon (violet circle with "i") — trigger hover/focus del tooltip ───
+function InfoIcon({ label, describedBy }: { label: string; describedBy: string }) {
   return (
-    <div className="w-[18px] h-[18px] rounded-full border border-accent-secondary flex items-center justify-center shrink-0">
-      <span className="font-mono text-[11px] text-accent-secondary leading-none">i</span>
-    </div>
+    <span
+      className="pointer-events-auto flex shrink-0 cursor-help items-center justify-center rounded-full border border-accent-secondary"
+      style={{ width: 18, height: 18 }}
+      tabIndex={0}
+      role="img"
+      aria-label={label}
+      aria-describedby={describedBy}
+    >
+      <span className="font-mono text-metadata text-accent-secondary leading-none">i</span>
+    </span>
   );
 }
 
@@ -204,9 +225,13 @@ export default function Matrix() {
       ═══════════════════════════════════════════════════════════ */}
 
       {/* ── SP group — 20 px from chart left (x=278); icon 8 px above label top ── */}
+      {/* `group` sul contenitore NON ruotato: il tooltip è figlio diretto qui
+          (fuori dal div ruotato -90°) così resta orizzontale e leggibile.
+          Si apre sopra (verso il top del chart), dentro l'area matrice.
+          z-30: stacking context sopra i box numerati (più avanti nel DOM). */}
       <div
-        className="absolute z-10 flex items-center justify-end pointer-events-none"
-        style={{ left: 258, top: 380, height: 482, transform: "translateX(-100%)" }}
+        className="group absolute z-30 flex items-center justify-end pointer-events-none"
+        style={{ left: 278, top: 380, height: 482, transform: "translateX(-100%)" }}
       >
         <div
           className="flex items-center gap-[8px] whitespace-nowrap bg-bg-primary px-[2px]"
@@ -218,8 +243,22 @@ export default function Matrix() {
           >
             <strong>SP</strong>: PERCEZIONE SIMBOLICA
           </p>
-          <InfoIcon />
+          <InfoIcon label="Cos'è la SP" describedBy="tt-sp" />
         </div>
+        <span
+          id="tt-sp"
+          role="tooltip"
+          className={TOOLTIP_CLASS}
+          style={{
+            left: "100%",
+            bottom: "50%",
+            marginLeft: 8,
+            marginBottom: 8,
+            width: TOOLTIP_MAX_W,
+          }}
+        >
+          {SP_TOOLTIP}
+        </span>
       </div>
 
       {/* ── Y-axis tick labels ──
@@ -297,9 +336,11 @@ export default function Matrix() {
       {/* ── X-axis label + info icon ── */}
       {/* Figma: centered at x=720, top≈893.
           bg-bg-primary hides the vertical centre dashed line
-          that would otherwise show through the label text. */}
+          that would otherwise show through the label text.
+          Tooltip SOPRA l'etichetta (bottom:100%) → resta nell'area chart,
+          fuori dai box 01–04. z-30 sopra quei box. */}
       <div
-        className="absolute flex items-center gap-[6px] bg-bg-primary px-[4px]"
+        className="group absolute z-30 flex items-center gap-[6px] bg-bg-primary px-[4px]"
         style={{ left: "50%", top: 893, transform: "translateX(-50%)" }}
       >
         <p
@@ -308,7 +349,21 @@ export default function Matrix() {
         >
           <strong>CFML</strong>: MATURITÀ FUNZIONALE
         </p>
-        <InfoIcon />
+        <InfoIcon label="Cos'è la CFML" describedBy="tt-cfml" />
+        <span
+          id="tt-cfml"
+          role="tooltip"
+          className={TOOLTIP_CLASS}
+          style={{
+            left: "50%",
+            bottom: "100%",
+            marginBottom: 8,
+            transform: "translateX(-50%)",
+            width: TOOLTIP_MAX_W,
+          }}
+        >
+          {CFML_TOOLTIP}
+        </span>
       </div>
 
       {/* ── Legend (bottom-right of chart) ── */}
@@ -429,15 +484,6 @@ export default function Matrix() {
         style={{ left: 219, top: 1389 }}
       >
         Analizza concept ↗
-      </button>
-
-      {/* ── CTA: Diagnosi — lime → nero, abs left=1114, top=1389 ── */}
-      <button
-        type="button"
-        className="absolute h-[30px] px-[8px] flex items-center justify-center gap-[8px] bg-accent-primary border border-fg-primary font-sans text-body text-fg-primary whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ease-out hover:bg-fg-primary hover:text-bg-elevated focus-visible:bg-fg-primary focus-visible:text-bg-elevated focus-visible:outline-none"
-        style={{ left: 1114, top: 1389 }}
-      >
-        Diagnosi? ↓
       </button>
 
       </div>{/* end mx-auto frame */}
