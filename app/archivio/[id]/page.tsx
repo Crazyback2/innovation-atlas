@@ -8,6 +8,11 @@ import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import ConceptSurveyCTA from "@/app/components/ConceptSurveyCTA";
 import ConceptComments from "@/app/components/ConceptComments";
 import { concepts } from "@/src/data/concepts";
+import { resolveConceptId, loadRealConcept } from "@/src/lib/archivio-source";
+
+// I tre concept pubblici leggono dati live dal DB (concepts/sp_surveys/sp_responses):
+// niente cache statica, altrimenti serviremmo aggregati SP/CFML stantii.
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -15,7 +20,10 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const concept = concepts.find((c) => c.id === id);
+  const uuid = resolveConceptId(id);
+  const concept =
+    (uuid ? await loadRealConcept(uuid) : null) ??
+    concepts.find((c) => c.id === id);
 
   if (!concept) {
     return { title: "Concept non trovato — Innovation Atlas" };
@@ -29,7 +37,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArchivioConceptPage({ params }: PageProps) {
   const { id } = await params;
-  const concept = concepts.find((c) => c.id === id);
+  const uuid = resolveConceptId(id);
+  const concept =
+    (uuid ? await loadRealConcept(uuid) : null) ??
+    concepts.find((c) => c.id === id);
 
   if (!concept) {
     notFound();

@@ -1,0 +1,119 @@
+import type { Concept } from "@/src/data/concepts";
+import type { SPConfig, SPAnswers, SPResult } from "@/src/data/sp-config/types";
+import type { CFMLAnswers } from "@/src/lib/scoring";
+import { createClient } from "@/src/lib/supabase/server";
+import { calculateSP, aggregateSP } from "@/src/lib/sp-scoring";
+import { calculateCFML } from "@/src/lib/scoring";
+import { toConceptView, type ConceptDbRow } from "@/src/lib/concept-adapter";
+import { CONCEPT_EDITORIAL } from "@/src/lib/concept-editorial";
+
+// Mappa slug pubblico -> UUID reale in DB (concepts.is_public = true).
+// Gli slug mock in src/data/concepts.ts sono "cubit" e "hapto" (combaciano);
+// per "shu" NON esiste un concept mock corrispondente (nessuna modifica al mock).
+export const REAL_CONCEPT_IDS: Record<string, string> = {
+  cubit: "22811dc5-b058-4df0-a8a3-f53db6178073",
+  shu: "e11e5c3a-19f8-429e-ae7e-aa8c95b4dedf",
+  hapto: "fad41e8a-ab6e-4b54-b9e8-bf802050207c",
+};
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function resolveConceptId(param: string): string | null {
+  const mapped = REAL_CONCEPT_IDS[param.toLowerCase()];
+  if (mapped) {
+    return mapped;
+  }
+  if (UUID_RE.test(param)) {
+    return param;
+  }
+  return null;
+}
+
+type RealConceptRow = ConceptDbRow & {
+  cfml_answers: CFMLAnswers | null;
+};
+
+type SurveyRow = {
+  id: string;
+  public_token: string;
+  sp_version: string;
+  config_snapshot: SPConfig;
+  min_responses: number;
+  created_at: string;
+};
+
+type ResponseRow = {
+  id: string;
+  answers: SPAnswers;
+};
+
+export async function loadRealConcept(uuid: string): Promise<Concept | null> {
+  const supabase = await createClient();
+
+  const { data: concept, error } = await supabase
+    .from("concepts")
+    .select(
+      "id, title, description, images, sector, cfml_score, cfml_levels_passed, cfml_completed_at, cfml_answers, created_at"
+    )
+    .eq("id", uuid)
+    .eq("is_public", true)
+    .maybeSingle();
+
+  if (error || !concept) {
+    return null;
+  }
+
+  const row = concept as RealConceptRow;
+
+  // SP: replica ESATTA del pattern in app/concept/[id]/sp/results/page.tsx
+  const { data: survey } = await supabase
+    .from("sp_surveys")
+    .select(
+      "id, public_token, sp_version, config_snapshot, min_responses, created_at"
+    )
+    .eq("concept_id", uuid)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let spAggregate: SPResult | null = null;
+  let spResponseCount = 0;
+
+  if (survey) {
+    const typedSurvey = survey as SurveyRow;
+    const config = typedSurvey.config_snapshot as SPConfig;
+
+    const { data: responses } = await supabase
+      .from("sp_responses")
+      .select("id, answers")
+      .eq("survey_id", typedSurvey.id);
+
+    const typedResponses = (responses ?? []) as ResponseRow[];
+    spResponseCount = typedResponses.length;
+
+    if (spResponseCount > 0) {
+      const individualResults = typedResponses.map((response) =>
+        calculateSP(response.answers, config)
+      );
+      spAggregate = aggregateSP(individualResults, config);
+    }
+  }
+
+  // CFML: breakdown ricalcolato come in app/concept/[id]/cfml/results/page.tsx.
+  // Come lì (cfml_score ?? result.score), il ricalcolo funge da fallback.
+  const cfmlResult = row.cfml_answers ? calculateCFML(row.cfml_answers) : null;
+
+  return toConceptView(
+    { row, spAggregate, spResponseCount },
+    {
+      ...CONCEPT_EDITORIAL[uuid],
+      ...(cfmlResult
+        ? {
+            cfml: row.cfml_score ?? cfmlResult.score,
+            cfmlLevelsPassed: row.cfml_levels_passed?.length ?? cfmlResult.level,
+          }
+        : {}),
+    }
+  );
+}
