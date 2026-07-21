@@ -41,6 +41,7 @@ function getLevelKey(level: CFMLLevel): CFMLLevelKey {
 }
 
 function formatScore(value: number): string {
+  if (!Number.isFinite(value)) return "—";
   return value.toFixed(1);
 }
 
@@ -95,6 +96,8 @@ function getStatusBadgeLabel(
     case "consolidato":
       return "superato";
     case "in corso":
+      // Risposte assenti/incomplete → NaN da CFML_ANSWER_VALUES[undefined]
+      if (!Number.isFinite(score)) return "Da compilare";
       return `${formatScore(score)} / ${maxScore}`;
     case "bloccato":
       return "bloccato";
@@ -186,7 +189,7 @@ export default function CFMLBreakdown({
                 <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                   <span
                     className={getStatusBadgeClassName(status)}
-                    aria-label={`Stato livello ${level}: ${status}, punteggio ${formatScore(score)} su ${maxScore}`}
+                    aria-label={`Stato livello ${level}: ${getStatusBadgeLabel(status, score, maxScore)}`}
                   >
                     {getStatusBadgeLabel(status, score, maxScore)}
                   </span>

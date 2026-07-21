@@ -4,10 +4,26 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import type { Concept } from "@/src/data/concepts";
 import { getQuadrant, isPlaceholderConcept } from "@/src/data/concepts";
+import { getBozzaPlaceholderSrc } from "@/src/lib/bozza-placeholder";
 import InfoIcon from "@/app/components/InfoIcon";
 
 interface Props {
   concept: Concept;
+  /**
+   * Se false, CFML non è ancora disponibile (hub privata in bozza).
+   * Default true: comportamento attuale di /archivio.
+   */
+  cfmlAvailable?: boolean;
+  /**
+   * Se false, SP non è ancora disponibile (hub privata in bozza).
+   * Default true: comportamento attuale di /archivio.
+   */
+  spAvailable?: boolean;
+  /**
+   * Se true e non ci sono immagini, usa /bozza/N.svg (deterministico sull'id)
+   * al posto del rettangolo grigio. Default false: /archivio invariato.
+   */
+  useBozzaPlaceholder?: boolean;
 }
 
 const GALLERY_BTN =
@@ -50,7 +66,12 @@ function LightboxImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function ConceptHero({ concept }: Props) {
+export default function ConceptHero({
+  concept,
+  cfmlAvailable = true,
+  spAvailable = true,
+  useBozzaPlaceholder = false,
+}: Props) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
@@ -58,8 +79,15 @@ export default function ConceptHero({ concept }: Props) {
   const imageCount = concept.images.length;
   const hasMultipleImages = imageCount > 1;
   const currentImage = imageCount > 0 ? concept.images[currentImageIndex] : null;
+  const bozzaSrc =
+    !currentImage && useBozzaPlaceholder
+      ? getBozzaPlaceholderSrc(concept.id)
+      : null;
+  const displayImage = currentImage ?? bozzaSrc;
+  const isBozzaImage = Boolean(bozzaSrc);
   const quadrant = getQuadrant(concept);
-  const isPlaceholder = isPlaceholderConcept(concept);
+  const isDemoPlaceholder = isPlaceholderConcept(concept);
+  const showPlaceholderBadge = isDemoPlaceholder || isBozzaImage;
 
   function goToPrevious() {
     if (!hasMultipleImages) return;
@@ -93,10 +121,10 @@ export default function ConceptHero({ concept }: Props) {
     <div className="w-[1160px]">
       {/* ── Hero box ── */}
       <div className="relative flex border border-fg-primary bg-bg-elevated">
-        {/* ── Etichetta PLACEHOLDER — solo per i concept dimostrativi ──
+        {/* ── Etichetta PLACEHOLDER — concept dimostrativi o immagine bozza ──
             Tipografia metadata, affiancata dall'icona informativa condivisa
             (stessa usata nelle intestazioni della matrice /archivio). */}
-        {isPlaceholder && (
+        {showPlaceholderBadge && (
           <div className="absolute left-[16px] top-[16px] z-20">
             <div className="flex items-center gap-[8px] border border-fg-primary bg-bg-elevated px-[10px] py-[7px]">
               <span className="font-mono text-metadata uppercase text-fg-primary leading-none">
@@ -104,7 +132,11 @@ export default function ConceptHero({ concept }: Props) {
               </span>
               <button
                 type="button"
-                aria-label="Cos'è un concept dimostrativo"
+                aria-label={
+                  isBozzaImage && !isDemoPlaceholder
+                    ? "Cos'è questo segnaposto immagine"
+                    : "Cos'è un concept dimostrativo"
+                }
                 aria-expanded={infoOpen}
                 onClick={() => setInfoOpen((prev) => !prev)}
                 className="flex items-center"
@@ -118,10 +150,20 @@ export default function ConceptHero({ concept }: Props) {
                 className="mt-[8px] w-[320px] border border-fg-primary bg-bg-elevated p-[12px]"
               >
                 <p className="font-mono text-metadata text-fg-primary leading-normal">
-                  Concept dimostrativo. Immagini e punteggi sono generati per
-                  popolare l&apos;archivio e illustrare il funzionamento della
-                  piattaforma. I dati reali provengono dalle valutazioni CFML e
-                  dalle rilevazioni SP dei concept analizzati.
+                  {isBozzaImage && !isDemoPlaceholder ? (
+                    <>
+                      Immagine non ancora caricata. Questo segnaposto resta fino
+                      a quando non aggiungi una foto del concept.
+                    </>
+                  ) : (
+                    <>
+                      Concept dimostrativo. Immagini e punteggi sono generati
+                      per popolare l&apos;archivio e illustrare il
+                      funzionamento della piattaforma. I dati reali provengono
+                      dalle valutazioni CFML e dalle rilevazioni SP dei concept
+                      analizzati.
+                    </>
+                  )}
                 </p>
               </div>
             )}
@@ -130,19 +172,25 @@ export default function ConceptHero({ concept }: Props) {
 
         {/* Left column — image */}
         <div className="size-[580px] shrink-0 border-r border-fg-primary overflow-hidden">
-          {currentImage ? (
-            <button
-              type="button"
-              onClick={() => setLightboxOpen(true)}
-              className="group relative size-full cursor-zoom-in"
-              aria-label="Ingrandisci immagine"
-            >
-              <ConceptHeroImage src={currentImage} alt={concept.title} />
-              <div
-                className="pointer-events-none absolute inset-0 bg-fg-primary/10 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                aria-hidden="true"
-              />
-            </button>
+          {displayImage ? (
+            isBozzaImage ? (
+              <div className="size-full bg-accent-tertiary" aria-hidden="true">
+                <ConceptHeroImage src={displayImage} alt="" />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="group relative size-full cursor-zoom-in"
+                aria-label="Ingrandisci immagine"
+              >
+                <ConceptHeroImage src={displayImage} alt={concept.title} />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-fg-primary/10 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  aria-hidden="true"
+                />
+              </button>
+            )
           ) : (
             <div className="size-full bg-accent-tertiary" aria-hidden="true" />
           )}
@@ -173,14 +221,22 @@ export default function ConceptHero({ concept }: Props) {
               {/* Metrics */}
               <div className="mt-[14px] flex items-baseline gap-[31px] uppercase text-fg-primary">
                 <p className="font-sans text-display font-medium leading-normal">
-                  CFML: {concept.cfml}
+                  {cfmlAvailable ? `CFML: ${concept.cfml}` : "CFML: -"}
                 </p>
                 <p className="font-sans leading-[60px]">
-                  <span className="text-display font-medium">SP: {concept.sp}</span>
-                  <span className="text-body font-normal normal-case">
-                    {" "}
-                    su {concept.spResponses} risposte
-                  </span>
+                  {spAvailable ? (
+                    <>
+                      <span className="text-display font-medium">
+                        SP: {concept.sp}
+                      </span>
+                      <span className="text-body font-normal normal-case">
+                        {" "}
+                        su {concept.spResponses} risposte
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-display font-medium">SP: -</span>
+                  )}
                 </p>
               </div>
 
@@ -202,9 +258,13 @@ export default function ConceptHero({ concept }: Props) {
               <div className="mt-auto flex items-end justify-between">
                 <div
                   className="flex size-[28px] items-center justify-center border border-fg-primary font-mono text-metadata text-fg-primary leading-none"
-                  aria-label={`Quadrante ${quadrant}`}
+                  aria-label={
+                    cfmlAvailable && spAvailable
+                      ? `Quadrante ${quadrant}`
+                      : "Quadrante non ancora disponibile"
+                  }
                 >
-                  {quadrant}
+                  {cfmlAvailable && spAvailable ? quadrant : "—"}
                 </div>
 
                 {(concept.author.name || concept.author.handle) ? (

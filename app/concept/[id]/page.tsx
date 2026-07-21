@@ -65,8 +65,14 @@ const IT_MONTHS_SHORT = [
 const secondaryActionButtonClassName =
   "inline-flex w-[200px] shrink-0 items-center justify-center border border-fg-primary bg-transparent px-6 py-3.5 font-sans text-body font-medium leading-normal text-fg-primary transition-opacity duration-150 ease-out hover:opacity-90";
 
+const primaryActionButtonClassName =
+  "inline-flex w-[200px] shrink-0 items-center justify-center border-none bg-accent-primary px-6 py-3.5 font-sans text-body font-medium leading-normal text-fg-primary transition-opacity duration-150 ease-out hover:opacity-90";
+
 const actionRowClassName =
   "grid min-h-[108px] w-full grid-cols-[1fr_200px] items-center gap-6 px-8 py-6";
+
+const activeActionRowClassName =
+  "bg-[color-mix(in_srgb,var(--color-accent-primary)_18%,transparent)]";
 
 function formatCfmlLevel(level: number | null | undefined): string {
   if (level == null) return "L0";
@@ -184,14 +190,31 @@ export default async function ConceptPage({ params }: PageProps) {
     author: { name: ownerName, handle: ownerHandle },
   });
   const cfmlCompleted = conceptView.cfmlCompletedAt != null;
-  const privateQuadrantNotes = getPrivateQuadrantCopy(
-    getQuadrant(conceptView),
-    conceptView.cfml,
-    conceptView.sp
-  );
+  const cfmlAvailable = cfmlCompleted;
+  const spAvailable =
+    Boolean(privateConceptInput.spAggregate) &&
+    privateConceptInput.spResponseAnswers.length > 0;
+  const positioningAvailable = cfmlAvailable && spAvailable;
+  const privateQuadrantNotes = positioningAvailable
+    ? getPrivateQuadrantCopy(
+        getQuadrant(conceptView),
+        conceptView.cfml,
+        conceptView.sp
+      )
+    : undefined;
 
   const surveys = await loadSurveysWithCounts(supabase, conceptView.id);
   const latestSurvey = surveys[0] ?? null;
+  // Passo attivo in Azioni: prima riga ancora da completare.
+  // Con CFML + survey + risposte (es. Cubit) nessuna evidenza — UI invariata.
+  const activeAction: "cfml" | "new-survey" | "survey" | null = !cfmlCompleted
+    ? "cfml"
+    : !latestSurvey
+      ? "new-survey"
+      : latestSurvey.responsesCount === 0
+        ? "survey"
+        : null;
+
 
   const csvMeta = buildCsvExportMeta({
     conceptName: conceptView.title,
@@ -224,7 +247,7 @@ export default async function ConceptPage({ params }: PageProps) {
       : null;
 
   const matriceCsv =
-    cfmlCsv && spCsv
+    cfmlCsv && spCsv && privateQuadrantNotes
       ? exportMatriceCsv(csvMeta, {
           cfml: conceptView.cfml,
           sp: conceptView.sp,
@@ -250,10 +273,17 @@ export default async function ConceptPage({ params }: PageProps) {
 
       <main className="flex-1 py-[var(--spacing-section)]">
         <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
-          <ConceptHero concept={conceptView} />
+          <ConceptHero
+            concept={conceptView}
+            cfmlAvailable={cfmlAvailable}
+            spAvailable={spAvailable}
+            useBozzaPlaceholder
+          />
           <ConceptStats
             concept={conceptView}
-            defaultOpen
+            defaultOpen={positioningAvailable || cfmlAvailable || spAvailable}
+            cfmlAvailable={cfmlAvailable}
+            spAvailable={spAvailable}
             cfmlDownload={
               cfmlCsv ? (
                 <DownloadCsvButton
@@ -276,7 +306,8 @@ export default async function ConceptPage({ params }: PageProps) {
           <ConceptQuadrant
             concept={conceptView}
             notes={privateQuadrantNotes}
-            alwaysVisible
+            alwaysVisible={positioningAvailable}
+            available={positioningAvailable}
             matrixDownload={
               matriceCsv ? (
                 <DownloadCsvButton
@@ -287,11 +318,12 @@ export default async function ConceptPage({ params }: PageProps) {
               ) : undefined
             }
           />
+
         </div>
 
         <div className="mx-auto mt-12 flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
           <div className="flex w-[1160px] flex-col">
-            <ReadingGuideBar />
+            <ReadingGuideBar available={cfmlAvailable} />
             {aiHandoffPrompt ? <AiHandoffBar prompt={aiHandoffPrompt} /> : null}
           </div>
         </div>
@@ -311,7 +343,11 @@ export default async function ConceptPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex w-full flex-col border border-fg-primary bg-bg-elevated">
-                  <div className={actionRowClassName}>
+                  <div
+                    className={`${actionRowClassName} ${
+                      activeAction === "cfml" ? activeActionRowClassName : ""
+                    }`}
+                  >
                     <div className="flex flex-col gap-1">
                       <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
                         Diagnosi CFML
@@ -324,13 +360,21 @@ export default async function ConceptPage({ params }: PageProps) {
                     </div>
                     <Link
                       href={`/concept/${conceptView.id}/cfml`}
-                      className={secondaryActionButtonClassName}
+                      className={
+                        activeAction === "cfml"
+                          ? primaryActionButtonClassName
+                          : secondaryActionButtonClassName
+                      }
                     >
                       {cfmlCompleted ? "Modifica diagnosi" : "Compila diagnosi"}
                     </Link>
                   </div>
 
-                  <div className={`${actionRowClassName} border-t border-fg-primary`}>
+                  <div
+                    className={`${actionRowClassName} border-t border-fg-primary ${
+                      activeAction === "survey" ? activeActionRowClassName : ""
+                    }`}
+                  >
                     <div className="flex flex-col gap-1">
                       <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
                         Survey SP
@@ -348,30 +392,43 @@ export default async function ConceptPage({ params }: PageProps) {
                     {latestSurvey ? (
                       <CopySurveyLinkButton
                         publicToken={latestSurvey.public_token}
+                        primary={activeAction === "survey"}
                       />
                     ) : (
                       <span className="inline-block w-[200px]" aria-hidden />
                     )}
                   </div>
 
-                  <div className={`${actionRowClassName} border-t border-fg-primary`}>
+                  <div
+                    className={`${actionRowClassName} border-t border-fg-primary ${
+                      activeAction === "new-survey"
+                        ? activeActionRowClassName
+                        : ""
+                    }`}
+                  >
                     <div className="flex flex-col gap-1">
                       <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
                         Nuova survey
                       </h3>
                       <span className="font-sans text-body leading-normal text-fg-primary opacity-70">
-                        Il pack è congelato nella survey attiva. Per
-                        modificarlo serve una nuova survey.
+                        {surveys.length > 0
+                          ? "Il pack è congelato nella survey attiva. Per modificarlo serve una nuova survey."
+                          : "Nessuna survey ancora. Crea la prima per congelare il pack e iniziare a raccogliere risposte."}
                       </span>
                     </div>
                     <Link
                       href={`/concept/${conceptView.id}/sp`}
-                      className={secondaryActionButtonClassName}
+                      className={
+                        activeAction === "new-survey"
+                          ? primaryActionButtonClassName
+                          : secondaryActionButtonClassName
+                      }
                     >
                       Crea survey
                     </Link>
                   </div>
                 </div>
+
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-4">

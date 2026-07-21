@@ -14,10 +14,28 @@ interface Props {
   cfmlDownload?: ReactNode;
   /** Slot opzionale in fondo al pannello SP (es. download CSV). */
   spDownload?: ReactNode;
+  /**
+   * Se false, pannello CFML in stato disattivato (hub privata in bozza).
+   * Default true: comportamento attuale di /archivio.
+   */
+  cfmlAvailable?: boolean;
+  /**
+   * Se false, pannello SP in stato disattivato (hub privata in bozza).
+   * Default true: comportamento attuale di /archivio.
+   */
+  spAvailable?: boolean;
 }
 
 const EXPAND_BTN =
   "flex h-[29px] shrink-0 items-center gap-[10px] border border-fg-primary bg-bg-elevated px-[12px] pt-[8px] pb-[7px] font-mono text-metadata text-fg-primary leading-none transition-colors duration-150 ease-out hover:bg-accent-primary";
+
+/** Chrome riquadro attivo — invariato rispetto a /archivio. */
+const BOX_ACTIVE = "border border-fg-primary bg-bg-elevated";
+/**
+ * Chrome riquadro disattivato: bordo attenuato, stesso sfondo elevated,
+ * senza opacity sul bordo (l'opacity va solo sul contenuto).
+ */
+const BOX_DISABLED = "border border-border-muted bg-bg-elevated";
 
 function StatColumn({
   title,
@@ -27,18 +45,24 @@ function StatColumn({
   isOpen,
   onToggle,
   panel,
+  available,
 }: {
   title: ReactNode;
-  score: number;
+  score: ReactNode;
   metadata: ReactNode;
   expandable: boolean;
   isOpen: boolean;
   onToggle: () => void;
   panel?: ReactNode;
+  available: boolean;
 }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <div className="flex min-h-[212px] flex-col px-[35px] py-[32px]">
+    <div className="flex min-w-0 flex-1 flex-col" aria-disabled={!available}>
+      <div
+        className={`flex min-h-[212px] flex-col px-[35px] py-[32px] ${
+          available ? "" : "opacity-40"
+        }`}
+      >
         <div className="flex items-start justify-between gap-[16px]">
           <div className="font-sans text-display-caps uppercase leading-[30px] text-fg-primary">
             {title}
@@ -79,15 +103,25 @@ export default function ConceptStats({
   defaultOpen = false,
   cfmlDownload,
   spDownload,
+  cfmlAvailable = true,
+  spAvailable = true,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const toggle = () => setOpen((prev) => !prev);
 
   const cfmlDetail = concept.cfmlDetail;
   const spDimensions = concept.spDimensions;
+  const cfmlExpandable = cfmlAvailable && Boolean(cfmlDetail);
+  const spExpandable = spAvailable && Boolean(spDimensions);
+  // Entrambi i pannelli spenti → stesso chrome del riquadro matrice disattivato.
+  const boxDisabled = !cfmlAvailable && !spAvailable;
 
   return (
-    <div className="relative mt-[91px] w-[1160px] border border-fg-primary bg-bg-elevated">
+    <div
+      className={`relative mt-[91px] w-[1160px] ${
+        boxDisabled ? BOX_DISABLED : BOX_ACTIVE
+      }`}
+    >
       <div className="flex items-start">
         <StatColumn
           title={
@@ -97,22 +131,30 @@ export default function ConceptStats({
               maturity level
             </>
           }
-          score={concept.cfml}
-          expandable={Boolean(cfmlDetail)}
+          score={cfmlAvailable ? concept.cfml : "—"}
+          available={cfmlAvailable}
+          expandable={cfmlExpandable}
           isOpen={open}
           onToggle={toggle}
           metadata={
-            <>
-              <p className="font-bold uppercase">
-                {concept.cfmlLevelsPassed ?? "—"} LIVELLI SU 6 SUPERATI
-              </p>
-              <p className="uppercase">
-                CHECKLIST COMPLETATA {formatDate(concept.cfmlCompletedAt)}
-              </p>
-            </>
+            cfmlAvailable ? (
+              <>
+                <p className="font-bold uppercase">
+                  {concept.cfmlLevelsPassed ?? "—"} LIVELLI SU 6 SUPERATI
+                </p>
+                <p className="uppercase">
+                  CHECKLIST COMPLETATA {formatDate(concept.cfmlCompletedAt)}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-bold uppercase">Da compilare</p>
+                <p className="uppercase">Checklist non ancora completata</p>
+              </>
+            )
           }
           panel={
-            cfmlDetail ? (
+            cfmlExpandable && cfmlDetail ? (
               <div className="flex flex-col gap-8">
                 <CFMLBreakdown
                   perLevelScores={cfmlDetail.perLevelScores}
@@ -133,23 +175,31 @@ export default function ConceptStats({
               perception
             </span>
           }
-          score={concept.sp}
-          expandable={Boolean(spDimensions)}
+          score={spAvailable ? concept.sp : "—"}
+          available={spAvailable}
+          expandable={spExpandable}
           isOpen={open}
           onToggle={toggle}
           metadata={
-            <>
-              <p className="font-bold uppercase">
-                {concept.spResponses} RISPONDENTI
-              </p>
-              <p className="uppercase">
-                FINESTRA DI RACCOLTA{" "}
-                {formatRange(concept.spWindowStart, concept.spWindowEnd)}
-              </p>
-            </>
+            spAvailable ? (
+              <>
+                <p className="font-bold uppercase">
+                  {concept.spResponses} RISPONDENTI
+                </p>
+                <p className="uppercase">
+                  FINESTRA DI RACCOLTA{" "}
+                  {formatRange(concept.spWindowStart, concept.spWindowEnd)}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-bold uppercase">In attesa di risposte</p>
+                <p className="uppercase">Nessuna rilevazione SP disponibile</p>
+              </>
+            )
           }
           panel={
-            spDimensions ? (
+            spExpandable && spDimensions ? (
               <div className="flex flex-col gap-8">
                 <SPBreakdown
                   perDimension={spDimensions}
@@ -164,7 +214,9 @@ export default function ConceptStats({
       </div>
 
       <div
-        className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-fg-primary"
+        className={`pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 ${
+          boxDisabled ? "bg-border-muted" : "bg-fg-primary"
+        }`}
         aria-hidden="true"
       />
     </div>

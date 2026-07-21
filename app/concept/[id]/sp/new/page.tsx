@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import StimulusPackPreview from "@/app/components/sp/StimulusPackPreview";
+import StimulusPackView from "@/app/components/sp/StimulusPackView";
 import { createClient } from "@/src/lib/supabase/server";
 import { isStimulusPackComplete } from "@/src/lib/stimulus-pack-complete";
 import CreateSPSurveyConfirm from "./CreateSPSurveyConfirm";
@@ -95,7 +95,7 @@ export default async function NewSPSurveyPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full max-w-[720px] px-[var(--spacing-gutter)]">
+        <div className="mx-auto box-content w-full max-w-[1160px] px-6 md:px-8">
           <Link
             href={`/concept/${typedConcept.id}`}
             className="font-sans text-body leading-normal text-fg-primary underline opacity-70 transition-opacity duration-150 ease-out hover:opacity-100"
@@ -115,7 +115,7 @@ export default async function NewSPSurveyPage({ params }: PageProps) {
             </p>
           </header>
 
-          <StimulusPackPreview pack={pack} />
+          <StimulusPackView pack={pack} variant="preview" />
 
           <CreateSPSurveyConfirm
             conceptId={typedConcept.id}
