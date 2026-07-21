@@ -29,13 +29,24 @@ type ResponseRow = {
 };
 
 /**
+ * Input per toConceptView + payload già in memoria per export CSV
+ * (nessuna query extra: survey/config/risposte sono le stesse dello scoring).
+ */
+export type PrivateConceptData = ToConceptViewInput & {
+  surveyId: string | null;
+  spConfig: SPConfig | null;
+  spResponseAnswers: SPAnswers[];
+};
+
+/**
  * Carica un concept privato per il data path allineato a loadRealConcept.
- * Ritorna l'input di toConceptView (senza overrides editoriali).
+ * Ritorna l'input di toConceptView (senza overrides editoriali) più
+ * surveyId/config/risposte grezze per l'export CSV.
  * Null se id non risolvibile, utente assente/non owner, o concept assente.
  */
 export async function loadPrivateConcept(
   id: string
-): Promise<ToConceptViewInput | null> {
+): Promise<PrivateConceptData | null> {
   const uuid = resolveConceptId(id);
   if (!uuid) {
     return null;
@@ -83,10 +94,15 @@ export async function loadPrivateConcept(
 
   let spAggregate: SPResult | null = null;
   let spResponseCount = 0;
+  let surveyId: string | null = null;
+  let spConfig: SPConfig | null = null;
+  let spResponseAnswers: SPAnswers[] = [];
 
   if (survey) {
     const typedSurvey = survey as SurveyRow;
     const config = typedSurvey.config_snapshot as SPConfig;
+    surveyId = typedSurvey.id;
+    spConfig = config;
 
     const { data: responses } = await supabase
       .from("sp_responses")
@@ -95,6 +111,7 @@ export async function loadPrivateConcept(
 
     const typedResponses = (responses ?? []) as ResponseRow[];
     spResponseCount = typedResponses.length;
+    spResponseAnswers = typedResponses.map((response) => response.answers);
 
     if (spResponseCount > 0) {
       const individualResults = typedResponses.map((response) =>
@@ -113,5 +130,8 @@ export async function loadPrivateConcept(
     spResponseCount,
     cfmlResult,
     cfmlAnswers: cfml_answers,
+    surveyId,
+    spConfig,
+    spResponseAnswers,
   };
 }

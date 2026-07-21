@@ -7,10 +7,21 @@ import ConceptStats from "@/app/components/ConceptStats";
 import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
-import { getQuadrant } from "@/src/data/concepts";
+import DownloadCsvButton from "@/app/concept/[id]/DownloadCsvButton";
+import {
+  getQuadrant,
+  REAL_CONCEPT_SLUG_TO_UUID,
+} from "@/src/data/concepts";
 import { toConceptView } from "@/src/lib/concept-adapter";
 import { loadPrivateConcept } from "@/src/lib/concept-private-source";
+import {
+  buildCsvExportMeta,
+  exportCfmlCsv,
+  exportMatriceCsv,
+  exportSpCsv,
+} from "@/src/lib/csv-export";
 import { getPrivateQuadrantCopy } from "@/src/lib/quadrant-copy";
+import { sanitizeFilename } from "@/src/lib/sanitize-filename";
 import { createClient } from "@/src/lib/supabase/server";
 
 // Aggregati CFML/SP live: niente cache statica (allineato a /archivio/[id]).
@@ -63,6 +74,16 @@ function formatSurveyDateItalian(isoDate: string): string {
   const month = IT_MONTHS_SHORT[date.getMonth()];
   const year = date.getFullYear();
   return `${day} ${month} ${year}`;
+}
+
+function conceptExportSlug(conceptId: string, title: string): string {
+  const entry = Object.entries(REAL_CONCEPT_SLUG_TO_UUID).find(
+    ([, uuid]) => uuid === conceptId
+  );
+  if (entry) {
+    return entry[0];
+  }
+  return sanitizeFilename(title);
 }
 
 async function loadSurveysWithCounts(
@@ -150,6 +171,47 @@ export default async function ConceptPage({ params }: PageProps) {
   );
 
   const surveys = await loadSurveysWithCounts(supabase, conceptView.id);
+
+  const csvMeta = buildCsvExportMeta({
+    conceptName: conceptView.title,
+    surveyId: privateConceptInput.surveyId,
+    spConfigVersion: privateConceptInput.spConfig?.version ?? null,
+  });
+  const exportSlug = conceptExportSlug(conceptView.id, conceptView.title);
+
+  const cfmlCsv =
+    cfmlCompleted &&
+    privateConceptInput.cfmlAnswers &&
+    privateConceptInput.cfmlResult
+      ? exportCfmlCsv(
+          csvMeta,
+          privateConceptInput.cfmlAnswers,
+          privateConceptInput.cfmlResult
+        )
+      : null;
+
+  const spCsv =
+    privateConceptInput.spAggregate &&
+    privateConceptInput.spConfig &&
+    privateConceptInput.spResponseAnswers.length > 0
+      ? exportSpCsv(
+          csvMeta,
+          privateConceptInput.spConfig,
+          privateConceptInput.spResponseAnswers,
+          privateConceptInput.spAggregate
+        )
+      : null;
+
+  const matriceCsv =
+    cfmlCsv && spCsv
+      ? exportMatriceCsv(csvMeta, {
+          cfml: conceptView.cfml,
+          sp: conceptView.sp,
+          quadrant: getQuadrant(conceptView),
+          spResponses: conceptView.spResponses,
+          quadrantReading: privateQuadrantNotes,
+        })
+      : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
@@ -299,6 +361,37 @@ export default async function ConceptPage({ params }: PageProps) {
               </div>
             </div>
           </section>
+
+          {cfmlCsv || spCsv || matriceCsv ? (
+            <section className="mt-12 flex flex-col gap-6">
+              <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
+                Export
+              </h2>
+              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+                {cfmlCsv ? (
+                  <DownloadCsvButton
+                    csv={cfmlCsv}
+                    filename={`${exportSlug}-cfml.csv`}
+                    label="SCARICA REPORT CFML"
+                  />
+                ) : null}
+                {spCsv ? (
+                  <DownloadCsvButton
+                    csv={spCsv}
+                    filename={`${exportSlug}-sp.csv`}
+                    label="SCARICA REPORT SP"
+                  />
+                ) : null}
+                {matriceCsv ? (
+                  <DownloadCsvButton
+                    csv={matriceCsv}
+                    filename={`${exportSlug}-matrice.csv`}
+                    label="SCARICA REPORT MATRICE"
+                  />
+                ) : null}
+              </div>
+            </section>
+          ) : null}
         </div>
       </main>
 
