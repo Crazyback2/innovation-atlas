@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import ConceptStats from "@/app/components/ConceptStats";
+import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
 import { toConceptView } from "@/src/lib/concept-adapter";
@@ -14,17 +16,6 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-};
-
-type ConceptRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  sector: string;
-  owner_id: string;
-  cfml_score: number | null;
-  cfml_level: number | null;
-  cfml_completed_at: string | null;
 };
 
 type SurveyRow = {
@@ -55,13 +46,12 @@ const IT_MONTHS_SHORT = [
 const actionLinkClassName =
   "font-sans text-body font-medium leading-normal text-accent-primary";
 
-function formatCfmlLevel(level: number | null): string {
+function formatCfmlLevel(level: number | null | undefined): string {
   if (level == null) return "L0";
   return `L${level}`;
 }
 
-function formatScore(value: number | null): string {
-  if (value == null) return "—";
+function formatScore(value: number): string {
   return value.toFixed(1);
 }
 
@@ -143,32 +133,16 @@ export default async function ConceptPage({ params }: PageProps) {
     redirect("/login");
   }
 
-  const { data: concept } = await supabase
-    .from("concepts")
-    .select(
-      "id, title, description, sector, owner_id, cfml_score, cfml_level, cfml_completed_at"
-    )
-    .eq("id", id)
-    .eq("owner_id", user.id)
-    .limit(1)
-    .maybeSingle();
-
-  if (!concept) {
+  const privateConceptInput = await loadPrivateConcept(id);
+  if (!privateConceptInput) {
     notFound();
   }
 
-  const typedConcept = concept as ConceptRow;
-  const cfmlCompleted = typedConcept.cfml_completed_at != null;
+  const conceptView = toConceptView(privateConceptInput);
+  const cfmlCompleted = conceptView.cfmlCompletedAt != null;
   const statusLabel = cfmlCompleted ? "CFML COMPILATA" : "BOZZA";
 
-  // Data path allineato ad archivio (toConceptView). Non ancora usato in UI.
-  const privateConceptInput = await loadPrivateConcept(id);
-  const conceptView = privateConceptInput
-    ? toConceptView(privateConceptInput)
-    : null;
-  void conceptView;
-
-  const surveys = await loadSurveysWithCounts(supabase, id);
+  const surveys = await loadSurveysWithCounts(supabase, conceptView.id);
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
@@ -178,28 +152,35 @@ export default async function ConceptPage({ params }: PageProps) {
         <div className="mx-auto w-full max-w-[720px] px-[var(--spacing-gutter)]">
           <header className="flex flex-col gap-4">
             <h1 className="font-heading text-display font-bold leading-normal text-fg-primary">
-              {typedConcept.title}
+              {conceptView.title}
             </h1>
 
             <p className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-              {typedConcept.sector} · {statusLabel}
+              {conceptView.sector} · {statusLabel}
             </p>
 
-            {typedConcept.description ? (
+            {conceptView.description ? (
               <p className="font-sans text-body leading-relaxed text-fg-primary">
-                {typedConcept.description}
+                {conceptView.description}
               </p>
             ) : null}
           </header>
+        </div>
 
-          <section className="mt-12 flex flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
+          <ConceptStats concept={conceptView} />
+          <ConceptQuadrant concept={conceptView} />
+        </div>
+
+        <div className="mx-auto mt-12 w-full max-w-[720px] px-[var(--spacing-gutter)]">
+          <section className="flex flex-col gap-6">
             <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
               Azioni
             </h2>
 
             <div className="flex flex-col gap-6">
               <Link
-                href={`/concept/${typedConcept.id}/edit`}
+                href={`/concept/${conceptView.id}/edit`}
                 className={actionLinkClassName}
               >
                 Modifica concept →
@@ -212,8 +193,8 @@ export default async function ConceptPage({ params }: PageProps) {
                   </span>
                   {cfmlCompleted ? (
                     <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
-                      {formatCfmlLevel(typedConcept.cfml_level)} ·{" "}
-                      {formatScore(typedConcept.cfml_score)}/100
+                      {formatCfmlLevel(conceptView.cfmlLevelsPassed)} ·{" "}
+                      {formatScore(conceptView.cfml)}/100
                     </span>
                   ) : (
                     <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
@@ -226,13 +207,13 @@ export default async function ConceptPage({ params }: PageProps) {
                   {cfmlCompleted ? (
                     <>
                       <Link
-                        href={`/concept/${typedConcept.id}/cfml/results`}
+                        href={`/concept/${conceptView.id}/cfml/results`}
                         className={actionLinkClassName}
                       >
                         Vedi risultati →
                       </Link>
                       <Link
-                        href={`/concept/${typedConcept.id}/cfml`}
+                        href={`/concept/${conceptView.id}/cfml`}
                         className={actionLinkClassName}
                       >
                         Modifica →
@@ -240,7 +221,7 @@ export default async function ConceptPage({ params }: PageProps) {
                     </>
                   ) : (
                     <Link
-                      href={`/concept/${typedConcept.id}/cfml`}
+                      href={`/concept/${conceptView.id}/cfml`}
                       className={actionLinkClassName}
                     >
                       Compila →
@@ -260,7 +241,7 @@ export default async function ConceptPage({ params }: PageProps) {
                       Nessuna survey creata
                     </span>
                     <Link
-                      href={`/concept/${typedConcept.id}/sp`}
+                      href={`/concept/${conceptView.id}/sp`}
                       className={actionLinkClassName}
                     >
                       Crea survey →
@@ -280,7 +261,7 @@ export default async function ConceptPage({ params }: PageProps) {
 
                         <div className="flex flex-wrap items-center gap-4">
                           <Link
-                            href={`/concept/${typedConcept.id}/sp/results?token=${survey.public_token}`}
+                            href={`/concept/${conceptView.id}/sp/results?token=${survey.public_token}`}
                             className={actionLinkClassName}
                           >
                             Vedi risultati →
@@ -297,7 +278,7 @@ export default async function ConceptPage({ params }: PageProps) {
                     ))}
 
                     <Link
-                      href={`/concept/${typedConcept.id}/sp`}
+                      href={`/concept/${conceptView.id}/sp`}
                       className={actionLinkClassName}
                     >
                       + Nuova survey
