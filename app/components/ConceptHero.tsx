@@ -148,74 +148,88 @@ export default function ConceptHero({ concept }: Props) {
           )}
         </div>
 
-        {/* Right column — content */}
-        <div className="relative size-[580px] shrink-0">
-          {/* NR. number — vertical, inner right edge (Figma: x=1280 y=168, bbox 19×65) */}
-          <div className="pointer-events-none absolute right-[21px] top-[35px] flex h-[65px] w-[19px] items-center justify-center">
-            <p className="rotate-90 whitespace-nowrap font-mono text-metadata text-fg-primary uppercase leading-normal">
-              {concept.number}
-            </p>
-          </div>
+          {/* Right column — content */}
+          <div className="relative size-[580px] shrink-0">
+            {/* NR. number — vertical, inner right edge (Figma: x=1280 y=168, bbox 19×65) */}
+            {concept.number ? (
+              <div className="pointer-events-none absolute right-[21px] top-[35px] flex h-[65px] w-[19px] items-center justify-center">
+                <p className="rotate-90 whitespace-nowrap font-mono text-metadata text-fg-primary uppercase leading-normal">
+                  {concept.number}
+                </p>
+              </div>
+            ) : null}
 
-          <div className="flex h-full flex-col pl-[31px] pr-[20px] pt-[31px] pb-[24px]">
-            {/* Title + tagline */}
-            <h1 className="font-heading font-bold text-h1 leading-[60px] text-fg-primary uppercase">
-              {concept.title}
-            </h1>
-            <p className="mt-[7px] font-sans text-[30px] uppercase leading-[38px] text-fg-primary">
-              {concept.tagline}
-            </p>
+            <div className="flex h-full flex-col pl-[31px] pr-[20px] pt-[31px] pb-[24px]">
+              {/* Title + tagline */}
+              <h1 className="font-heading font-bold text-h1 leading-[60px] text-fg-primary uppercase">
+                {concept.title}
+              </h1>
+              {concept.tagline ? (
+                <p className="mt-[7px] font-sans text-[30px] uppercase leading-[38px] text-fg-primary">
+                  {concept.tagline}
+                </p>
+              ) : null}
 
-            {/* Metrics */}
-            <div className="mt-[14px] flex items-baseline gap-[31px] uppercase text-fg-primary">
-              <p className="font-sans text-display font-medium leading-normal">
-                CFML: {concept.cfml}
-              </p>
-              <p className="font-sans leading-[60px]">
-                <span className="text-display font-medium">SP: {concept.sp}</span>
-                <span className="text-body font-normal normal-case">
-                  {" "}
-                  su {concept.spResponses} risposte
-                </span>
-              </p>
-            </div>
-
-            {/* Description */}
-            <p className="mt-[18px] font-sans text-body text-fg-primary leading-normal">
-              {concept.description}
-            </p>
-
-            {/* Tags */}
-            <p className="mt-[20px] font-mono text-metadata text-fg-primary leading-normal">
-              {concept.tags.map((tag) => `#${tag}`).join(" ")}
-            </p>
-
-            {/* Bottom row — quadrant + author */}
-            <div className="mt-auto flex items-end justify-between">
-              <div
-                className="flex size-[28px] items-center justify-center border border-fg-primary font-mono text-metadata text-fg-primary leading-none"
-                aria-label={`Quadrante ${quadrant}`}
-              >
-                {quadrant}
+              {/* Metrics */}
+              <div className="mt-[14px] flex items-baseline gap-[31px] uppercase text-fg-primary">
+                <p className="font-sans text-display font-medium leading-normal">
+                  CFML: {concept.cfml}
+                </p>
+                <p className="font-sans leading-[60px]">
+                  <span className="text-display font-medium">SP: {concept.sp}</span>
+                  <span className="text-body font-normal normal-case">
+                    {" "}
+                    su {concept.spResponses} risposte
+                  </span>
+                </p>
               </div>
 
-              <div className="flex items-center gap-[12px]">
-                <div className="text-right">
-                  <p className="font-sans text-body text-fg-primary leading-normal">
-                    {concept.author.name}
-                  </p>
-                  <p className="font-sans text-body text-fg-primary leading-normal">
-                    {concept.author.handle}
-                  </p>
-                </div>
+              {/* Description */}
+              {concept.description ? (
+                <p className="mt-[18px] font-sans text-body text-fg-primary leading-normal">
+                  {concept.description}
+                </p>
+              ) : null}
+
+              {/* Tags */}
+              {concept.tags.length > 0 ? (
+                <p className="mt-[20px] font-mono text-metadata text-fg-primary leading-normal">
+                  {concept.tags.map((tag) => `#${tag}`).join(" ")}
+                </p>
+              ) : null}
+
+              {/* Bottom row — quadrant + author */}
+              <div className="mt-auto flex items-end justify-between">
                 <div
-                  className="size-[50px] shrink-0 rounded-full border border-fg-primary bg-accent-tertiary"
-                  aria-hidden="true"
-                />
+                  className="flex size-[28px] items-center justify-center border border-fg-primary font-mono text-metadata text-fg-primary leading-none"
+                  aria-label={`Quadrante ${quadrant}`}
+                >
+                  {quadrant}
+                </div>
+
+                {(concept.author.name || concept.author.handle) ? (
+                  <div className="flex items-center gap-[12px]">
+                    <div className="text-right">
+                      {concept.author.name ? (
+                        <p className="font-sans text-body text-fg-primary leading-normal">
+                          {concept.author.name}
+                        </p>
+                      ) : null}
+                      {concept.author.handle ? (
+                        <p className="font-sans text-body text-fg-primary leading-normal">
+                          {concept.author.handle}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div
+                      className="size-[50px] shrink-0 rounded-full border border-fg-primary bg-accent-tertiary"
+                      aria-hidden="true"
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* ── Gallery controls ── */}

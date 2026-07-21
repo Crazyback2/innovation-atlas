@@ -5,6 +5,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import ConceptStats from "@/app/components/ConceptStats";
 import ConceptQuadrant from "@/app/components/ConceptQuadrant";
+import ConceptHero from "@/app/components/ConceptHero";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
 import DeleteConceptButton from "@/app/concept/[id]/DeleteConceptButton";
@@ -169,9 +170,20 @@ export default async function ConceptPage({ params }: PageProps) {
     notFound();
   }
 
-  const conceptView = toConceptView(privateConceptInput);
+  const ownerName =
+    typeof user.user_metadata?.full_name === "string" &&
+    user.user_metadata.full_name.trim().length > 0
+      ? user.user_metadata.full_name.trim()
+      : (user.email ?? "—");
+  const ownerHandle =
+    typeof user.email === "string" && user.email.includes("@")
+      ? user.email.split("@")[0]!
+      : "";
+
+  const conceptView = toConceptView(privateConceptInput, {
+    author: { name: ownerName, handle: ownerHandle },
+  });
   const cfmlCompleted = conceptView.cfmlCompletedAt != null;
-  const statusLabel = cfmlCompleted ? "CFML COMPILATA" : "BOZZA";
   const privateQuadrantNotes = getPrivateQuadrantCopy(
     getQuadrant(conceptView),
     conceptView.cfml,
@@ -237,25 +249,8 @@ export default async function ConceptPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto w-full max-w-[720px] px-[var(--spacing-gutter)]">
-          <header className="flex flex-col gap-4">
-            <h1 className="font-heading text-display font-bold leading-normal text-fg-primary">
-              {conceptView.title}
-            </h1>
-
-            <p className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-              {conceptView.sector} · {statusLabel}
-            </p>
-
-            {conceptView.description ? (
-              <p className="font-sans text-body leading-relaxed text-fg-primary">
-                {conceptView.description}
-              </p>
-            ) : null}
-          </header>
-        </div>
-
         <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
+          <ConceptHero concept={conceptView} />
           <ConceptStats
             concept={conceptView}
             defaultOpen
