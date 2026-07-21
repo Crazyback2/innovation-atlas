@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 160 160">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        fill: none;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-4 {
+        stroke-dasharray: 1.99 1.99;
+      }
+
+      .cls-4, .cls-5 {
+        stroke-width: .75px;
+      }
+
+      .cls-7 {
+        opacity: .12;
+      }
+
+      .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15 {
+        fill: #fff;
+      }
+
+      .cls-8 {
+        opacity: .25;
+      }
+
+      .cls-9 {
+        opacity: .5;
+      }
+
+      .cls-10 {
+        opacity: .38;
+      }
+
+      .cls-11 {
+        opacity: .62;
+      }
+
+      .cls-12 {
+        opacity: .88;
+      }
+
+      .cls-13 {
+        opacity: .75;
+      }
+
+      .cls-16 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-17 {
+        clip-path: url(#clippath-3);
+      }
+
+      .cls-18 {
+        clip-path: url(#clippath-2);
+      }
+
+      .cls-15 {
+        opacity: 0;
+      }
+
+      .cls-6 {
+        stroke-width: 2px;
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-6" x="-168.26" y="-159.68" width="152.8" height="152.8" rx="10" ry="10"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <rect class="cls-6" x="2.76" y="-163.29" width="152.8" height="152.8" rx="10" ry="10"/>
+    </clipPath>
+    <clipPath id="clippath-2">
+      <rect class="cls-1" x="3.6" y="3.6" width="152.8" height="152.8" rx="10" ry="10"/>
+    </clipPath>
+    <clipPath id="clippath-3">
+      <rect class="cls-1" x="2.6" y="167.73" width="152.8" height="152.8" rx="10" ry="10"/>
+    </clipPath>
+    <clipPath id="clippath-4">
+      <rect class="cls-1" x="169.18" y="167.3" width="152.8" height="152.8" rx="10" ry="10"/>
+    </clipPath>
+  </defs>
+  <rect width="160" height="160"/>
+  <g id="Livello_1" data-name="Livello 1">
+    <rect class="cls-6" x="-168.26" y="-159.68" width="152.8" height="152.8" rx="10" ry="10"/>
+    <g>
+      <g class="cls-16">
+        <circle class="cls-3" cx="47.44" cy="-55.17" r="65.14"/>
+      </g>
+      <rect class="cls-6" x="2.76" y="-163.29" width="152.8" height="152.8" rx="10" ry="10"/>
+    </g>
+    <g class="cls-18">
+      <g>
+        <circle class="cls-3" cx="48.28" cy="111.72" r="65.14"/>
+        <circle class="cls-3" cx="80" cy="80" r="65.14"/>
+        <circle class="cls-3" cx="111.72" cy="48.28" r="65.14"/>
+      </g>
+      <line class="cls-2" x1="-3.84" y1="163.84" x2="164.55" y2="-4.55"/>
+      <rect class="cls-6" x="3.6" y="3.6" width="152.8" height="152.8" rx="10" ry="10"/>
+      <circle class="cls-14" cx="126.1" cy="33.99" r="14.35"/>
+      <g>
+        <circle class="cls-14" cx="126.12" cy="33.98" r="14.35"/>
+        <circle class="cls-12" cx="111.76" cy="48.35" r="14.35"/>
+        <circle class="cls-13" cx="97.39" cy="62.71" r="14.35"/>
+        <circle class="cls-11" cx="83.03" cy="77.07" r="14.35"/>
+        <circle class="cls-9" cx="68.66" cy="91.44" r="14.35"/>
+        <circle class="cls-10" cx="54.3" cy="105.8" r="14.35"/>
+        <circle class="cls-8" cx="39.93" cy="120.17" r="14.35"/>
+        <circle class="cls-7" cx="25.57" cy="134.53" r="14.35"/>
+        <circle class="cls-15" cx="11.21" cy="148.9" r="14.35"/>
+      </g>
+    </g>
+    <g class="cls-17">
+      <circle class="cls-5" cx="110.71" cy="212.41" r="65.14"/>
+      <line class="cls-4" x1="-4.84" y1="327.97" x2="163.54" y2="159.58"/>
+    </g>
+  </g>
+</svg>
