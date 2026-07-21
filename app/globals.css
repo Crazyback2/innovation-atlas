@@ -30,7 +30,9 @@
   --spacing-section: 120px;
   --container-page: 1248px;
   --container-wizard: 890px;
+  --container-respondent: 1160px;
   --max-width-wizard: var(--container-wizard);
+  --max-width-respondent: var(--container-respondent);
 
   /* Animazione marquee — crea la utility `animate-marquee` in Tailwind v4 */
   --animate-marquee: marquee 40s linear infinite;

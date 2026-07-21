@@ -10,7 +10,10 @@ const spConfigV1_2026_06: SPConfig = {
       id: "estetica",
       number: 1,
       title: "Segnali estetici",
-      description: "Guarda il concept e valuta la tua prima impressione visiva.",
+      description:
+        "Guarda il concept e valuta la tua prima impressione visiva.",
+      instruction:
+        "Seleziona un valore da 1 a 7 tra i due opposti, es. {poleLow}=1, 4=neutro, 7={poleHigh}",
       method: "semantic_differential",
       items: [
         {
@@ -43,7 +46,7 @@ const spConfigV1_2026_06: SPConfig = {
           poleHigh: "Semplice",
           reverseScored: false,
           tooltip:
-            "Riguarda la densità visiva. Non riguarda né l'ordine né la qualità.",
+            "Coppia neutra: non riguarda ordine né qualità, solo la densità di elementi e dettagli visivi. Né complesso né semplice è meglio.",
         },
       ],
     },
@@ -51,7 +54,9 @@ const spConfigV1_2026_06: SPConfig = {
       id: "ruolo",
       number: 2,
       title: "Ruolo e categoria",
-      description: "Capire cosa è il concept e a cosa serve.",
+      description:
+        "Valuta quanto ti è chiaro cos'è questo concept e a cosa serve.",
+      instruction: "1 = fortemente in disaccordo, 7 = fortemente d'accordo",
       method: "likert",
       items: [
         {
@@ -91,7 +96,8 @@ const spConfigV1_2026_06: SPConfig = {
       id: "identita",
       number: 3,
       title: "Significato identitario e sociale",
-      description: "Cosa il concept dice di chi lo usa.",
+      description: "Immagina di essere associato a questo concept.",
+      instruction: "1 = fortemente in disaccordo, 7 = fortemente d'accordo",
       method: "likert",
       items: [
         {
@@ -122,7 +128,9 @@ const spConfigV1_2026_06: SPConfig = {
       id: "morale",
       number: 4,
       title: "Significato morale e normativo",
-      description: "Cosa è considerato accettabile usarlo.",
+      description:
+        "Valuta tenendo conto del contesto in cui verrebbe usato.",
+      instruction: "1 = fortemente in disaccordo, 7 = fortemente d'accordo",
       method: "likert",
       items: [
         {
@@ -149,7 +157,9 @@ const spConfigV1_2026_06: SPConfig = {
       id: "relazionale",
       number: 5,
       title: "Significato relazionale",
-      description: "Come il concept si pone rispetto a chi lo usa.",
+      description:
+        "Immagina di usare questo concept: ti lascia il controllo, è discreto, rispetta i tuoi confini?",
+      instruction: "1 = fortemente in disaccordo, 7 = fortemente d'accordo",
       method: "likert",
       items: [
         {
@@ -180,7 +190,9 @@ const spConfigV1_2026_06: SPConfig = {
       id: "emozione",
       number: 6,
       title: "Risposta emotiva",
-      description: "L'affetto che il concept lascia.",
+      description: "Che sensazione ti trasmette questo concept",
+      instruction:
+        "Seleziona un valore da 1 a 7 tra i due stati emotivi opposti",
       method: "semantic_differential",
       items: [
         {

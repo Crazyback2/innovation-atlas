@@ -8,12 +8,13 @@ import type {
   SPMethod,
 } from "@/src/data/sp-config/types";
 import Button from "@/app/components/Button";
+import InfoIcon from "@/app/components/InfoIcon";
 import OverlayLightbox from "@/app/components/OverlayLightbox";
 import StimulusPackHero from "@/app/components/sp/StimulusPackHero";
 import StimulusPackView, {
   type StimulusPackData,
 } from "@/app/components/sp/StimulusPackView";
-import { wizardContainerClassName } from "@/app/concept/wizard-container";
+import { respondentContainerClassName } from "@/app/concept/wizard-container";
 import SP_CONFIG_V1 from "@/src/data/sp-config/v1_2026-06";
 import { submitSPResponse } from "@/app/sp/[token]/actions";
 
@@ -39,12 +40,24 @@ function isStepComplete(dimension: SPDimension, answers: AnswersState): boolean 
   return dimension.items.every((item) => isItemAnswered(item, answers));
 }
 
-/** Istruzione scala: poli del primo item (o ancore likert se assenti). */
-function scaleInstruction(dimension: SPDimension): string {
+/**
+ * Istruzione da config. Se il template contiene {poleLow}/{poleHigh} e il
+ * primo item ha i poli (struttura semantic differential), li interpola.
+ */
+function scaleInstruction(
+  instruction: string,
+  dimension: SPDimension
+): string {
   const first = dimension.items[0];
-  const left = first?.poleLow?.trim() || "Per niente d'accordo";
-  const right = first?.poleHigh?.trim() || "Completamente d'accordo";
-  return `Seleziona un valore da 1 a 7 tra i due opposti, es. ${left}=1, 4=neutro, 7=${right}`;
+  const hasPoles = Boolean(first?.poleLow && first?.poleHigh);
+
+  if (!hasPoles) {
+    return instruction;
+  }
+
+  return instruction
+    .replaceAll("{poleLow}", first?.poleLow ?? "")
+    .replaceAll("{poleHigh}", first?.poleHigh ?? "");
 }
 
 function ScaleRadios({
@@ -130,7 +143,7 @@ function SemanticDifferentialItem({
   onChange: (next: number) => void;
 }) {
   return (
-    <div className={itemRowClassName} title={item.tooltip}>
+    <div className={itemRowClassName}>
       <div className="flex items-center gap-4">
         <span className={`${poleClassName} text-right`}>{item.poleLow}</span>
         <div className="min-w-0 flex-1">
@@ -142,7 +155,28 @@ function SemanticDifferentialItem({
             onChange={onChange}
           />
         </div>
-        <span className={poleClassName}>{item.poleHigh}</span>
+        <div className="flex w-[120px] shrink-0 items-center gap-2">
+          <span className="font-sans text-body uppercase leading-relaxed text-fg-primary">
+            {item.poleHigh}
+          </span>
+          {item.tooltip ? (
+            <span className="group relative inline-flex shrink-0">
+              <button
+                type="button"
+                aria-label={`Informazioni su ${item.poleHigh}`}
+                className="cursor-help"
+              >
+                <InfoIcon />
+              </button>
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden w-[280px] border border-accent-tertiary bg-bg-elevated px-3 py-2 font-sans text-body leading-relaxed text-fg-primary shadow-sm group-hover:block group-focus-within:block"
+              >
+                {item.tooltip}
+              </span>
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -327,13 +361,11 @@ export default function SPSurveyWizard({
 
   if (phase === "pack") {
     return (
-      <div className="mx-auto box-content w-full max-w-[1160px] px-6 md:px-8">
-        <StimulusPackView
-          pack={pack}
-          variant="respondent"
-          onStartSurvey={startSurvey}
-        />
-      </div>
+      <StimulusPackView
+        pack={pack}
+        variant="respondent"
+        onStartSurvey={startSurvey}
+      />
     );
   }
 
@@ -344,13 +376,17 @@ export default function SPSurveyWizard({
   const openText =
     typeof answers.R5_open === "string" ? answers.R5_open : "";
 
-  // Copy editoriale: modulo v1 (stesso id dimensione). Item/scoring restano dallo snapshot.
-  const description =
-    SP_CONFIG_V1.dimensions.find((entry) => entry.id === dimension.id)
-      ?.description ?? dimension.description;
+  const liveDimension = SP_CONFIG_V1.dimensions.find(
+    (entry) => entry.id === dimension.id
+  );
+  const description = liveDimension?.description ?? dimension.description;
+  const instruction = scaleInstruction(
+    liveDimension?.instruction ?? "",
+    dimension
+  );
 
   return (
-    <div className={wizardContainerClassName}>
+    <div className={respondentContainerClassName}>
       <div className="flex w-full min-w-0 flex-col gap-8">
         {/* Intestazione allineata al wizard CFML */}
         <div className="flex flex-col gap-2">
@@ -385,7 +421,7 @@ export default function SPSurveyWizard({
         </div>
 
         <p className="text-center font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-          {scaleInstruction(dimension)}
+          {instruction}
         </p>
 
         {/* Righe item = divider CFML (gap-2 + bordo per riga) */}
@@ -393,11 +429,18 @@ export default function SPSurveyWizard({
           {dimension.items.map((item) => {
             const raw = answers[item.id];
             const value = typeof raw === "number" ? raw : undefined;
+            const liveTooltip = liveDimension?.items.find(
+              (entry) => entry.id === item.id
+            )?.tooltip;
+            const itemForUi =
+              liveTooltip !== undefined
+                ? { ...item, tooltip: liveTooltip }
+                : item;
 
             return (
               <SurveyItem
                 key={item.id}
-                item={item}
+                item={itemForUi}
                 method={dimension.method}
                 scaleMin={config.scaleMin}
                 scaleMax={config.scaleMax}

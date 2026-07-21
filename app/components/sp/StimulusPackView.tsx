@@ -1,5 +1,6 @@
 import StartSurveyButton from "./StartSurveyButton";
 import StimulusPackHero from "./StimulusPackHero";
+import { respondentContainerClassName } from "@/app/concept/wizard-container";
 
 export type StimulusPackData = {
   title: string;
@@ -45,7 +46,7 @@ export default function StimulusPackView({
 }: StimulusPackViewProps) {
   if (variant === "preview") {
     return (
-      <div className="mt-8">
+      <div className="mt-8 w-full min-w-0">
         <StimulusPackHero pack={pack} />
       </div>
     );
@@ -58,37 +59,39 @@ export default function StimulusPackView({
   }
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <div className="flex items-start justify-between gap-6">
-        <p className="font-mono text-metadata leading-normal text-fg-primary">
-          Innovation Atlas // V.01
+    <div className={respondentContainerClassName}>
+      <div className="flex w-full min-w-0 flex-col gap-8">
+        <div className="flex items-start justify-between gap-6">
+          <p className="font-mono text-metadata leading-normal text-fg-primary">
+            Innovation Atlas // V.01
+          </p>
+          <p className="font-mono text-metadata leading-normal text-fg-primary text-right">
+            // Politecnico di Milano
+          </p>
+        </div>
+
+        <h1 className="font-heading text-hero font-bold uppercase leading-[80px] text-fg-primary">
+          Percezione
+          <br />
+          Simbolica
+        </h1>
+
+        <p className="font-sans text-body leading-normal text-fg-primary">
+          {INTRO_TEXT}
         </p>
-        <p className="font-mono text-metadata leading-normal text-fg-primary text-right">
-          // Politecnico di Milano
-        </p>
-      </div>
 
-      <h1 className="font-heading text-hero font-bold uppercase leading-[80px] text-fg-primary">
-        Percezione
-        <br />
-        Simbolica
-      </h1>
+        <DashedDivider />
 
-      <p className="max-w-wizard font-sans text-body leading-normal text-fg-primary">
-        {INTRO_TEXT}
-      </p>
+        <StimulusPackHero pack={pack} />
 
-      <DashedDivider />
+        <DashedDivider />
 
-      <StimulusPackHero pack={pack} />
-
-      <DashedDivider />
-
-      <div className="flex flex-col items-center gap-6">
-        <p className="max-w-wizard text-center font-sans text-body leading-normal text-fg-primary">
-          Quando hai finito di guardare, puoi iniziare.
-        </p>
-        <StartSurveyButton onStart={onStartSurvey} />
+        <div className="flex flex-col items-center gap-6">
+          <p className="text-center font-sans text-body leading-normal text-fg-primary">
+            Quando hai finito di guardare, puoi iniziare.
+          </p>
+          <StartSurveyButton onStart={onStartSurvey} />
+        </div>
       </div>
     </div>
   );

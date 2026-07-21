@@ -112,9 +112,10 @@ export default function StimulusPackHero({ pack }: { pack: StimulusPackData }) {
   }, [lightboxOpen, hasMultipleImages, imageCount]);
 
   return (
-    <div className="w-full max-w-[1160px]">
+    <div className="w-[1160px] max-w-full">
+      {/* Larghezze fisse come ConceptHero/Cubit: 580 + gap + resto in 1160 */}
       <div className="flex w-full min-w-0 items-start gap-8">
-        {/* Left frame — image only, fixed square; does not stretch with text */}
+        {/* Left frame — quadrato 580px; non si allarga col testo */}
         <div className="w-[580px] shrink-0">
           <div className="size-[580px] overflow-hidden border border-fg-primary bg-bg-elevated">
             {currentImage ? (
@@ -171,7 +172,7 @@ export default function StimulusPackHero({ pack }: { pack: StimulusPackData }) {
           </div>
         </div>
 
-        {/* Right frame — text fields; free to grow taller than the image */}
+        {/* Right frame — testo; larghezza dal flex dentro i 1160 fissi, non dal contenuto */}
         <div className="flex min-w-0 flex-1 flex-col gap-6 overflow-x-hidden border border-fg-primary bg-bg-elevated pl-[31px] pr-[20px] pt-[31px] pb-[24px]">
           <FieldBlock label="Titolo">
             <h2 className="min-w-0 max-w-full break-words font-heading text-h1 font-bold uppercase leading-[60px] text-fg-primary">

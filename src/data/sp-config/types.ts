@@ -24,6 +24,11 @@ export type SPDimension = {
   number: number;                      // 1..6, ordine di somministrazione
   title: string;                       // es. "Segnali estetici"
   description: string;                 // breve, una frase per intro nel wizard
+  /**
+   * Istruzione sotto l'header. Può contenere {poleLow}/{poleHigh}
+   * interpolati dal primo item (solo se presenti sulla struttura item).
+   */
+  instruction: string;
   method: SPMethod;
   items: SPItem[];
 };

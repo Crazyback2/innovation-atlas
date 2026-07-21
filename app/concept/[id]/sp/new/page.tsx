@@ -6,6 +6,10 @@ import Footer from "@/app/components/Footer";
 import StimulusPackView from "@/app/components/sp/StimulusPackView";
 import { createClient } from "@/src/lib/supabase/server";
 import { isStimulusPackComplete } from "@/src/lib/stimulus-pack-complete";
+import {
+  respondentContainerClassName,
+  respondentPageClassName,
+} from "@/app/concept/wizard-container";
 import CreateSPSurveyConfirm from "./CreateSPSurveyConfirm";
 
 type PageProps = {
@@ -94,8 +98,8 @@ export default async function NewSPSurveyPage({ params }: PageProps) {
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
 
-      <main className="flex-1 py-[var(--spacing-section)]">
-        <div className="mx-auto box-content w-full max-w-[1160px] px-6 md:px-8">
+      <main className={`flex-1 py-[var(--spacing-section)] ${respondentPageClassName}`}>
+        <div className={respondentContainerClassName}>
           <Link
             href={`/concept/${typedConcept.id}`}
             className="font-sans text-body leading-normal text-fg-primary underline opacity-70 transition-opacity duration-150 ease-out hover:opacity-100"

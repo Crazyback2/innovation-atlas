@@ -3,6 +3,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import type { SPConfig } from "@/src/data/sp-config/types";
 import type { StimulusPackData } from "@/app/components/sp/StimulusPackView";
 import SPSurveyWizard from "@/app/components/sp/SPSurveyWizard";
+import { respondentPageClassName } from "@/app/concept/wizard-container";
 
 type PageProps = {
   params: Promise<{ token: string }>;
@@ -31,7 +32,7 @@ export default async function SPSurveyPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-bg-primary py-[var(--spacing-section)] font-sans">
-      <main className="w-full">
+      <main className={respondentPageClassName}>
         <SPSurveyWizard
           pack={pack}
           config={config}
