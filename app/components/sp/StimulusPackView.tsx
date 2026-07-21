@@ -30,18 +30,18 @@ function DashedDivider() {
 type StimulusPackViewProps = {
   pack: StimulusPackData;
   /**
-   * `respondent` — shell Figma (meta, intro, divider, CTA scroll).
+   * `respondent` — shell Figma (meta, intro, divider, CTA).
    * `preview` — solo pack hero, nessuna CTA.
    */
   variant: "respondent" | "preview";
-  /** Required when variant is `respondent`: id of the questionnaire section. */
-  surveySectionId?: string;
+  /** Required when variant is `respondent`: avvia il questionario. */
+  onStartSurvey?: () => void;
 };
 
 export default function StimulusPackView({
   pack,
   variant,
-  surveySectionId,
+  onStartSurvey,
 }: StimulusPackViewProps) {
   if (variant === "preview") {
     return (
@@ -51,9 +51,9 @@ export default function StimulusPackView({
     );
   }
 
-  if (!surveySectionId) {
+  if (!onStartSurvey) {
     throw new Error(
-      'StimulusPackView: surveySectionId is required for variant="respondent".'
+      'StimulusPackView: onStartSurvey is required for variant="respondent".'
     );
   }
 
@@ -88,7 +88,7 @@ export default function StimulusPackView({
         <p className="max-w-wizard text-center font-sans text-body leading-normal text-fg-primary">
           Quando hai finito di guardare, puoi iniziare.
         </p>
-        <StartSurveyButton targetId={surveySectionId} />
+        <StartSurveyButton onStart={onStartSurvey} />
       </div>
     </div>
   );
