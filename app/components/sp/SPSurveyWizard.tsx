@@ -8,10 +8,13 @@ import type {
   SPMethod,
 } from "@/src/data/sp-config/types";
 import Button from "@/app/components/Button";
+import OverlayLightbox from "@/app/components/OverlayLightbox";
+import StimulusPackHero from "@/app/components/sp/StimulusPackHero";
 import StimulusPackView, {
   type StimulusPackData,
 } from "@/app/components/sp/StimulusPackView";
 import { wizardContainerClassName } from "@/app/concept/wizard-container";
+import SP_CONFIG_V1 from "@/src/data/sp-config/v1_2026-06";
 import { submitSPResponse } from "@/app/sp/[token]/actions";
 
 type AnswersState = Record<string, number | string>;
@@ -34,6 +37,14 @@ function isItemAnswered(item: SPItem, answers: AnswersState): boolean {
 
 function isStepComplete(dimension: SPDimension, answers: AnswersState): boolean {
   return dimension.items.every((item) => isItemAnswered(item, answers));
+}
+
+/** Istruzione scala: poli del primo item (o ancore likert se assenti). */
+function scaleInstruction(dimension: SPDimension): string {
+  const first = dimension.items[0];
+  const left = first?.poleLow?.trim() || "Per niente d'accordo";
+  const right = first?.poleHigh?.trim() || "Completamente d'accordo";
+  return `Seleziona un valore da 1 a 7 tra i due opposti, es. ${left}=1, 4=neutro, 7=${right}`;
 }
 
 function ScaleRadios({
@@ -249,6 +260,7 @@ export default function SPSurveyWizard({
   const [phase, setPhase] = useState<"pack" | "survey">("pack");
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswersState>({});
+  const [packLightboxOpen, setPackLightboxOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const dimension = dimensions[stepIndex];
@@ -332,15 +344,29 @@ export default function SPSurveyWizard({
   const openText =
     typeof answers.R5_open === "string" ? answers.R5_open : "";
 
+  // Copy editoriale: modulo v1 (stesso id dimensione). Item/scoring restano dallo snapshot.
+  const description =
+    SP_CONFIG_V1.dimensions.find((entry) => entry.id === dimension.id)
+      ?.description ?? dimension.description;
+
   return (
     <div className={wizardContainerClassName}>
       <div className="flex w-full min-w-0 flex-col gap-8">
         {/* Intestazione allineata al wizard CFML */}
         <div className="flex flex-col gap-2">
-          <div className="inline-flex w-fit border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pb-2 pt-2">
-            <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
-              {stepIndex + 1} / {totalSteps}
-            </span>
+          <div className="flex items-center justify-between gap-4">
+            <div className="inline-flex w-fit border border-fg-primary bg-bg-elevated pl-3 pr-2.5 pb-2 pt-2">
+              <span className="font-mono text-metadata uppercase leading-normal text-fg-primary">
+                {stepIndex + 1} / {totalSteps}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPackLightboxOpen(true)}
+              className="cursor-pointer border-none bg-accent-secondary px-3 py-2 font-sans text-metadata font-medium uppercase leading-none text-bg-elevated transition-opacity duration-150 ease-out hover:opacity-90"
+            >
+              Rivedi concept
+            </button>
           </div>
 
           <div className="border border-fg-primary bg-bg-elevated px-14 pb-6 pt-8">
@@ -350,13 +376,17 @@ export default function SPSurveyWizard({
             <h2 className="mt-7 font-heading text-h1 font-bold uppercase text-fg-primary">
               {dimension.title}
             </h2>
-            {dimension.description ? (
+            {description ? (
               <p className="mt-2 font-sans text-body leading-relaxed text-fg-primary opacity-60">
-                {dimension.description}
+                {description}
               </p>
             ) : null}
           </div>
         </div>
+
+        <p className="text-center font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
+          {scaleInstruction(dimension)}
+        </p>
 
         {/* Righe item = divider CFML (gap-2 + bordo per riga) */}
         <section className="flex flex-col gap-2">
@@ -403,6 +433,14 @@ export default function SPSurveyWizard({
           )}
         </div>
       </div>
+
+      <OverlayLightbox
+        open={packLightboxOpen}
+        onClose={() => setPackLightboxOpen(false)}
+        label="Rivedi concept"
+      >
+        <StimulusPackHero pack={pack} />
+      </OverlayLightbox>
     </div>
   );
 }

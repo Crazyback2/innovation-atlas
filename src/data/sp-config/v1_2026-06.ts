@@ -10,7 +10,7 @@ const spConfigV1_2026_06: SPConfig = {
       id: "estetica",
       number: 1,
       title: "Segnali estetici",
-      description: "Reazione visiva immediata al concept.",
+      description: "Guarda il concept e valuta la tua prima impressione visiva.",
       method: "semantic_differential",
       items: [
         {

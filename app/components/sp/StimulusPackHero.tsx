@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { X } from "lucide-react";
+import OverlayLightbox from "@/app/components/OverlayLightbox";
 import type { StimulusPackData } from "./StimulusPackView";
 
 const GALLERY_BTN =
@@ -100,21 +100,15 @@ export default function StimulusPackHero({ pack }: { pack: StimulusPackData }) {
   }
 
   useEffect(() => {
-    if (!lightboxOpen) return;
-
-    document.body.style.overflow = "hidden";
+    if (!lightboxOpen || !hasMultipleImages) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setLightboxOpen(false);
       if (e.key === "ArrowLeft") goToPrevious();
       if (e.key === "ArrowRight") goToNext();
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [lightboxOpen, hasMultipleImages, imageCount]);
 
   return (
@@ -222,26 +216,13 @@ export default function StimulusPackHero({ pack }: { pack: StimulusPackData }) {
         </div>
       </div>
 
-      {lightboxOpen && currentImage ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Galleria immagini"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-bg-elevated/80 backdrop-blur-sm"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <button
-            type="button"
-            aria-label="Chiudi"
-            onClick={() => setLightboxOpen(false)}
-            className={`${GALLERY_BTN} absolute top-8 left-8 cursor-pointer hover:bg-accent-primary`}
-          >
-            <X className="size-3.5" strokeWidth={1.5} />
-          </button>
-
-          <LightboxImage src={currentImage} alt={imageAlt} />
-
-          {hasMultipleImages ? (
+      <OverlayLightbox
+        open={lightboxOpen && Boolean(currentImage)}
+        onClose={() => setLightboxOpen(false)}
+        label="Galleria immagini"
+        contentClassName=""
+        footer={
+          hasMultipleImages ? (
             <div
               className="absolute bottom-8 left-8 flex items-center gap-[8px]"
               onClick={(e) => e.stopPropagation()}
@@ -266,9 +247,13 @@ export default function StimulusPackHero({ pack }: { pack: StimulusPackData }) {
                 {safeIndex + 1} / {imageCount}
               </p>
             </div>
-          ) : null}
-        </div>
-      ) : null}
+          ) : null
+        }
+      >
+        {currentImage ? (
+          <LightboxImage src={currentImage} alt={imageAlt} />
+        ) : null}
+      </OverlayLightbox>
     </div>
   );
 }
