@@ -5,7 +5,12 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
+import { toConceptView } from "@/src/lib/concept-adapter";
+import { loadPrivateConcept } from "@/src/lib/concept-private-source";
 import { createClient } from "@/src/lib/supabase/server";
+
+// Aggregati CFML/SP live: niente cache statica (allineato a /archivio/[id]).
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -155,6 +160,13 @@ export default async function ConceptPage({ params }: PageProps) {
   const typedConcept = concept as ConceptRow;
   const cfmlCompleted = typedConcept.cfml_completed_at != null;
   const statusLabel = cfmlCompleted ? "CFML COMPILATA" : "BOZZA";
+
+  // Data path allineato ad archivio (toConceptView). Non ancora usato in UI.
+  const privateConceptInput = await loadPrivateConcept(id);
+  const conceptView = privateConceptInput
+    ? toConceptView(privateConceptInput)
+    : null;
+  void conceptView;
 
   const surveys = await loadSurveysWithCounts(supabase, id);
 
