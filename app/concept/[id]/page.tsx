@@ -8,10 +8,13 @@ import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
 import DownloadCsvButton from "@/app/concept/[id]/DownloadCsvButton";
+import ReadingGuideBar from "@/app/concept/[id]/ReadingGuideBar";
+import AiHandoffBar from "@/app/concept/[id]/AiHandoffBar";
 import {
   getQuadrant,
   REAL_CONCEPT_SLUG_TO_UUID,
 } from "@/src/data/concepts";
+import { buildAiHandoffPrompt } from "@/src/lib/ai-handoff";
 import { toConceptView } from "@/src/lib/concept-adapter";
 import { loadPrivateConcept } from "@/src/lib/concept-private-source";
 import {
@@ -213,6 +216,16 @@ export default async function ConceptPage({ params }: PageProps) {
         })
       : null;
 
+  const aiHandoffPrompt =
+    cfmlCompleted &&
+    privateConceptInput.spAggregate &&
+    privateConceptInput.spResponseAnswers.length > 0 &&
+    privateConceptInput.surveyCreatedAt
+      ? buildAiHandoffPrompt(conceptView, {
+          collectedAt: privateConceptInput.surveyCreatedAt,
+        })
+      : null;
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-primary font-sans">
       <Header />
@@ -237,11 +250,41 @@ export default async function ConceptPage({ params }: PageProps) {
         </div>
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
-          <ConceptStats concept={conceptView} />
+          <ConceptStats
+            concept={conceptView}
+            defaultOpen
+            cfmlDownload={
+              cfmlCsv ? (
+                <DownloadCsvButton
+                  csv={cfmlCsv}
+                  filename={`${exportSlug}-cfml.csv`}
+                  label="SCARICA REPORT CFML"
+                />
+              ) : undefined
+            }
+            spDownload={
+              spCsv ? (
+                <DownloadCsvButton
+                  csv={spCsv}
+                  filename={`${exportSlug}-sp.csv`}
+                  label="SCARICA REPORT SP"
+                />
+              ) : undefined
+            }
+          />
           <ConceptQuadrant
             concept={conceptView}
             notes={privateQuadrantNotes}
             alwaysVisible
+            matrixDownload={
+              matriceCsv ? (
+                <DownloadCsvButton
+                  csv={matriceCsv}
+                  filename={`${exportSlug}-matrice.csv`}
+                  label="SCARICA REPORT MATRICE"
+                />
+              ) : undefined
+            }
           />
         </div>
 
@@ -361,37 +404,11 @@ export default async function ConceptPage({ params }: PageProps) {
               </div>
             </div>
           </section>
+        </div>
 
-          {cfmlCsv || spCsv || matriceCsv ? (
-            <section className="mt-12 flex flex-col gap-6">
-              <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-                Export
-              </h2>
-              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                {cfmlCsv ? (
-                  <DownloadCsvButton
-                    csv={cfmlCsv}
-                    filename={`${exportSlug}-cfml.csv`}
-                    label="SCARICA REPORT CFML"
-                  />
-                ) : null}
-                {spCsv ? (
-                  <DownloadCsvButton
-                    csv={spCsv}
-                    filename={`${exportSlug}-sp.csv`}
-                    label="SCARICA REPORT SP"
-                  />
-                ) : null}
-                {matriceCsv ? (
-                  <DownloadCsvButton
-                    csv={matriceCsv}
-                    filename={`${exportSlug}-matrice.csv`}
-                    label="SCARICA REPORT MATRICE"
-                  />
-                ) : null}
-              </div>
-            </section>
-          ) : null}
+        <div className="mx-auto mt-12 flex w-full max-w-[1160px] flex-col gap-4 px-[var(--spacing-gutter)]">
+          <ReadingGuideBar />
+          {aiHandoffPrompt ? <AiHandoffBar prompt={aiHandoffPrompt} /> : null}
         </div>
       </main>
 

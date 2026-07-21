@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { Concept } from "@/src/data/concepts";
 import { getQuadrant } from "@/src/data/concepts";
 import {
@@ -15,6 +15,8 @@ interface Props {
   notes?: string;
   /** Se true, matrice sempre aperta e niente bottone toggle. Default: false (archivio). */
   alwaysVisible?: boolean;
+  /** Slot opzionale sotto la matrice (es. download CSV). */
+  matrixDownload?: ReactNode;
 }
 
 const POSITION_BTN =
@@ -62,6 +64,7 @@ export default function ConceptQuadrant({
   concept,
   notes,
   alwaysVisible = false,
+  matrixDownload,
 }: Props) {
   const quadrant = getQuadrant(concept);
   const [line1, line2] = getQuadrantEvocativeLabel(concept);
@@ -128,8 +131,9 @@ export default function ConceptQuadrant({
       </div>
 
       {showMatrix && (
-        <div className="border-t border-fg-primary p-8">
+        <div className="flex flex-col gap-8 border-t border-fg-primary p-8">
           <MatrixChart concepts={[concept]} singleConcept />
+          {matrixDownload ?? null}
         </div>
       )}
     </div>

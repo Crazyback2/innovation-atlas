@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/app/components/Button";
+import { Download } from "lucide-react";
 
 export default function DownloadCsvButton({
   csv,
@@ -22,8 +22,13 @@ export default function DownloadCsvButton({
   }
 
   return (
-    <Button type="button" variant="secondary" onClick={handleDownload}>
-      {label}
-    </Button>
+    <button
+      type="button"
+      onClick={handleDownload}
+      className="flex w-full cursor-pointer items-center justify-between gap-4 border border-accent-tertiary bg-transparent px-6 py-3.5 font-sans text-body font-medium leading-normal text-fg-primary transition-colors duration-150 ease-out hover:border-fg-primary"
+    >
+      <span>{label}</span>
+      <Download className="size-4 shrink-0" aria-hidden="true" />
+    </button>
   );
 }

@@ -34,6 +34,7 @@ type ResponseRow = {
  */
 export type PrivateConceptData = ToConceptViewInput & {
   surveyId: string | null;
+  surveyCreatedAt: string | null;
   spConfig: SPConfig | null;
   spResponseAnswers: SPAnswers[];
 };
@@ -95,6 +96,7 @@ export async function loadPrivateConcept(
   let spAggregate: SPResult | null = null;
   let spResponseCount = 0;
   let surveyId: string | null = null;
+  let surveyCreatedAt: string | null = null;
   let spConfig: SPConfig | null = null;
   let spResponseAnswers: SPAnswers[] = [];
 
@@ -102,6 +104,7 @@ export async function loadPrivateConcept(
     const typedSurvey = survey as SurveyRow;
     const config = typedSurvey.config_snapshot as SPConfig;
     surveyId = typedSurvey.id;
+    surveyCreatedAt = typedSurvey.created_at;
     spConfig = config;
 
     const { data: responses } = await supabase
@@ -131,6 +134,7 @@ export async function loadPrivateConcept(
     cfmlResult,
     cfmlAnswers: cfml_answers,
     surveyId,
+    surveyCreatedAt,
     spConfig,
     spResponseAnswers,
   };

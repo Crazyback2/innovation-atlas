@@ -8,6 +8,12 @@ import SPBreakdown from "@/app/components/SPBreakdown";
 
 interface Props {
   concept: Concept;
+  /** Se true, i pannelli partono aperti. Default: false (archivio). */
+  defaultOpen?: boolean;
+  /** Slot opzionale in fondo al pannello CFML (es. download CSV). */
+  cfmlDownload?: ReactNode;
+  /** Slot opzionale in fondo al pannello SP (es. download CSV). */
+  spDownload?: ReactNode;
 }
 
 const EXPAND_BTN =
@@ -68,8 +74,13 @@ function StatColumn({
   );
 }
 
-export default function ConceptStats({ concept }: Props) {
-  const [open, setOpen] = useState(false);
+export default function ConceptStats({
+  concept,
+  defaultOpen = false,
+  cfmlDownload,
+  spDownload,
+}: Props) {
+  const [open, setOpen] = useState(defaultOpen);
   const toggle = () => setOpen((prev) => !prev);
 
   const cfmlDetail = concept.cfmlDetail;
@@ -102,11 +113,14 @@ export default function ConceptStats({ concept }: Props) {
           }
           panel={
             cfmlDetail ? (
-              <CFMLBreakdown
-                perLevelScores={cfmlDetail.perLevelScores}
-                levelConsolidation={cfmlDetail.levelConsolidation}
-                answers={cfmlDetail.answers}
-              />
+              <div className="flex flex-col gap-8">
+                <CFMLBreakdown
+                  perLevelScores={cfmlDetail.perLevelScores}
+                  levelConsolidation={cfmlDetail.levelConsolidation}
+                  answers={cfmlDetail.answers}
+                />
+                {cfmlDownload ?? null}
+              </div>
             ) : null
           }
         />
@@ -136,11 +150,14 @@ export default function ConceptStats({ concept }: Props) {
           }
           panel={
             spDimensions ? (
-              <SPBreakdown
-                perDimension={spDimensions}
-                responseCount={concept.spResponses}
-                minResponses={0}
-              />
+              <div className="flex flex-col gap-8">
+                <SPBreakdown
+                  perDimension={spDimensions}
+                  responseCount={concept.spResponses}
+                  minResponses={0}
+                />
+                {spDownload ?? null}
+              </div>
             ) : null
           }
         />
