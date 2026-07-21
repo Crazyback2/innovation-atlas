@@ -7,8 +7,10 @@ import ConceptStats from "@/app/components/ConceptStats";
 import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
+import { getQuadrant } from "@/src/data/concepts";
 import { toConceptView } from "@/src/lib/concept-adapter";
 import { loadPrivateConcept } from "@/src/lib/concept-private-source";
+import { getPrivateQuadrantCopy } from "@/src/lib/quadrant-copy";
 import { createClient } from "@/src/lib/supabase/server";
 
 // Aggregati CFML/SP live: niente cache statica (allineato a /archivio/[id]).
@@ -141,6 +143,11 @@ export default async function ConceptPage({ params }: PageProps) {
   const conceptView = toConceptView(privateConceptInput);
   const cfmlCompleted = conceptView.cfmlCompletedAt != null;
   const statusLabel = cfmlCompleted ? "CFML COMPILATA" : "BOZZA";
+  const privateQuadrantNotes = getPrivateQuadrantCopy(
+    getQuadrant(conceptView),
+    conceptView.cfml,
+    conceptView.sp
+  );
 
   const surveys = await loadSurveysWithCounts(supabase, conceptView.id);
 
@@ -169,7 +176,11 @@ export default async function ConceptPage({ params }: PageProps) {
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
           <ConceptStats concept={conceptView} />
-          <ConceptQuadrant concept={conceptView} />
+          <ConceptQuadrant
+            concept={conceptView}
+            notes={privateQuadrantNotes}
+            alwaysVisible
+          />
         </div>
 
         <div className="mx-auto mt-12 w-full max-w-[720px] px-[var(--spacing-gutter)]">

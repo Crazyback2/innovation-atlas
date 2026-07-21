@@ -11,6 +11,10 @@ import MatrixChart from "@/app/components/MatrixChart";
 
 interface Props {
   concept: Concept;
+  /** Se passato, sostituisce positioningNotes (e il placeholder Lorem). */
+  notes?: string;
+  /** Se true, matrice sempre aperta e niente bottone toggle. Default: false (archivio). */
+  alwaysVisible?: boolean;
 }
 
 const POSITION_BTN =
@@ -54,12 +58,17 @@ function QuadrantGrid({ activeCell }: { activeCell: number }) {
   );
 }
 
-export default function ConceptQuadrant({ concept }: Props) {
+export default function ConceptQuadrant({
+  concept,
+  notes,
+  alwaysVisible = false,
+}: Props) {
   const quadrant = getQuadrant(concept);
   const [line1, line2] = getQuadrantEvocativeLabel(concept);
   const activeCell = getQuadrantGridCell(quadrant);
-  const paragraphs =
-    concept.positioningNotes?.split("\n\n") ?? PLACEHOLDER_PARAGRAPHS;
+  const paragraphs = notes
+    ? notes.split("\n\n")
+    : (concept.positioningNotes?.split("\n\n") ?? PLACEHOLDER_PARAGRAPHS);
 
   const [open, setOpen] = useState(false);
   const toggle = () => setOpen((prev) => !prev);
@@ -68,6 +77,8 @@ export default function ConceptQuadrant({ concept }: Props) {
   // non è collocabile, quindi il bottone non viene reso affatto.
   const canShowPosition =
     typeof concept.cfml === "number" && typeof concept.sp === "number";
+  const showMatrix = canShowPosition && (alwaysVisible || open);
+  const showToggle = canShowPosition && !alwaysVisible;
 
   return (
     <div className="mt-[-1px] w-[1160px] border border-fg-primary bg-bg-elevated">
@@ -88,7 +99,7 @@ export default function ConceptQuadrant({ concept }: Props) {
             </div>
           </div>
 
-          {canShowPosition && (
+          {showToggle && (
             <button
               type="button"
               className={`${POSITION_BTN} mt-auto`}
@@ -116,7 +127,7 @@ export default function ConceptQuadrant({ concept }: Props) {
         </div>
       </div>
 
-      {canShowPosition && open && (
+      {showMatrix && (
         <div className="border-t border-fg-primary p-8">
           <MatrixChart concepts={[concept]} singleConcept />
         </div>
