@@ -76,7 +76,13 @@ type ResponseRow = {
   answers: SPAnswers;
 };
 
-export async function loadRealConcept(uuid: string): Promise<Concept | null> {
+export type ArchivioConcept = Concept & {
+  publicToken?: string | null;
+};
+
+export async function loadRealConcept(
+  uuid: string
+): Promise<ArchivioConcept | null> {
   const supabase = await createClient();
 
   const { data: concept, error } = await supabase
@@ -107,6 +113,7 @@ export async function loadRealConcept(uuid: string): Promise<Concept | null> {
 
   let spAggregate: SPResult | null = null;
   let spResponseCount = 0;
+  const publicToken = survey ? (survey as SurveyRow).public_token : null;
 
   if (survey) {
     const typedSurvey = survey as SurveyRow;
@@ -132,22 +139,26 @@ export async function loadRealConcept(uuid: string): Promise<Concept | null> {
   // Come lì (cfml_score ?? result.score), il ricalcolo funge da fallback.
   const cfmlResult = row.cfml_answers ? calculateCFML(row.cfml_answers) : null;
 
-  return toConceptView(
-    {
-      row,
-      spAggregate,
-      spResponseCount,
-      cfmlResult,
-      cfmlAnswers: row.cfml_answers,
-    },
-    {
-      ...CONCEPT_EDITORIAL[uuid],
-      ...(cfmlResult
-        ? {
-            cfml: row.cfml_score ?? cfmlResult.score,
-            cfmlLevelsPassed: row.cfml_levels_passed?.length ?? cfmlResult.level,
-          }
-        : {}),
-    }
-  );
+  return {
+    ...toConceptView(
+      {
+        row,
+        spAggregate,
+        spResponseCount,
+        cfmlResult,
+        cfmlAnswers: row.cfml_answers,
+      },
+      {
+        ...CONCEPT_EDITORIAL[uuid],
+        ...(cfmlResult
+          ? {
+              cfml: row.cfml_score ?? cfmlResult.score,
+              cfmlLevelsPassed:
+                row.cfml_levels_passed?.length ?? cfmlResult.level,
+            }
+          : {}),
+      }
+    ),
+    publicToken,
+  };
 }

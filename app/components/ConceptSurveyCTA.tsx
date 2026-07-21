@@ -1,7 +1,9 @@
+import Link from "next/link";
 import type { Concept } from "@/src/data/concepts";
 
 interface Props {
   concept: Concept;
+  publicToken?: string | null;
 }
 
 const SURVEY_BTN =
@@ -34,7 +36,11 @@ function ConstructionZone() {
   );
 }
 
-export default function ConceptSurveyCTA({ concept }: Props) {
+export default function ConceptSurveyCTA({ concept, publicToken }: Props) {
+  if (!publicToken) {
+    return null;
+  }
+
   return (
     <div className="relative w-[1160px]">
       <div
@@ -71,9 +77,12 @@ export default function ConceptSurveyCTA({ concept }: Props) {
             <p className="text-center font-sans text-body leading-normal text-fg-primary">
               Aiuta a misurare la percezione simbolica di {concept.title}:
             </p>
-            <button type="button" className={`${SURVEY_BTN} mx-auto mt-[22px]`}>
+            <Link
+              href={`/sp/${publicToken}`}
+              className={`${SURVEY_BTN} mx-auto mt-[22px]`}
+            >
               Compila SP
-            </button>
+            </Link>
           </div>
         </div>
 

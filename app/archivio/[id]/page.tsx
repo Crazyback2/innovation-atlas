@@ -38,9 +38,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ArchivioConceptPage({ params }: PageProps) {
   const { id } = await params;
   const uuid = resolveConceptId(id);
-  const concept =
-    (uuid ? await loadRealConcept(uuid) : null) ??
-    concepts.find((c) => c.id === id);
+  const realConcept = uuid ? await loadRealConcept(uuid) : null;
+  const concept = realConcept ?? concepts.find((c) => c.id === id);
 
   if (!concept) {
     notFound();
@@ -55,7 +54,10 @@ export default async function ArchivioConceptPage({ params }: PageProps) {
           <ConceptHero concept={concept} />
           <ConceptStats concept={concept} />
           <ConceptQuadrant concept={concept} />
-          <ConceptSurveyCTA concept={concept} />
+          <ConceptSurveyCTA
+            concept={concept}
+            publicToken={realConcept?.publicToken ?? null}
+          />
           <ConceptComments concept={concept} />
         </div>
       </main>
