@@ -7,9 +7,9 @@ export default function ReadingGuideBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex w-full flex-col">
-      <div className="flex w-full items-center justify-between gap-6 bg-bg-elevated px-8 py-6">
-        <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary">
+    <div className="flex w-full flex-col border border-fg-primary bg-bg-elevated">
+      <div className="flex w-full items-center justify-between gap-6 px-8 py-6">
+        <h2 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
           Interpreta i risultati in autonomia
         </h2>
         <button
@@ -23,7 +23,7 @@ export default function ReadingGuideBar() {
       </div>
 
       {open ? (
-        <div className="flex flex-col gap-8 border border-t-0 border-accent-tertiary bg-bg-elevated px-8 py-8">
+        <div className="flex flex-col gap-8 border-t border-fg-primary px-8 py-8">
           {READING_GUIDE.map((section) => (
             <div key={section.title} className="flex flex-col gap-2">
               <h3 className="font-heading text-body font-medium leading-relaxed text-fg-primary">

@@ -7,9 +7,11 @@ import ConceptStats from "@/app/components/ConceptStats";
 import ConceptQuadrant from "@/app/components/ConceptQuadrant";
 import CopySurveyLinkButton from "@/app/concept/[id]/CopySurveyLinkButton";
 import DeleteSurveyButton from "@/app/concept/[id]/DeleteSurveyButton";
+import DeleteConceptButton from "@/app/concept/[id]/DeleteConceptButton";
 import DownloadCsvButton from "@/app/concept/[id]/DownloadCsvButton";
 import ReadingGuideBar from "@/app/concept/[id]/ReadingGuideBar";
 import AiHandoffBar from "@/app/concept/[id]/AiHandoffBar";
+import { CONCEPT_CARD_GRID_W } from "@/app/components/CardGrid";
 import {
   getQuadrant,
   REAL_CONCEPT_SLUG_TO_UUID,
@@ -59,8 +61,11 @@ const IT_MONTHS_SHORT = [
   "dic",
 ] as const;
 
-const actionLinkClassName =
-  "font-sans text-body font-medium leading-normal text-accent-primary";
+const secondaryActionButtonClassName =
+  "inline-flex w-[200px] shrink-0 items-center justify-center border border-fg-primary bg-transparent px-6 py-3.5 font-sans text-body font-medium leading-normal text-fg-primary transition-opacity duration-150 ease-out hover:opacity-90";
+
+const actionRowClassName =
+  "grid min-h-[108px] w-full grid-cols-[1fr_200px] items-center gap-6 px-8 py-6";
 
 function formatCfmlLevel(level: number | null | undefined): string {
   if (level == null) return "L0";
@@ -174,6 +179,7 @@ export default async function ConceptPage({ params }: PageProps) {
   );
 
   const surveys = await loadSurveysWithCounts(supabase, conceptView.id);
+  const latestSurvey = surveys[0] ?? null;
 
   const csvMeta = buildCsvExportMeta({
     conceptName: conceptView.title,
@@ -288,127 +294,105 @@ export default async function ConceptPage({ params }: PageProps) {
           />
         </div>
 
-        <div className="mx-auto mt-12 w-full max-w-[720px] px-[var(--spacing-gutter)]">
-          <section className="flex flex-col gap-6">
-            <h2 className="font-mono text-metadata uppercase leading-normal text-fg-primary opacity-70">
-              Azioni
-            </h2>
-
-            <div className="flex flex-col gap-6">
-              <Link
-                href={`/concept/${conceptView.id}/edit`}
-                className={actionLinkClassName}
-              >
-                Modifica concept →
-              </Link>
-
-              <div className="flex items-start justify-between gap-8">
-                <div className="flex flex-col gap-1">
-                  <span className="font-heading text-body font-medium leading-relaxed text-fg-primary">
-                    Diagnosi CFML
-                  </span>
-                  {cfmlCompleted ? (
-                    <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
-                      {formatCfmlLevel(conceptView.cfmlLevelsPassed)} ·{" "}
-                      {formatScore(conceptView.cfml)}/100
-                    </span>
-                  ) : (
-                    <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
-                      Non ancora compilata
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex shrink-0 flex-wrap items-center justify-end gap-4">
-                  {cfmlCompleted ? (
-                    <>
-                      <Link
-                        href={`/concept/${conceptView.id}/cfml/results`}
-                        className={actionLinkClassName}
-                      >
-                        Vedi risultati →
-                      </Link>
-                      <Link
-                        href={`/concept/${conceptView.id}/cfml`}
-                        className={actionLinkClassName}
-                      >
-                        Modifica →
-                      </Link>
-                    </>
-                  ) : (
-                    <Link
-                      href={`/concept/${conceptView.id}/cfml`}
-                      className={actionLinkClassName}
-                    >
-                      Compila →
-                    </Link>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <span className="font-heading text-body font-medium leading-relaxed text-fg-primary">
-                  Symbolic Perception
-                </span>
-
-                {surveys.length === 0 ? (
-                  <div className="flex flex-col gap-2">
-                    <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
-                      Nessuna survey creata
-                    </span>
-                    <Link
-                      href={`/concept/${conceptView.id}/sp`}
-                      className={actionLinkClassName}
-                    >
-                      Crea survey →
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-6">
-                    {surveys.map((survey) => (
-                      <div key={survey.id} className="flex flex-col gap-2">
-                        <span className="font-sans text-metadata leading-normal text-fg-primary opacity-70">
-                          {formatSurveyDateItalian(survey.created_at)} ·{" "}
-                          {survey.responsesCount}{" "}
-                          {survey.responsesCount === 1
-                            ? "risposta raccolta"
-                            : "risposte raccolte"}
-                        </span>
-
-                        <div className="flex flex-wrap items-center gap-4">
-                          <Link
-                            href={`/concept/${conceptView.id}/sp/results?token=${survey.public_token}`}
-                            className={actionLinkClassName}
-                          >
-                            Vedi risultati →
-                          </Link>
-                          <CopySurveyLinkButton
-                            publicToken={survey.public_token}
-                          />
-                          <DeleteSurveyButton
-                            surveyId={survey.id}
-                            responsesCount={survey.responsesCount}
-                          />
-                        </div>
-                      </div>
-                    ))}
-
-                    <Link
-                      href={`/concept/${conceptView.id}/sp`}
-                      className={actionLinkClassName}
-                    >
-                      + Nuova survey
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
+        <div className="mx-auto mt-12 flex w-full max-w-[1440px] flex-col items-center px-[var(--spacing-gutter)]">
+          <div className="flex w-[1160px] flex-col">
+            <ReadingGuideBar />
+            {aiHandoffPrompt ? <AiHandoffBar prompt={aiHandoffPrompt} /> : null}
+          </div>
         </div>
 
-        <div className="mx-auto mt-12 flex w-full max-w-[1160px] flex-col gap-4 px-[var(--spacing-gutter)]">
-          <ReadingGuideBar />
-          {aiHandoffPrompt ? <AiHandoffBar prompt={aiHandoffPrompt} /> : null}
+        <div className="mx-auto mt-12 flex w-full max-w-[var(--container-page)] flex-col items-center px-[var(--spacing-gutter)]">
+          <div
+            className="flex flex-col"
+            style={{ width: CONCEPT_CARD_GRID_W }}
+          >
+            <div className="flex w-full flex-col">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h2 className="font-sans text-display-caps uppercase text-fg-primary">
+                    Azioni
+                  </h2>
+                  <div className="-mt-[7px] border-t border-dashed border-fg-primary" />
+                </div>
+
+                <div className="flex w-full flex-col border border-fg-primary bg-bg-elevated">
+                  <div className={actionRowClassName}>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
+                        Diagnosi CFML
+                      </h3>
+                      <span className="font-sans text-body leading-normal text-fg-primary opacity-70">
+                        {cfmlCompleted
+                          ? `${formatCfmlLevel(conceptView.cfmlLevelsPassed)} - ${formatScore(conceptView.cfml)}/100`
+                          : "Non ancora compilata"}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/concept/${conceptView.id}/cfml`}
+                      className={secondaryActionButtonClassName}
+                    >
+                      {cfmlCompleted ? "Modifica diagnosi" : "Compila diagnosi"}
+                    </Link>
+                  </div>
+
+                  <div className={`${actionRowClassName} border-t border-fg-primary`}>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
+                        Survey SP
+                      </h3>
+                      <span className="font-sans text-body leading-normal text-fg-primary opacity-70">
+                        {latestSurvey
+                          ? `${formatSurveyDateItalian(latestSurvey.created_at)} - ${latestSurvey.responsesCount} ${
+                              latestSurvey.responsesCount === 1
+                                ? "risposta raccolta"
+                                : "risposte raccolte"
+                            }`
+                          : "Nessuna survey creata"}
+                      </span>
+                    </div>
+                    {latestSurvey ? (
+                      <CopySurveyLinkButton
+                        publicToken={latestSurvey.public_token}
+                      />
+                    ) : (
+                      <span className="inline-block w-[200px]" aria-hidden />
+                    )}
+                  </div>
+
+                  <div className={`${actionRowClassName} border-t border-fg-primary`}>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-sans text-body font-medium uppercase leading-normal text-fg-primary">
+                        Nuova survey
+                      </h3>
+                      <span className="font-sans text-body leading-normal text-fg-primary opacity-70">
+                        Il pack è congelato nella survey attiva. Per
+                        modificarlo serve una nuova survey.
+                      </span>
+                    </div>
+                    <Link
+                      href={`/concept/${conceptView.id}/sp`}
+                      className={secondaryActionButtonClassName}
+                    >
+                      Crea survey
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-4">
+                {latestSurvey ? (
+                  <DeleteSurveyButton
+                    surveyId={latestSurvey.id}
+                    responsesCount={latestSurvey.responsesCount}
+                  />
+                ) : null}
+                <DeleteConceptButton
+                  conceptId={conceptView.id}
+                  conceptTitle={conceptView.title}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
